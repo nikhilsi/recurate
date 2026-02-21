@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.0] - 2026-02-21
+
+### Added
+- **ChatGPT (chat.com) support** — second platform, tested and working end-to-end
+- `lib/platforms/chatgpt.ts` — ChatGPT DOM selectors, response extraction, ProseMirror injection
+- `entrypoints/chatgpt.content.ts` — content script matching `chat.com/*` and `chatgpt.com/*`
+- Streaming detection via stop button presence/absence (ChatGPT has no `data-is-streaming` attribute)
+- Editor injection handles both `<textarea>` and `contenteditable` div (ChatGPT uses ProseMirror like claude.ai)
+- Theme detection, SPA navigation handling, proactive feedback injection — same patterns as claude.ai
+
+### Fixed
+- ChatGPT editor detection — initial implementation assumed `<textarea>` but ChatGPT uses `div.ProseMirror#prompt-textarea[contenteditable]`
+
+### Notes
+- Extension now builds at 93 KB total (two content scripts + shared code)
+- Zero changes to shared code (side panel, annotations, formatter, background, types)
+- Updated extension architecture doc with ChatGPT platform section and proactive injection flow
+
+---
+
 ## [0.3.0] - 2026-02-21
 
 ### Added

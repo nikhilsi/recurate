@@ -2,7 +2,7 @@
 
 **Status:** Implementation-ready
 **Date:** February 21, 2026
-**Target:** V1 — claude.ai only
+**Target:** V1 — claude.ai + ChatGPT (chat.com)
 
 ---
 
@@ -15,10 +15,11 @@
 5. [State Management](#state-management)
 6. [Messaging Architecture](#messaging-architecture)
 7. [Platform Integration — claude.ai](#platform-integration-claudeai)
-8. [Annotation UX](#annotation-ux)
-9. [Structured Feedback Format](#structured-feedback-format)
-10. [Extensibility](#extensibility)
-11. [Known Risks & Mitigations](#known-risks--mitigations)
+8. [Platform Integration — ChatGPT](#platform-integration-chatgpt)
+9. [Annotation UX](#annotation-ux)
+10. [Structured Feedback Format](#structured-feedback-format)
+11. [Extensibility](#extensibility)
+12. [Known Risks & Mitigations](#known-risks--mitigations)
 
 ---
 
@@ -26,15 +27,16 @@
 
 The Recurate Annotator is a Chrome extension that adds a side panel to AI chat interfaces. The side panel displays the AI's latest response and provides annotation tools — highlight (keep/carry forward) and strikethrough (drop/discard). When the user is ready, the extension generates structured feedback text and injects it into the platform's native text box alongside the user's next question.
 
-**V1 scope:** claude.ai only. Additional platforms (chat.com, grok.com, gemini.google.com) follow the same architecture with platform-specific selectors.
+**V1 scope:** claude.ai and ChatGPT (chat.com). Additional platforms (grok.com, gemini.google.com) follow the same architecture with platform-specific selectors.
 
 **Core loop:**
 
-1. Content script detects AI response completion on claude.ai
+1. Content script detects AI response completion on the platform
 2. Content script extracts response HTML → sends to side panel via background service worker
 3. Side panel renders the response with annotation capabilities
 4. User annotates (highlight / strikethrough) via floating toolbar
-5. User clicks "Apply" → preview shown → structured feedback injected into claude.ai's text box
+5. Structured feedback auto-injects into the platform's text box (zero-click flow)
+6. User types their message after the feedback and sends normally
 
 ---
 
@@ -91,16 +93,22 @@ extensions/chrome/
 │   │       ├── sidepanel.css          #   Global layout, typography
 │   │       └── annotations.css        #   Highlight/strikethrough visual treatment
 │   │
-│   └── claude.content.ts             # Content script for claude.ai (WXT naming convention)
-│                                      #   - MutationObserver for response detection
-│                                      #   - Response HTML extraction
-│                                      #   - Structured feedback injection into ProseMirror
+│   ├── claude.content.ts              # Content script for claude.ai
+│   │                                  #   - MutationObserver on data-is-streaming
+│   │                                  #   - Response HTML extraction
+│   │                                  #   - Proactive feedback injection into ProseMirror
+│   │
+│   └── chatgpt.content.ts            # Content script for chat.com / chatgpt.com
+│                                      #   - MutationObserver + stop button detection
+│                                      #   - Response HTML extraction from article elements
+│                                      #   - Proactive feedback injection into ProseMirror
 │
 ├── lib/
 │   ├── types.ts                       # Shared TypeScript types (Annotation, Message, etc.)
 │   ├── formatter.ts                   # Annotations → structured feedback text
 │   └── platforms/
-│       └── claude.ts                  # claude.ai DOM selectors and extraction/injection logic
+│       ├── claude.ts                  # claude.ai DOM selectors and extraction/injection logic
+│       └── chatgpt.ts                # ChatGPT DOM selectors and extraction/injection logic
 │
 └── public/
     └── icons/                         # Extension icons (16, 32, 48, 128px)
@@ -121,17 +129,14 @@ extensions/chrome/
 App.tsx
 ├── StatusBar                    # "Connected to claude.ai" / "Waiting for response..."
 ├── ResponseView                 # The AI response with annotation overlays
-│   └── (rendered HTML with <mark> and <del> wrappers)
+│   └── (rendered HTML with <mark> and <del> wrappers via DOM overlay)
 ├── AnnotationToolbar            # Floating toolbar (appears on text selection)
 │   ├── ✓ Highlight button
 │   ├── ✗ Strikethrough button
 │   └── ↺ Clear button (when selection overlaps existing annotation)
 ├── AnnotationList               # "3 highlights, 1 strikethrough" + item list
 │   └── AnnotationItem × N      # Each annotation with type icon + text preview + delete
-└── FeedbackPreview              # Shown when user clicks "Apply"
-    ├── Preview text (read-only)
-    ├── "Inject" button
-    └── "Cancel" button
+└── Feedback indicator           # "Annotations will be included in your next message"
 ```
 
 ### Component responsibilities
@@ -143,15 +148,15 @@ App.tsx
 | **ResponseView** | Response HTML + annotations signal | Selection events | Renders sanitized HTML, overlays annotations as `<mark>`/`<del>` wrappers, emits text selection events |
 | **AnnotationToolbar** | Selection position + overlap state | Annotation actions | Positions near selection, dispatches addAnnotation/removeAnnotation |
 | **AnnotationList** | Annotations signal | Remove actions | Displays all annotations, click-to-scroll, delete buttons |
-| **FeedbackPreview** | Annotations signal | Inject/cancel | Formats annotations into structured text, shows preview, dispatches inject message |
+| **Feedback indicator** | Annotations signal | — | Shows "Annotations will be included in your next message" when annotations exist |
 
 ### Data flow
 
 ```
-claude.ai DOM
+Platform DOM (claude.ai / ChatGPT)
     ↓ (MutationObserver detects response completion)
-Content Script (claude.ts)
-    ↓ (chrome.runtime.sendMessage)
+Content Script (claude.content.ts / chatgpt.content.ts)
+    ↓ (browser.runtime.sendMessage)
 Background (background.ts)
     ↓ (relay)
 Side Panel (App.tsx)
@@ -161,14 +166,12 @@ ResponseView
 AnnotationToolbar
     ↓ (user clicks ✓ or ✗)
 annotations signal updates
-    ↓ (user clicks "Apply")
-FeedbackPreview
-    ↓ (user clicks "Inject")
+    ↓ (auto — PENDING_FEEDBACK message)
 Background (relay)
-    ↓ (chrome.tabs.sendMessage)
-Content Script (claude.ts)
-    ↓ (injects into ProseMirror)
-claude.ai text box
+    ↓ (browser.tabs.sendMessage)
+Content Script
+    ↓ (proactive injection into editor)
+Platform text box (feedback auto-appears, user types after it)
 ```
 
 ---
@@ -200,12 +203,16 @@ interface ResponseData {
 
 type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready';
 
+type Theme = 'light' | 'dark';
+
 // Message types for chrome.runtime messaging
-type Message =
+type ExtensionMessage =
   | { type: 'RESPONSE_STREAMING'; html: string; messageId: string }
   | { type: 'RESPONSE_READY'; html: string; text: string; messageId: string }
   | { type: 'INJECT_FEEDBACK'; feedback: string }
-  | { type: 'CONNECTION_STATUS'; status: ConnectionStatus };
+  | { type: 'PENDING_FEEDBACK'; feedback: string | null }
+  | { type: 'CONNECTION_STATUS'; status: ConnectionStatus }
+  | { type: 'THEME_CHANGED'; theme: Theme };
 ```
 
 ### Signals
@@ -219,7 +226,6 @@ import { signal, computed, batch } from '@preact/signals';
 export const annotations = signal<Annotation[]>([]);
 export const currentResponse = signal<ResponseData | null>(null);
 export const connectionStatus = signal<ConnectionStatus>('disconnected');
-export const showPreview = signal(false);
 
 // Derived state (auto-updates when dependencies change)
 export const highlights = computed(() =>
@@ -265,7 +271,6 @@ export function setResponse(data: ResponseData) {
   batch(() => {
     currentResponse.value = data;
     annotations.value = [];  // Clear annotations for new response
-    showPreview.value = false;
   });
 }
 ```
@@ -303,25 +308,32 @@ Content Script  ←──  Background  ←──  Side Panel
    });
 ```
 
-### Message flow: Inject feedback
+### Message flow: Proactive feedback injection
+
+When annotations change, the side panel sends `PENDING_FEEDBACK` with the formatted text (or `null` when cleared). The content script injects it into the editor if empty or replaces stale feedback.
 
 ```
-1. Side panel:
-   chrome.runtime.sendMessage({ type: 'INJECT_FEEDBACK', feedback })
+1. Side panel (App.tsx useEffect on annotations):
+   browser.runtime.sendMessage({ type: 'PENDING_FEEDBACK', feedback: formattedText })
 
 2. Background (background.ts):
-   // Must relay to content script via chrome.tabs.sendMessage
-   chrome.runtime.onMessage.addListener((msg) => {
-     if (msg.type === 'INJECT_FEEDBACK') {
-       chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-         if (tab?.id) chrome.tabs.sendMessage(tab.id, msg);
+   // Relays PENDING_FEEDBACK (and legacy INJECT_FEEDBACK) to content script
+   browser.runtime.onMessage.addListener((msg) => {
+     if (msg.type === 'INJECT_FEEDBACK' || msg.type === 'PENDING_FEEDBACK') {
+       browser.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+         if (tab?.id) browser.tabs.sendMessage(tab.id, msg);
        });
      }
    });
 
-3. Content script (claude.ts):
-   chrome.runtime.onMessage.addListener((msg) => {
-     if (msg.type === 'INJECT_FEEDBACK') injectIntoTextBox(msg.feedback);
+3. Content script:
+   // On PENDING_FEEDBACK — inject if editor is empty or has stale feedback
+   // On null — clear our feedback from editor
+   browser.runtime.onMessage.addListener((msg) => {
+     if (msg.type === 'PENDING_FEEDBACK') {
+       if (msg.feedback) tryInjectFeedback();
+       else clearFeedbackFromEditor();
+     }
    });
 ```
 
@@ -463,7 +475,80 @@ urlObserver.observe(document.body, { childList: true, subtree: true });
 
 ---
 
-## 8. Annotation UX
+## 8. Platform Integration — ChatGPT
+
+ChatGPT (chat.com / chatgpt.com) is the second supported platform. It follows the same architecture as claude.ai but with different DOM selectors and detection strategies.
+
+### Key differences from claude.ai
+
+| Aspect | claude.ai | ChatGPT |
+|--------|-----------|---------|
+| **Input editor** | ProseMirror `contenteditable` div | ProseMirror `contenteditable` div (same!) |
+| **Response containers** | `[data-is-streaming]` attribute | `article` elements with `.markdown.prose` content |
+| **Streaming detection** | `data-is-streaming` attribute toggle | Stop button appears/disappears |
+| **Theme** | `html.dark` / `html.light` class | `html.dark` class (dark mode) |
+| **URL** | `claude.ai/*` | `chat.com/*`, `chatgpt.com/*` |
+
+### DOM selectors
+
+```typescript
+// lib/platforms/chatgpt.ts
+
+export const SELECTORS = {
+  responseArticle: 'article[data-testid^="conversation-turn-"]',
+  responseContent: ['.markdown.prose', '.prose', '[class*="markdown"]'],
+  inputEditor: '#prompt-textarea',
+  inputEditorFallback: '[contenteditable="true"]',
+  stopButton: 'button[aria-label="Stop generating"], button[data-testid="stop-button"]',
+};
+```
+
+### Streaming detection
+
+ChatGPT has no `data-is-streaming` attribute. Instead, the content script watches for the stop button:
+
+```typescript
+const observer = new MutationObserver(() => {
+  const streaming = isStreaming(); // checks for stop button presence
+  if (streaming && !wasStreaming) {
+    wasStreaming = true;  // streaming started
+  } else if (!streaming && wasStreaming) {
+    wasStreaming = false;  // streaming ended — extract response
+    debounce(() => extractAndSend(), 500);
+  }
+});
+observer.observe(document.body, { childList: true, subtree: true });
+```
+
+### Text injection
+
+ChatGPT also uses ProseMirror (same `div.ProseMirror[contenteditable="true"]#prompt-textarea`). The injection approach handles both textarea and contenteditable elements:
+
+```typescript
+export function setEditorContent(text: string): boolean {
+  const editor = getEditor();
+  if (!editor) return false;
+
+  if (isTextarea(editor)) {
+    // Textarea path — native value setter to bypass React
+    nativeSetter.call(editor, text);
+  } else {
+    // Contenteditable path — rebuild with <p> elements
+    editor.innerHTML = '';
+    for (const line of text.split('\n')) {
+      const p = document.createElement('p');
+      p.textContent = line || '\u200B';
+      editor.appendChild(p);
+    }
+  }
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}
+```
+
+---
+
+## 9. Annotation UX
 
 ### Floating toolbar
 
@@ -517,14 +602,15 @@ Annotations (3 highlights, 1 strikethrough)
 2. **Click an annotation** in the ResponseView → toggles it off directly
 3. **Click delete** in the AnnotationList → removes by ID
 
-### Apply flow
+### Proactive injection flow (zero-click)
 
-1. User clicks **"Apply annotations"** button (below the annotation list)
-2. **FeedbackPreview** panel slides in, showing the structured text that will be injected
-3. User reviews the preview
-4. **"Inject into text box"** sends the text to the content script → ProseMirror
-5. **"Cancel"** closes the preview, annotations remain
-6. After injection, annotations remain visible until the next AI response auto-loads
+1. User annotates text in the side panel
+2. Formatted feedback auto-injects into the platform's text box immediately
+3. User types their message after the `[Your message below]` marker
+4. User sends normally via the platform's own send button/Enter key
+5. When annotations are cleared or a new response arrives, feedback is removed from the text box
+
+No "Apply" or "Inject" buttons — the flow is completely automatic. The side panel shows a subtle indicator: "Annotations will be included in your next message."
 
 ---
 
@@ -624,11 +710,10 @@ type: 'highlight' | 'strikethrough' | 'deeper' | 'question'
 
 ### Adding new platforms
 
-Each platform needs:
+Each platform needs two files (see claude.ai and ChatGPT as templates):
 
-1. A new content script: `entrypoints/content/chatgpt.ts` (or `grok.ts`, `gemini.ts`)
-2. A new selectors file: `lib/platforms/chatgpt.ts`
-3. Updated `wxt.config.ts` matches (or content script `matches` metadata)
+1. A platform module: `lib/platforms/<name>.ts` — DOM selectors, `extractLatestResponse()`, `isStreaming()`, `getEditor()`, `setEditorContent()`, `clearEditor()`
+2. A content script: `entrypoints/<name>.content.ts` — `matches` URL patterns, theme detection, streaming observation, proactive feedback injection
 
 The side panel, state management, and formatter are platform-agnostic — they receive HTML and emit text. Only the content scripts are platform-specific.
 
@@ -684,4 +769,4 @@ The side panel, state management, and formatter are platform-agnostic — they r
 
 ---
 
-*This document captures the complete extension architecture as of February 21, 2026. It is implementation-ready — a developer can build from this document and the parent design doc (docs/design.md) without additional context.*
+*This document captures the complete extension architecture as of February 21, 2026. Updated with ChatGPT support and proactive injection flow. A developer can build from this document and the parent design doc (docs/design.md) without additional context.*

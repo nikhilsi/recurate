@@ -6,7 +6,7 @@
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai, preparing for ChatGPT + VS Code + Chrome Web Store
+**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, preparing for VS Code + Chrome Web Store
 
 ---
 
@@ -53,8 +53,18 @@
 - Project structure: `extensions/chrome/`, `extensions/vscode/` (future)
 - VS Code extension planned — same annotation UX, different host environment
 
+### Chrome Extension (Working on ChatGPT)
+- `lib/platforms/chatgpt.ts` — DOM selectors, response extraction, ProseMirror injection
+- `entrypoints/chatgpt.content.ts` — content script for chat.com / chatgpt.com
+- **Tested and working end-to-end on chat.com:**
+  - Response detection via MutationObserver + stop button presence/absence
+  - Response extraction from `article` elements with `.markdown.prose` content
+  - Annotation and feedback injection working (same proactive zero-click flow)
+  - ChatGPT also uses ProseMirror (div#prompt-textarea[contenteditable]) — handles both textarea and contenteditable
+  - Theme detection, SPA navigation handling
+- Build output: 93 KB total (both content scripts + shared code)
+
 ### Not Yet Built
-- ChatGPT (chat.com) content script
 - VS Code extension
 - Chrome Web Store listing
 - Logo, icons, visual identity
@@ -75,8 +85,10 @@
 - ~~Selection precision~~ → word-level snapping
 - ~~HTML formatting preservation~~ → DOM overlay approach (TreeWalker + surroundContents)
 
+### Resolved (ChatGPT)
+- ~~chat.com DOM structure~~ → `article` elements, `div.ProseMirror#prompt-textarea` (contenteditable), stop button for streaming
+
 ### To Research (Next)
-- chat.com DOM structure (response containers, input field, streaming indicators)
 - VS Code extension architecture (terminal capture, Webview panel, Claude Code hooks)
 
 ### Critical (Roundtable — not needed for extensions)
@@ -104,7 +116,9 @@
 | **Site config** | `mkdocs.yml` |
 | **Extension config** | `extensions/chrome/wxt.config.ts` |
 | **Content script (claude.ai)** | `extensions/chrome/entrypoints/claude.content.ts` |
-| **Platform selectors** | `extensions/chrome/lib/platforms/claude.ts` |
+| **Content script (ChatGPT)** | `extensions/chrome/entrypoints/chatgpt.content.ts` |
+| **Platform selectors (claude.ai)** | `extensions/chrome/lib/platforms/claude.ts` |
+| **Platform selectors (ChatGPT)** | `extensions/chrome/lib/platforms/chatgpt.ts` |
 | **Annotation state** | `extensions/chrome/entrypoints/sidepanel/state/annotations.ts` |
 
 ---

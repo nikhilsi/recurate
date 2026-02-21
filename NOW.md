@@ -27,6 +27,7 @@
   - Word-level selection snapping
   - DOM overlay annotations (preserves HTML formatting)
 - Project restructure: `extension/` → `extensions/chrome/`
+- ChatGPT (chat.com) support — tested and working end-to-end
 
 ---
 
@@ -38,11 +39,11 @@
 - [ ] Site favicon and social card
 - [ ] Update recurate.ai with logo
 
-### 2. ChatGPT Support (chat.com)
-- [ ] Research chat.com DOM structure (response containers, input field, streaming indicators)
-- [ ] Create `chatgpt.content.ts` content script
-- [ ] Create `lib/platforms/chatgpt.ts` platform module
-- [ ] Test end-to-end on chat.com
+### 2. ChatGPT Support (chat.com) — DONE
+- [x] Research chat.com DOM structure (response containers, input field, streaming indicators)
+- [x] Create `chatgpt.content.ts` content script
+- [x] Create `lib/platforms/chatgpt.ts` platform module
+- [x] Test end-to-end on chat.com
 
 ### 3. Chrome Web Store Submission
 - [ ] Store description — lead with the problem, not the feature
