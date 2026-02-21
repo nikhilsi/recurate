@@ -81,3 +81,4 @@ nav:
   - Documentation:
     - Product Brief: product_brief.md
     - Design & Architecture: design.md
+    - Extension Architecture: extension-architecture.md

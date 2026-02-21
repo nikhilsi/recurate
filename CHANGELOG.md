@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.2.0] - 2026-02-21
+
+### Added
+- recurate.ai website — MkDocs Material, GitHub Pages, custom domain, blog, OG meta tags
+- Extension architecture doc (docs/extension-architecture.md)
+- Chrome extension scaffold — WXT + Preact + Preact Signals + TypeScript
+  - Side panel with component architecture (ResponseView, AnnotationToolbar, AnnotationList, FeedbackPreview)
+  - Content script for claude.ai (MutationObserver response detection, ProseMirror injection)
+  - Background service worker (message relay between content script and side panel)
+  - Annotation state management via Preact Signals
+  - Dark theme with highlight (green) and strikethrough (red) annotation styles
+  - Structured feedback formatter (KEEP/DROP format)
+- .gitignore for build artifacts
+
+### Tech Decisions
+- **WXT** for extension build framework (file-based entrypoints, auto-manifest, HMR)
+- **Preact + Signals** for side panel UI (4KB runtime, fine-grained reactivity)
+- **TypeScript** across all extension code
+- **claude.ai first** — V1 targets claude.ai only, other platforms follow same architecture
+- **Annotation UX** — floating toolbar with ✓ (highlight), ✗ (strikethrough), ↺ (clear)
+
+### Changed
+- Moved DESIGN.md, PRODUCT_BRIEF.md, blog article into docs/ folder (served on site)
+- Updated all cross-references in CLAUDE.md, README, tracking docs
+- Fixed blog article Phase 1/2 numbering inconsistency
+- Fixed broken BLOG.md link in README
+
+---
+
 ## [0.1.0] - 2026-02-21
 
 ### Added

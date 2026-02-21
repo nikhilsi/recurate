@@ -123,19 +123,20 @@ recurate/
 │       └── posts/
 │           └── text-box-problem.md  (Blog article)
 │
-├── extension/                   (Phase 0 — Chrome extension)
-│   ├── manifest.json
-│   ├── background.js
-│   ├── sidepanel/
-│   ├── content-scripts/
-│   └── shared/
+├── extension/                   (Phase 0 — Chrome extension, WXT + Preact)
+│   ├── wxt.config.ts            (WXT + Vite + Preact configuration)
+│   ├── entrypoints/
+│   │   ├── background.ts        (Service worker)
+│   │   ├── claude.content.ts    (Content script for claude.ai)
+│   │   └── sidepanel/           (Side panel UI — Preact components)
+│   └── lib/                     (Shared types, formatter, platform selectors)
 │
 └── platform/                    (Phase 1 — Roundtable web app)
     ├── frontend/                (React + TypeScript)
     └── backend/                 (Python + FastAPI)
 ```
 
-**Note:** The `extension/` and `platform/` directories don't exist yet. The project structure above is the target layout described in docs/design.md.
+**Note:** The `platform/` directory doesn't exist yet. See `docs/extension-architecture.md` for the full extension structure.
 
 ---
 

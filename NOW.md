@@ -3,10 +3,10 @@
 ---
 **Last Updated**: February 21, 2026
 **Purpose**: What to work on next
-**Context**: See CLAUDE.md for rules, CURRENT_STATE.md for what's built, docs/design.md for the full design
+**Context**: See CLAUDE.md for rules, CURRENT_STATE.md for what's built, docs/extension-architecture.md for extension details
 ---
 
-**Phase**: Pre-implementation → Website + Extension Build
+**Phase**: Extension Implementation
 
 ---
 
@@ -18,55 +18,72 @@
 - Project scaffolding: README, CLAUDE.md, tracking docs
 - MkDocs Material site: landing page, blog, docs, OG meta tags, GitHub Actions deploy
 - Social card for link previews
+- recurate.ai live with custom domain
+- Extension architecture doc (docs/extension-architecture.md)
+- Extension scaffold: WXT + Preact + Signals + TypeScript, builds clean
 
 ---
 
-## Next Priority
+## Current Focus: Chrome Extension (Phase 0)
 
-### Track 1: Website (recurate.ai)
+Build the Recurate Annotator — see docs/extension-architecture.md:
 
-1. [x] Reorganize files into MkDocs layout (docs/ folder)
-2. [x] Create mkdocs.yml configuration
-3. [x] Create GitHub Actions deploy workflow
-4. [x] Create site landing page (docs/index.md)
-5. [x] Set up blog with the text-box-problem article
-6. [x] Add OG meta tags for social preview
-7. [ ] Configure custom domain DNS at GoDaddy
-8. [ ] Set GitHub Pages source to "GitHub Actions" + add custom domain
-9. [ ] Logo and visual identity (when ready)
+### Scaffold (Done)
+1. [x] Set up extension project structure (WXT + Preact)
+2. [x] Extension architecture doc
+3. [x] Component architecture (ResponseView, Toolbar, List, Preview)
+4. [x] State management (Preact Signals)
+5. [x] Content script for claude.ai (extraction, injection, streaming detection)
+6. [x] Background service worker (message relay)
+7. [x] Styles (dark theme, annotation visuals)
 
-### Track 2: Chrome Extension (Phase 0)
+### Integration Testing (Next)
+8. [ ] Load extension in Chrome, verify side panel opens
+9. [ ] Test response detection on claude.ai
+10. [ ] Test annotation UX (select text, toolbar, highlight/strikethrough)
+11. [ ] Test feedback preview + injection into text box
+12. [ ] Debug and fix issues from real-world testing
 
-Build the Recurate Annotator — see docs/design.md Section 3:
+### Polish
+13. [ ] Handle edge cases (long responses, code blocks, empty selections)
+14. [ ] SPA navigation handling (conversation switching)
+15. [ ] Error states (selector failures, injection failures)
+16. [ ] Extension icons (16, 32, 48, 128px)
 
-1. [ ] Set up extension project structure (Manifest V3)
-2. [ ] Implement side panel with annotation UI (highlight + strikethrough)
-3. [ ] Build content script: extract latest AI response from DOM
-4. [ ] Build content script: inject structured feedback into text input
-5. [ ] Test on claude.ai (primary target)
-6. [ ] Test on chat.com, grok.com, gemini.google.com
-7. [ ] Polish UX — annotation must be faster than typing
-8. [ ] Chrome Web Store listing
+### Ship
+17. [ ] Test on multiple claude.ai conversations
+18. [ ] Chrome Web Store listing
+19. [ ] Logo and visual identity
+
+---
+
+## Website (recurate.ai)
+
+1. [x] Site structure and deployment
+2. [x] Custom domain configured
+3. [ ] Logo and visual identity (when ready)
 
 ---
 
 ## Backlog
 
-1. **CC schema design** — critical for Roundtable, not needed for extension
-2. **Synthesis prompt engineering** — auto-synthesis and user-refined prompts
-3. **Roundtable backend** — FastAPI + LLM orchestration
-4. **Roundtable frontend** — React + TypeScript
-5. **Extension ↔ Platform convergence** (Phase 2)
+1. **Extension V1.1** — ⤵ "dig deeper" + ? "verify" annotation gestures
+2. **Additional platforms** — chat.com, grok.com, gemini.google.com
+3. **CC schema design** — critical for Roundtable, not needed for extension
+4. **Synthesis prompt engineering** — auto-synthesis and user-refined prompts
+5. **Roundtable backend** — FastAPI + LLM orchestration
+6. **Roundtable frontend** — React + TypeScript
+7. **Extension ↔ Platform convergence** (Phase 2)
 
 ---
 
 ## Reminders
 
-- Domain registered: recurate.ai
 - No API keys needed for the Chrome extension (fully client-side)
-- docs/design.md is implementation-ready for the extension
+- docs/extension-architecture.md has the full tech details
+- To test: `cd extension && npm run dev`, load `.output/chrome-mv3-dev` in chrome://extensions
 - The extension is the priority — it validates the core UX before building the platform
 
 ---
 
-**For more details**: See CURRENT_STATE.md | CHANGELOG.md | docs/design.md
+**For more details**: See CURRENT_STATE.md | CHANGELOG.md | docs/extension-architecture.md
