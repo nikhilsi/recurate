@@ -12,7 +12,7 @@ export default defineBackground({
         // Forward to the active tab's content script
         browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
           if (tab?.id) {
-            browser.tabs.sendMessage(tab.id, message);
+            browser.tabs.sendMessage(tab.id, message).catch(() => {});
           }
         });
       }
