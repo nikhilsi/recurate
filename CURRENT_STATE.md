@@ -14,9 +14,9 @@
 
 ### Documentation (Complete)
 - README.md — project overview and two-product vision
-- DESIGN.md — comprehensive design & architecture (implementation-ready)
-- PRODUCT_BRIEF.md — non-technical product brief
-- Blog article — "The Text Box Is the Only Way to Talk to AI. That's a Problem."
+- docs/design.md — comprehensive design & architecture (implementation-ready)
+- docs/product_brief.md — non-technical product brief
+- Blog article — docs/blog/posts/text-box-problem.md
 - CLAUDE.md — development rules and workflow
 - Tracking docs — CHANGELOG.md, CURRENT_STATE.md, NOW.md
 
@@ -27,10 +27,13 @@
 - Fast path (no annotation) + power path (annotate then proceed)
 - Supported platforms: claude.ai, chat.com, grok.com, gemini.google.com
 
+### Website
+- recurate.ai — MkDocs Material site, deployed via GitHub Pages
+- Blog with first article live
+- No logo or visual identity yet
+
 ### Not Yet Built
-- No code — extension, platform, website all pending
-- No website — recurate.ai domain registered, MkDocs setup pending
-- No logo or visual identity
+- No code — extension, platform pending
 - No Chrome Web Store listing
 
 ---
@@ -57,11 +60,12 @@
 
 | Purpose | File |
 |---------|------|
-| **Design & architecture** | `DESIGN.md` |
-| **Product brief** | `PRODUCT_BRIEF.md` |
-| **Blog article** | `The Text Box Is the Only Way to Talk to AI. That's a Problem.md` |
+| **Design & architecture** | `docs/design.md` |
+| **Product brief** | `docs/product_brief.md` |
+| **Blog article** | `docs/blog/posts/text-box-problem.md` |
 | **Dev rules** | `CLAUDE.md` |
+| **Site config** | `mkdocs.yml` |
 
 ---
 
-**For more details**: See NOW.md | CHANGELOG.md | DESIGN.md
+**For more details**: See NOW.md | CHANGELOG.md | docs/design.md

@@ -1,8 +1,13 @@
-# The Text Box Is the Only Way to Talk to AI. That's a Problem.
-
-*February 2026*
-
 ---
+date: 2026-02-21
+authors:
+  - nikhil
+slug: text-box-problem
+title: "The Text Box Is the Only Way to Talk to AI. That's a Problem."
+description: "Why the text box is AI's biggest UX blind spot, and what we're building to fix it."
+---
+
+# The Text Box Is the Only Way to Talk to AI. That's a Problem.
 
 I had a moment last week that probably sounds familiar.
 
@@ -15,6 +20,8 @@ I typed a message. A long one. "I agree with your first point about X, but the p
 By the time I finished typing, I'd spent more time writing my feedback than reading the original response. And I knew that half my nuance would get lost anyway — the AI would latch onto some parts of my feedback and miss others, because I was trying to communicate a complex, multi-layered reaction through a single text box.
 
 **This happens every day, to millions of people, across every AI chat interface in the world. And nobody seems to be working on it.**
+
+<!-- more -->
 
 ## The Text Box Bottleneck
 
@@ -52,7 +59,7 @@ This is a fundamentally different interaction model. Today, the AI decides what 
 
 ## The Multi-Model Angle
 
-Here's where it gets even more interesting. 
+Here's where it gets even more interesting.
 
 Many of us don't just use one AI — we bounce between Claude, ChatGPT, and Grok, asking the same questions across platforms. Each conversation happens in isolation. When we do this, *we* become the synthesis layer: reading one model's response, mentally carrying the good parts to another, rephrasing questions.
 
@@ -72,9 +79,9 @@ Maybe it's because annotation feels like a "small" UX improvement compared to a 
 
 We're building **Recurate** — tools that let you curate AI conversations instead of just chatting through them.
 
-**Phase 1** is a Chrome extension that works on any AI chat site. It adds a side panel where you can annotate the AI's response before sending your next message. No backend, no API keys — just install and your conversations get better.
+First up is a **Chrome extension** that works on any AI chat site. It adds a side panel where you can annotate the AI's response before sending your next message. No backend, no API keys — just install and your conversations get better.
 
-**Phase 2** is a multi-model platform where you can ask questions across multiple AIs simultaneously and curate across all of them, building a shared conversation that's richer than any single model could produce.
+Next is a **multi-model platform** where you can ask questions across multiple AIs simultaneously and curate across all of them, building a shared conversation that's richer than any single model could produce.
 
 The name comes from the core action: you **curate** the AI's response, and every turn, the conversation gets **re-curated** — refined, improved, more aligned with what you actually care about.
 

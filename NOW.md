@@ -3,7 +3,7 @@
 ---
 **Last Updated**: February 21, 2026
 **Purpose**: What to work on next
-**Context**: See CLAUDE.md for rules, CURRENT_STATE.md for what's built, DESIGN.md for the full design
+**Context**: See CLAUDE.md for rules, CURRENT_STATE.md for what's built, docs/design.md for the full design
 ---
 
 **Phase**: Pre-implementation → Website + Extension Build
@@ -12,10 +12,12 @@
 
 ## Recently Completed
 
-- Complete design & architecture document (DESIGN.md)
-- Product brief (PRODUCT_BRIEF.md)
+- Complete design & architecture document (docs/design.md)
+- Product brief (docs/product_brief.md)
 - Blog article: "The Text Box Is the Only Way to Talk to AI. That's a Problem."
 - Project scaffolding: README, CLAUDE.md, tracking docs
+- MkDocs Material site: landing page, blog, docs, OG meta tags, GitHub Actions deploy
+- Social card for link previews
 
 ---
 
@@ -23,20 +25,19 @@
 
 ### Track 1: Website (recurate.ai)
 
-Set up MkDocs Material site (similar to tourgraph.ai setup):
-
-1. [ ] Reorganize files into MkDocs layout (docs/ folder)
-2. [ ] Create mkdocs.yml configuration
-3. [ ] Create GitHub Actions deploy workflow
-4. [ ] Create site landing page (docs/index.md)
-5. [ ] Set up blog with the text-box-problem article
-6. [ ] Configure custom domain (recurate.ai)
-7. [ ] Add OG meta tags for social preview
-8. [ ] Logo and visual identity (when ready)
+1. [x] Reorganize files into MkDocs layout (docs/ folder)
+2. [x] Create mkdocs.yml configuration
+3. [x] Create GitHub Actions deploy workflow
+4. [x] Create site landing page (docs/index.md)
+5. [x] Set up blog with the text-box-problem article
+6. [x] Add OG meta tags for social preview
+7. [ ] Configure custom domain DNS at GoDaddy
+8. [ ] Set GitHub Pages source to "GitHub Actions" + add custom domain
+9. [ ] Logo and visual identity (when ready)
 
 ### Track 2: Chrome Extension (Phase 0)
 
-Build the Recurate Annotator — see DESIGN.md Section 3:
+Build the Recurate Annotator — see docs/design.md Section 3:
 
 1. [ ] Set up extension project structure (Manifest V3)
 2. [ ] Implement side panel with annotation UI (highlight + strikethrough)
@@ -63,9 +64,9 @@ Build the Recurate Annotator — see DESIGN.md Section 3:
 
 - Domain registered: recurate.ai
 - No API keys needed for the Chrome extension (fully client-side)
-- DESIGN.md is implementation-ready for the extension
+- docs/design.md is implementation-ready for the extension
 - The extension is the priority — it validates the core UX before building the platform
 
 ---
 
-**For more details**: See CURRENT_STATE.md | CHANGELOG.md | DESIGN.md
+**For more details**: See CURRENT_STATE.md | CHANGELOG.md | docs/design.md

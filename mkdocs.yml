@@ -1,0 +1,83 @@
+site_name: Recurate
+site_url: https://recurate.ai
+site_description: "Don't just chat, recurate. Annotation tools for AI conversations."
+site_author: Nikhil Singhal
+repo_url: https://github.com/nikhilsi/recurate
+repo_name: nikhilsi/recurate
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+    - search.suggest
+    - search.highlight
+  # logo: assets/images/recurate-icon.svg
+  # favicon: assets/images/recurate-icon.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - blog:
+      blog_dir: blog
+      post_date_format: long
+      post_url_format: "{slug}"
+      archive: false
+      categories: false
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nikhilsi/recurate
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/nikhilsinghal/
+
+copyright: Copyright &copy; 2026 Nikhil Singhal
+
+nav:
+  - Home: index.md
+  - Blog: blog/index.md
+  - Documentation:
+    - Product Brief: product_brief.md
+    - Design & Architecture: design.md

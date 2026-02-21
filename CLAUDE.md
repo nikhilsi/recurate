@@ -17,8 +17,8 @@
 6. **`git log --oneline -10`** — Recent commits
 
 **Detailed reference** (read when relevant to your task):
-- **DESIGN.md** — Complete design & architecture document (Chrome extension + Roundtable platform)
-- **PRODUCT_BRIEF.md** — Non-technical product brief — the "why" and "what"
+- **docs/design.md** — Complete design & architecture document (Chrome extension + Roundtable platform)
+- **docs/product_brief.md** — Non-technical product brief — the "why" and "what"
 
 ---
 
@@ -107,15 +107,13 @@ recurate/
 ├── CURRENT_STATE.md             (What's built & status)
 ├── NOW.md                       (Current priorities)
 ├── CHANGELOG.md                 (Version history)
-├── DESIGN.md                    (Complete design & architecture)
-├── PRODUCT_BRIEF.md             (Non-technical product brief)
 ├── LICENSE                      (MIT)
 │
-├── docs/                        (MkDocs source — will serve recurate.ai)
+├── docs/                        (MkDocs source — serves recurate.ai)
 │   ├── index.md                 (Site landing page)
 │   ├── CNAME                    (Custom domain: recurate.ai)
-│   ├── product_brief.md         (Product brief for site)
-│   ├── design.md                (Design doc for site)
+│   ├── product_brief.md         (Non-technical product brief)
+│   ├── design.md                (Complete design & architecture)
 │   ├── overrides/
 │   │   └── main.html            (OG meta tags)
 │   ├── assets/images/           (Logo, favicon, social card)
@@ -137,7 +135,7 @@ recurate/
     └── backend/                 (Python + FastAPI)
 ```
 
-**Note:** The `extension/` and `platform/` directories don't exist yet. The project structure above is the target layout described in DESIGN.md.
+**Note:** The `extension/` and `platform/` directories don't exist yet. The project structure above is the target layout described in docs/design.md.
 
 ---
 
@@ -158,6 +156,6 @@ recurate/
 - No code written yet — design phase only
 - No website — MkDocs setup pending (see SITE_SETUP_GUIDE.md)
 - No logo or visual identity
-- CC schema not yet defined (critical open item — see DESIGN.md Section 6.3)
-- Synthesis model not yet selected (critical open item — see DESIGN.md Section 6.4)
+- CC schema not yet defined (critical open item — see docs/design.md Section 6.3)
+- Synthesis model not yet selected (critical open item — see docs/design.md Section 6.4)
 - DOM selectors for each LLM platform not yet researched

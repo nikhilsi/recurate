@@ -43,7 +43,7 @@ A web application that sends your question to multiple AI models simultaneously,
 
 The annotation mechanism becomes even more powerful here — you're curating across multiple AI perspectives, shaping a shared memory that all models build on.
 
-**Status:** Design phase — see [DESIGN.md](DESIGN.md)
+**Status:** Design phase — see [Design & Architecture](https://recurate.ai/design/)
 
 ## How It Works
 
@@ -74,9 +74,9 @@ Turn N: Every turn is sharper than the last
 
 ## Documentation
 
-- **[DESIGN.md](DESIGN.md)** — Complete design and architecture document
-- **[PRODUCT_BRIEF.md](PRODUCT_BRIEF.md)** — Non-technical product brief — the "why" and "what"
-- **[Blog: The Text Box Problem](BLOG.md)** — Why the text box is AI's biggest UX blind spot
+- **[Design & Architecture](https://recurate.ai/design/)** — Complete design and architecture document
+- **[Product Brief](https://recurate.ai/product_brief/)** — Non-technical product brief — the "why" and "what"
+- **[Blog: The Text Box Problem](https://recurate.ai/blog/text-box-problem)** — Why the text box is AI's biggest UX blind spot
 
 ## Tech Stack
 
