@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.0] - 2026-02-21
+
+### Added
+- **Annotation UX working end-to-end on claude.ai** — tested and validated with real conversations
+- Auto-inject feedback into text box — annotations proactively appear in claude.ai's input as user annotates, zero-click flow (no Apply/Inject buttons)
+- Light/dark theme support — side panel matches claude.ai's theme via CSS variables and content script detection
+- Word-level selection snapping — partial word selections expand to full word boundaries for cleaner annotations
+- DOM overlay annotations — `<mark>`/`<del>` wrappers applied via TreeWalker, preserves all HTML formatting (headings, lists, code blocks, bold)
+- Theme detection via MutationObserver on `<html>` class attribute + `prefers-color-scheme` fallback
+- `THEME_CHANGED` and `PENDING_FEEDBACK` message types for content script ↔ side panel communication
+
+### Changed
+- **Project restructure**: `extension/` → `extensions/chrome/` for multi-extension support (VS Code extension planned)
+- ResponseView rewritten — uses `useEffect` + DOM manipulation instead of `dangerouslySetInnerHTML` with escaped plain text
+- Content script rewritten — proactive injection approach replaces fragile Enter/send button interception
+- CSS rewritten with CSS custom properties for theming (all hardcoded colors → variables)
+- Updated all doc references to new `extensions/chrome/` paths
+
+### Removed
+- "Apply annotations" button and FeedbackPreview panel (replaced by zero-click auto-inject flow)
+- `showPreview` signal (no longer needed)
+- `escapeHtml()` plain text rebuild approach (replaced by DOM overlay)
+
+### Fixed
+- Annotation no longer destroys HTML formatting (was rebuilding from plain text, now uses DOM overlays)
+- Side panel theme now matches claude.ai's light/dark mode (was always dark)
+
+---
+
 ## [0.2.0] - 2026-02-21
 
 ### Added
