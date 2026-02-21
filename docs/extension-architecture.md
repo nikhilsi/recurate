@@ -65,7 +65,7 @@ Chrome's Content Security Policy bans `eval()` and `new Function()` on extension
 ## 3. Project Structure
 
 ```
-extension/
+extensions/chrome/
 ├── package.json                       # Dependencies and scripts
 ├── tsconfig.json                      # TypeScript configuration
 ├── wxt.config.ts                      # WXT + Vite + Preact configuration

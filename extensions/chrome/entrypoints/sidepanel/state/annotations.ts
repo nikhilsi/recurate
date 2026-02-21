@@ -6,7 +6,6 @@ import type { Annotation, AnnotationType, ResponseData, ConnectionStatus } from 
 export const annotations = signal<Annotation[]>([]);
 export const currentResponse = signal<ResponseData | null>(null);
 export const connectionStatus = signal<ConnectionStatus>('disconnected');
-export const showPreview = signal(false);
 
 // --- Derived state ---
 
@@ -70,6 +69,5 @@ export function setResponse(data: ResponseData) {
   batch(() => {
     currentResponse.value = data;
     annotations.value = [];
-    showPreview.value = false;
   });
 }

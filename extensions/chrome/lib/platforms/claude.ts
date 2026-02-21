@@ -70,29 +70,55 @@ export function isStreaming(): boolean {
 }
 
 /**
- * Inject structured feedback text into claude.ai's ProseMirror text input.
- * Returns true if injection succeeded.
+ * Get the ProseMirror editor element, or null if not found.
  */
-export function injectFeedback(text: string): boolean {
-  const editor =
+export function getEditor(): HTMLElement | null {
+  return (
     document.querySelector(SELECTORS.inputEditor) ||
-    document.querySelector(SELECTORS.inputEditorFallback);
+    document.querySelector(SELECTORS.inputEditorFallback)
+  ) as HTMLElement | null;
+}
 
+/**
+ * Get the current text content of the editor.
+ */
+export function getEditorText(): string {
+  const editor = getEditor();
+  return editor?.textContent?.trim() || '';
+}
+
+// Marker used to identify our injected feedback in the editor
+export const FEEDBACK_MARKER = '[Feedback on your previous response]';
+
+/**
+ * Set the editor content to the given text, replacing everything.
+ * ProseMirror syncs via the input event dispatch.
+ */
+export function setEditorContent(text: string): boolean {
+  const editor = getEditor();
   if (!editor) return false;
 
-  // ProseMirror expects <p> elements as children
+  editor.innerHTML = '';
   const lines = text.split('\n');
   for (const line of lines) {
     const p = document.createElement('p');
-    p.textContent = line || '\u200B'; // Zero-width space for empty lines
+    p.textContent = line || '\u200B';
     editor.appendChild(p);
   }
 
-  // Dispatch input event so ProseMirror syncs its internal state
   editor.dispatchEvent(new Event('input', { bubbles: true }));
+  editor.focus();
+  return true;
+}
 
-  // Focus the editor so the user can start typing their message
-  (editor as HTMLElement).focus();
+/**
+ * Clear the editor to an empty state.
+ */
+export function clearEditor(): boolean {
+  const editor = getEditor();
+  if (!editor) return false;
 
+  editor.innerHTML = '<p><br></p>';
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
   return true;
 }

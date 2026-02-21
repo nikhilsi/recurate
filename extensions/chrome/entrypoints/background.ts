@@ -8,7 +8,7 @@ export default defineBackground({
     // Relay messages from side panel to content scripts
     // (Side panel cannot directly message content scripts)
     browser.runtime.onMessage.addListener((message, sender) => {
-      if (message.type === 'INJECT_FEEDBACK') {
+      if (message.type === 'INJECT_FEEDBACK' || message.type === 'PENDING_FEEDBACK') {
         // Forward to the active tab's content script
         browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
           if (tab?.id) {

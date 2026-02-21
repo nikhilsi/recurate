@@ -83,7 +83,7 @@
 | **Blog article** | `docs/blog/posts/text-box-problem.md` |
 | **Dev rules** | `CLAUDE.md` |
 | **Site config** | `mkdocs.yml` |
-| **Extension config** | `extension/wxt.config.ts` |
+| **Extension config** | `extensions/chrome/wxt.config.ts` |
 
 ---
 

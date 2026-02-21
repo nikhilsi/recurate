@@ -33,11 +33,11 @@
 .annotation-toolbar {
   display: flex;
   gap: 2px;
-  background: #1e1f2e;
-  border: 1px solid #3d3f4e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px var(--shadow-color);
   z-index: 1000;
   animation: toolbar-fade-in 0.1s ease-out;
 }
@@ -68,7 +68,7 @@
 }
 
 .toolbar-btn:hover {
-  background: #2d2f3e;
+  background: var(--bg-tertiary);
 }
 
 .toolbar-btn-highlight {
@@ -88,7 +88,7 @@
 }
 
 .toolbar-btn-clear {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .toolbar-btn-clear:hover {

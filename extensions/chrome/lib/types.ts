@@ -20,9 +20,13 @@ export interface ResponseData {
 
 export type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready';
 
+export type Theme = 'light' | 'dark';
+
 // Chrome runtime message types
 export type ExtensionMessage =
   | { type: 'RESPONSE_STREAMING'; html: string; messageId: string }
   | { type: 'RESPONSE_READY'; html: string; text: string; messageId: string }
   | { type: 'INJECT_FEEDBACK'; feedback: string }
-  | { type: 'CONNECTION_STATUS'; status: ConnectionStatus };
+  | { type: 'PENDING_FEEDBACK'; feedback: string | null }
+  | { type: 'CONNECTION_STATUS'; status: ConnectionStatus }
+  | { type: 'THEME_CHANGED'; theme: Theme };

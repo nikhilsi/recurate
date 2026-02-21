@@ -81,7 +81,7 @@ Build the Recurate Annotator — see docs/extension-architecture.md:
 
 - No API keys needed for the Chrome extension (fully client-side)
 - docs/extension-architecture.md has the full tech details
-- To test: `cd extension && npm run dev`, load `.output/chrome-mv3-dev` in chrome://extensions
+- To test: `cd extensions/chrome && npm run dev`, load `.output/chrome-mv3-dev` in chrome://extensions
 - The extension is the priority — it validates the core UX before building the platform
 
 ---

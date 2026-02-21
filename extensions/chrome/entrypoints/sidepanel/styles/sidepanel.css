@@ -1,4 +1,49 @@
-/* Global side panel styles */
+/* Theme variables */
+
+:root,
+[data-theme="dark"] {
+  --bg-primary: #1a1b26;
+  --bg-secondary: #1e1f2e;
+  --bg-tertiary: #2d2f3e;
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-faint: #6b7280;
+  --text-faintest: #4b5563;
+  --border-color: #2d2f3e;
+  --link-color: #60a5fa;
+  --code-bg: #2d2f3e;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --btn-primary-bg: #4f46e5;
+  --btn-primary-hover: #4338ca;
+  --btn-success-bg: #22c55e;
+  --btn-success-hover: #16a34a;
+  --btn-secondary-bg: #374151;
+  --btn-secondary-hover: #4b5563;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+  --text-faintest: #d1d5db;
+  --border-color: #e5e7eb;
+  --link-color: #2563eb;
+  --code-bg: #f3f4f6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --btn-primary-bg: #4f46e5;
+  --btn-primary-hover: #4338ca;
+  --btn-success-bg: #16a34a;
+  --btn-success-hover: #15803d;
+  --btn-secondary-bg: #e5e7eb;
+  --btn-secondary-hover: #d1d5db;
+}
+
+/* Global styles */
 
 * {
   box-sizing: border-box;
@@ -10,8 +55,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #e5e7eb;
-  background: #1a1b26;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
 }
 
 .app {
@@ -23,14 +68,14 @@ body {
 
 .app-header {
   padding: 12px 16px;
-  border-bottom: 1px solid #2d2f3e;
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 .app-header h1 {
   font-size: 16px;
   font-weight: 600;
-  color: #f3f4f6;
+  color: var(--text-primary);
 }
 
 /* Status bar */
@@ -40,8 +85,8 @@ body {
   gap: 8px;
   padding: 8px 16px;
   font-size: 12px;
-  color: #9ca3af;
-  border-bottom: 1px solid #2d2f3e;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -63,13 +108,13 @@ body {
   padding: 16px;
   font-size: 14px;
   line-height: 1.6;
-  color: #d1d5db;
+  color: var(--text-secondary);
 }
 
 .response-content h1,
 .response-content h2,
 .response-content h3 {
-  color: #f3f4f6;
+  color: var(--text-primary);
   margin: 16px 0 8px;
 }
 
@@ -88,7 +133,7 @@ body {
 }
 
 .response-content code {
-  background: #2d2f3e;
+  background: var(--code-bg);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 13px;
@@ -96,7 +141,7 @@ body {
 }
 
 .response-content pre {
-  background: #2d2f3e;
+  background: var(--code-bg);
   padding: 12px;
   border-radius: 8px;
   overflow-x: auto;
@@ -109,13 +154,13 @@ body {
 }
 
 .response-content a {
-  color: #60a5fa;
+  color: var(--link-color);
 }
 
 .response-content blockquote {
-  border-left: 3px solid #4b5563;
+  border-left: 3px solid var(--text-faintest);
   padding-left: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin: 8px 0;
 }
 
@@ -128,26 +173,26 @@ body {
   flex: 1;
   padding: 32px;
   text-align: center;
-  color: #6b7280;
+  color: var(--text-faint);
 }
 
 .empty-state .hint {
   font-size: 12px;
   margin-top: 8px;
-  color: #4b5563;
+  color: var(--text-faintest);
 }
 
 /* Apply bar */
 .apply-bar {
   padding: 12px 16px;
-  border-top: 1px solid #2d2f3e;
+  border-top: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 .apply-button {
   width: 100%;
   padding: 10px 16px;
-  background: #4f46e5;
+  background: var(--btn-primary-bg);
   color: white;
   border: none;
   border-radius: 8px;
@@ -158,14 +203,14 @@ body {
 }
 
 .apply-button:hover {
-  background: #4338ca;
+  background: var(--btn-primary-hover);
 }
 
 /* Feedback preview */
 .feedback-preview {
-  border-top: 1px solid #2d2f3e;
+  border-top: 1px solid var(--border-color);
   padding: 16px;
-  background: #1e1f2e;
+  background: var(--bg-secondary);
   flex-shrink: 0;
   max-height: 50vh;
   overflow-y: auto;
@@ -173,18 +218,18 @@ body {
 
 .feedback-preview h3 {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin-bottom: 8px;
   font-weight: 500;
 }
 
 .feedback-preview-text {
-  background: #2d2f3e;
+  background: var(--bg-tertiary);
   padding: 12px;
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.5;
-  color: #d1d5db;
+  color: var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-word;
   margin-bottom: 12px;
@@ -199,7 +244,7 @@ body {
 .inject-button {
   flex: 1;
   padding: 10px 16px;
-  background: #22c55e;
+  background: var(--btn-success-bg);
   color: white;
   border: none;
   border-radius: 8px;
@@ -210,13 +255,13 @@ body {
 }
 
 .inject-button:hover {
-  background: #16a34a;
+  background: var(--btn-success-hover);
 }
 
 .cancel-button {
   padding: 10px 16px;
-  background: #374151;
-  color: #d1d5db;
+  background: var(--btn-secondary-bg);
+  color: var(--text-secondary);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -225,12 +270,12 @@ body {
 }
 
 .cancel-button:hover {
-  background: #4b5563;
+  background: var(--btn-secondary-hover);
 }
 
 /* Annotation list */
 .annotation-list {
-  border-top: 1px solid #2d2f3e;
+  border-top: 1px solid var(--border-color);
   flex-shrink: 0;
   max-height: 30vh;
   overflow-y: auto;
@@ -242,13 +287,13 @@ body {
   align-items: center;
   padding: 8px 16px;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .clear-all-btn {
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--text-faint);
   cursor: pointer;
   font-size: 12px;
   padding: 2px 6px;
@@ -276,7 +321,7 @@ body {
 }
 
 .annotation-item:hover {
-  background: #2d2f3e;
+  background: var(--bg-tertiary);
 }
 
 .annotation-item-icon {
@@ -296,7 +341,7 @@ body {
 
 .annotation-item-text {
   flex: 1;
-  color: #9ca3af;
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
@@ -304,7 +349,7 @@ body {
   flex-shrink: 0;
   background: none;
   border: none;
-  color: #4b5563;
+  color: var(--text-faintest);
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
@@ -315,4 +360,15 @@ body {
 
 .annotation-item-delete:hover {
   color: #ef4444;
+}
+
+/* Pending feedback indicator */
+.feedback-pending {
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  text-align: center;
+  flex-shrink: 0;
 }

@@ -123,13 +123,14 @@ recurate/
 │       └── posts/
 │           └── text-box-problem.md  (Blog article)
 │
-├── extension/                   (Phase 0 — Chrome extension, WXT + Preact)
-│   ├── wxt.config.ts            (WXT + Vite + Preact configuration)
-│   ├── entrypoints/
-│   │   ├── background.ts        (Service worker)
-│   │   ├── claude.content.ts    (Content script for claude.ai)
-│   │   └── sidepanel/           (Side panel UI — Preact components)
-│   └── lib/                     (Shared types, formatter, platform selectors)
+├── extensions/
+│   └── chrome/                  (Phase 0 — Chrome extension, WXT + Preact)
+│       ├── wxt.config.ts        (WXT + Vite + Preact configuration)
+│       ├── entrypoints/
+│       │   ├── background.ts    (Service worker)
+│       │   ├── claude.content.ts (Content script for claude.ai)
+│       │   └── sidepanel/       (Side panel UI — Preact components)
+│       └── lib/                 (Shared types, formatter, platform selectors)
 │
 └── platform/                    (Phase 1 — Roundtable web app)
     ├── frontend/                (React + TypeScript)
