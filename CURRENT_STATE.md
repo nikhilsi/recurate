@@ -6,7 +6,7 @@
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, preparing for VS Code + Chrome Web Store
+**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, VS Code extension built (needs testing), preparing for Chrome Web Store
 
 ---
 
@@ -64,8 +64,18 @@
   - Theme detection, SPA navigation handling
 - Build output: 93 KB total (both content scripts + shared code)
 
+### VS Code Extension (Built, needs testing)
+- Located at `extensions/vscode/`
+- Extension host (Node.js): JSONL watcher, webview provider, clipboard copy
+- Webview sidebar (Preact + Signals): same annotation UI as Chrome extension
+- **JSONL file watching**: monitors `~/.claude/projects/<encoded-path>/*.jsonl` for Claude Code assistant responses
+- Extracts text content blocks from assistant messages, converts markdown → HTML via `marked`
+- Clipboard-based feedback: "Copy Feedback" button → copies KEEP/DROP text → user pastes into Claude Code
+- Theme detection: reads VS Code's `vscode-light`/`vscode-dark` body class
+- Build: extension host 78.5 KB (esbuild), webview 27.67 KB JS + 5.76 KB CSS (Vite)
+- **Not yet tested in Extension Development Host** — needs F5 testing
+
 ### Not Yet Built
-- VS Code extension
 - Chrome Web Store listing
 - Logo, icons, visual identity
 - Settings/config page
@@ -88,8 +98,10 @@
 ### Resolved (ChatGPT)
 - ~~chat.com DOM structure~~ → `article` elements, `div.ProseMirror#prompt-textarea` (contenteditable), stop button for streaming
 
-### To Research (Next)
-- VS Code extension architecture (terminal capture, Webview panel, Claude Code hooks)
+### Resolved (VS Code Extension)
+- ~~VS Code extension architecture~~ → JSONL file watching + Webview sidebar + clipboard feedback
+- ~~Terminal capture approach~~ → JSONL files at `~/.claude/projects/` (not terminal API — unstable)
+- ~~Feedback injection~~ → clipboard copy (V1), Terminal.sendText() possible V2
 
 ### Critical (Roundtable — not needed for extensions)
 1. CC schema/structure — JSON vs natural language, token budget
@@ -120,6 +132,10 @@
 | **Platform selectors (claude.ai)** | `extensions/chrome/lib/platforms/claude.ts` |
 | **Platform selectors (ChatGPT)** | `extensions/chrome/lib/platforms/chatgpt.ts` |
 | **Annotation state** | `extensions/chrome/entrypoints/sidepanel/state/annotations.ts` |
+| **VS Code extension entry** | `extensions/vscode/src/extension.ts` |
+| **JSONL watcher** | `extensions/vscode/src/jsonlWatcher.ts` |
+| **VS Code webview provider** | `extensions/vscode/src/webviewProvider.ts` |
+| **VS Code webview app** | `extensions/vscode/webview/App.tsx` |
 
 ---
 

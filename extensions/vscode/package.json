@@ -1,0 +1,60 @@
+{
+  "name": "recurate-annotator-vscode",
+  "displayName": "Recurate Annotator",
+  "description": "Don't just chat, recurate. Annotation tools for Claude Code conversations.",
+  "version": "0.1.0",
+  "publisher": "recurate",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["*"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "recurate-sidebar",
+          "title": "Recurate",
+          "icon": "$(symbol-color)"
+        }
+      ]
+    },
+    "views": {
+      "recurate-sidebar": [
+        {
+          "type": "webview",
+          "id": "recurate.annotator",
+          "name": "Annotator"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "recurate.copyFeedback",
+        "title": "Recurate: Copy Feedback to Clipboard"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "npm run compile:extension && npm run compile:webview",
+    "compile:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "compile:webview": "vite build",
+    "watch": "npm run compile:extension -- --watch",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.0",
+    "@preact/signals": "^2.0.0",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "preact": "^10.25.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "marked": "^15.0.0"
+  }
+}

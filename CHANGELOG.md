@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.5.0] - 2026-02-21
+
+### Added
+- **VS Code extension** — annotate Claude Code's text responses directly in VS Code
+- `extensions/vscode/` project with full build pipeline (esbuild + Vite)
+- **JSONL file watcher** — monitors `~/.claude/projects/<encoded-path>/*.jsonl` for new Claude Code assistant responses
+- Extracts text content blocks from assistant messages (ignores tool_use, thinking blocks)
+- Markdown → HTML rendering via `marked` library
+- **Webview sidebar** — same Preact + Signals annotation UI as Chrome extension
+- "Copy Feedback" button — copies KEEP/DROP formatted text to clipboard for pasting into Claude Code
+- VS Code theme detection (light/dark via body class)
+- WebviewViewProvider with CSP, nonce-based script loading, asset discovery
+- Shared types and formatter between extension host and webview
+
+### Architecture
+- Extension host (Node.js): jsonlWatcher.ts, webviewProvider.ts, clipboard.ts, extension.ts
+- Webview (Preact): App.tsx, ResponseView, AnnotationToolbar, AnnotationList, StatusBar
+- messaging.ts adapter replaces Chrome's browser.runtime API with VS Code's postMessage
+- Build: extension host 78.5 KB, webview 27.67 KB JS + 5.76 KB CSS
+
+### Notes
+- ~70% of Chrome extension UI code reused (components, state, styles, formatter)
+- JSONL watching chosen over terminal API (unstable) and hooks (tool events only)
+- Clipboard feedback chosen for V1 (simplest, safest — Terminal.sendText() possible V2)
+- Not yet tested in Extension Development Host — needs F5 testing
+
+---
+
 ## [0.4.0] - 2026-02-21
 
 ### Added

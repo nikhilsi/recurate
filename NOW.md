@@ -53,13 +53,16 @@
 - [ ] Free forever for the extension
 - [ ] Review and submit
 
-### 4. VS Code Extension
-- [ ] Research Claude Code terminal output capture (hooks, shell integration API)
-- [ ] Scaffold VS Code extension project (`extensions/vscode/`)
-- [ ] Webview panel with shared annotation UI
-- [ ] Terminal output capture (clipboard-based for V1, hooks for V2)
-- [ ] Feedback injection via `Terminal.sendText()`
-- [ ] Test with Claude Code in VS Code
+### 4. VS Code Extension — Built, needs testing
+- [x] Research Claude Code output capture (JSONL file watching)
+- [x] Scaffold VS Code extension project (`extensions/vscode/`)
+- [x] JSONL watcher — watches `~/.claude/projects/` for Claude Code responses
+- [x] Webview sidebar with shared annotation UI (Preact + Signals, same as Chrome)
+- [x] Markdown → HTML rendering via `marked`
+- [x] Clipboard-based feedback (Copy Feedback → paste into Claude Code)
+- [x] Build succeeds (extension host 78.5 KB, webview 27.67 KB)
+- [ ] Test with F5 (Extension Development Host) in VS Code
+- [ ] Fix any issues found during testing
 
 ### 5. Ship
 - [ ] Publish Chrome extension to Chrome Web Store
