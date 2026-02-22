@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338CA"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="128" height="128" rx="28" ry="28" fill="url(#bg)"/>
+
+  <!-- Two open curved arrows forming the re-curation cycle -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Upper arrow: sweeps from bottom-left to upper-right -->
+    <path d="M 34,80 A 32,32 0 0,1 80,34" />
+    <!-- Arrowhead: opens inward toward center -->
+    <polyline points="84,23 80,34 70,38" />
+
+    <!-- Lower arrow: sweeps from upper-right to bottom-left -->
+    <path d="M 94,48 A 32,32 0 0,1 48,94" />
+    <!-- Arrowhead: opens inward toward center -->
+    <polyline points="44,105 48,94 58,90" />
+  </g>
+
+  <!-- Check mark (green — keep/highlight) -->
+  <polyline
+    points="43,59 51,68 67,48"
+    fill="none" stroke="#34D399" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
+  />
+
+  <!-- Strikethrough line (red — drop) -->
+  <line x1="62" y1="77" x2="80" y2="77"
+    stroke="#F87171" stroke-width="6" stroke-linecap="round"
+  />
+</svg>

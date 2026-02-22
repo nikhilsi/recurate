@@ -25,7 +25,8 @@
 ### Website (Live)
 - recurate.ai — MkDocs Material site, deployed via GitHub Pages
 - Blog with first article live
-- No logo or visual identity yet
+- Logo (SVG), favicon (32px PNG), social card (1200x630 PNG)
+- OG meta tags with social card for link previews
 
 ### Chrome Extension (Working on claude.ai)
 - WXT + Preact + Preact Signals + TypeScript
@@ -80,9 +81,15 @@
 - Build: extension host 81 KB (esbuild), webview 28.5 KB JS + 6 KB CSS (Vite)
 - **Tested end-to-end**: installed via .vsix, annotated response, auto-copied feedback, pasted into Claude Code
 
+### Icons & Visual Identity (Complete)
+- Master SVG icon: circular arrows (re-curation cycle) + green checkmark + red strikethrough on indigo gradient
+- Chrome extension icons: 16, 32, 48, 128px PNG (in `extensions/chrome/public/icons/`)
+- VS Code extension: 128px marketplace icon + monochrome activity bar SVG
+- Site: SVG logo in header, 32px PNG favicon, 1200x630 social card PNG
+- Generation scripts: `scripts/generate-icons.mjs`, `scripts/generate-social-card.mjs` (sharp)
+
 ### Not Yet Built
 - Chrome Web Store listing
-- Logo, icons, visual identity
 - Settings/config page
 - Platform (Roundtable) — design phase only
 
@@ -141,6 +148,9 @@
 | **JSONL watcher** | `extensions/vscode/src/jsonlWatcher.ts` |
 | **VS Code webview provider** | `extensions/vscode/src/webviewProvider.ts` |
 | **VS Code webview app** | `extensions/vscode/webview/App.tsx` |
+| **Master icon SVG** | `docs/assets/images/recurate-icon.svg` |
+| **Icon generation** | `scripts/generate-icons.mjs` |
+| **Social card generation** | `scripts/generate-social-card.mjs` |
 
 ---
 

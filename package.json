@@ -1,0 +1,27 @@
+{
+  "name": "recurate",
+  "version": "1.0.0",
+  "description": "**[recurate.ai](https://recurate.ai)**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikhilsi/recurate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nikhilsi/recurate/issues"
+  },
+  "homepage": "https://github.com/nikhilsi/recurate#readme",
+  "devDependencies": {
+    "sharp": "^0.34.5"
+  }
+}

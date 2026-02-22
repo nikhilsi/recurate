@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="cardbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E293B"/>
+      <stop offset="100%" style="stop-color:#0F172A"/>
+    </linearGradient>
+    <linearGradient id="iconbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338CA"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark slate background -->
+  <rect width="1200" height="630" fill="url(#cardbg)"/>
+
+  <!-- Icon (scaled version of recurate-icon, centered at x=490, y=240) -->
+  <g transform="translate(460,195) scale(0.625)">
+    <rect x="0" y="0" width="128" height="128" rx="28" ry="28" fill="url(#iconbg)"/>
+    <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 34,80 A 32,32 0 0,1 80,34" />
+      <polyline points="84,23 80,34 70,38" />
+      <path d="M 94,48 A 32,32 0 0,1 48,94" />
+      <polyline points="44,105 48,94 58,90" />
+    </g>
+    <polyline points="43,59 51,68 67,48" fill="none" stroke="#34D399" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="62" y1="77" x2="80" y2="77" stroke="#F87171" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="555" y="268" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#F1F5F9" text-anchor="start">Recurate</text>
+
+  <!-- Colored divider line (indigo) -->
+  <line x1="555" y1="300" x2="635" y2="300" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Tagline -->
+  <text x="555" y="340" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" fill="#94A3B8">Don't just chat, recurate.</text>
+
+  <!-- Description -->
+  <text x="555" y="378" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#64748B">Annotation tools for AI conversations.</text>
+
+  <!-- URL at bottom -->
+  <text x="600" y="570" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#6366F1" text-anchor="middle">recurate.ai</text>
+</svg>

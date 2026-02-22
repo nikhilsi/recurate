@@ -4,6 +4,7 @@
   "description": "Don't just chat, recurate. Annotation tools for Claude Code conversations.",
   "version": "0.1.0",
   "publisher": "recurate",
+  "icon": "icon.png",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -17,7 +18,7 @@
         {
           "id": "recurate-sidebar",
           "title": "Recurate",
-          "icon": "$(symbol-color)"
+          "icon": "resources/activity-bar-icon.svg"
         }
       ]
     },

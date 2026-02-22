@@ -37,16 +37,26 @@
   - Sidebar persists across tab switches (WEBVIEW_READY handshake)
   - Performance: reads only tail of JSONL file (not entire 25MB+)
   - Tested: annotate → auto-copy → paste into Claude Code
+- Icons, logo & visual identity — complete:
+  - Master SVG icon: circular arrows + green checkmark + red strikethrough on indigo gradient
+  - Chrome extension icons (16/32/48/128px PNG)
+  - VS Code extension icon (128px PNG) + monochrome activity bar SVG
+  - Site favicon (32px PNG) and logo (SVG)
+  - Social card (1200x630 PNG)
+  - All references wired up (manifests, package.json, mkdocs.yml, OG meta tags)
 
 ---
 
 ## Current Focus
 
-### 1. Icons, Logo & Visual Identity
-- [ ] Use recraft.ai to create logo and icons
-- [ ] Extension icons (16, 32, 48, 128px)
-- [ ] Site favicon and social card
-- [ ] Update recurate.ai with logo
+### 1. Icons, Logo & Visual Identity — DONE
+- [x] Design icon: circular arrows (re-curation cycle) + green checkmark + red strikethrough
+- [x] Extension icons (16, 32, 48, 128px PNG from master SVG)
+- [x] Site favicon and logo (SVG + PNG)
+- [x] Chrome extension manifest wired up
+- [x] VS Code extension package.json wired up
+- [x] mkdocs.yml logo and favicon enabled
+- [x] Social card (1200x630 PNG — icon + title + tagline on dark slate background)
 
 ### 2. ChatGPT Support (chat.com) — DONE
 - [x] Research chat.com DOM structure (response containers, input field, streaming indicators)

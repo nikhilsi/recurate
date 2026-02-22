@@ -31,8 +31,8 @@ theme:
     - toc.follow
     - search.suggest
     - search.highlight
-  # logo: assets/images/recurate-icon.svg
-  # favicon: assets/images/recurate-icon.png
+  logo: assets/images/recurate-icon.svg
+  favicon: assets/images/recurate-icon.png
   icon:
     repo: fontawesome/brands/github
   font:

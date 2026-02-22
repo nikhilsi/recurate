@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.6.0] - 2026-02-21
+
+### Added
+- **Icons, logo & visual identity** — custom icon design and all generated assets
+- Master SVG icon: circular arrows (re-curation cycle) + green checkmark (keep) + red strikethrough (drop) on indigo gradient background
+- Chrome extension icons (16, 32, 48, 128px PNG) wired into manifest
+- VS Code extension marketplace icon (128px PNG) and monochrome activity bar SVG
+- Site logo (SVG) and favicon (32px PNG) enabled in mkdocs.yml
+- Social card (1200x630 PNG) — icon + title + tagline + URL on dark slate background
+- `scripts/generate-icons.mjs` — generates all PNG icons from master SVG via sharp
+- `scripts/generate-social-card.mjs` — generates social card PNG from SVG via sharp
+
+### Changed
+- VS Code activity bar icon from generic `$(symbol-color)` codicon to custom monochrome SVG
+- mkdocs.yml — logo and favicon now point to generated assets
+- Chrome extension wxt.config.ts — manifest includes icon paths
+
+### Notes
+- Icon color palette: indigo (#4338CA → #6366F1 gradient), green keep (#34D399), red drop (#F87171)
+- Social card follows tourgraph pattern (centered icon + title, colored divider, tagline, URL)
+- All PNGs generated from SVG sources via sharp (reproducible, not hand-exported)
+
+---
+
 ## [0.5.0] - 2026-02-21
 
 ### Added
