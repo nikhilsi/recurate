@@ -6,7 +6,7 @@
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, VS Code extension built (needs testing), preparing for Chrome Web Store
+**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, VS Code extension working, preparing for packaging & shipping
 
 ---
 
@@ -64,16 +64,17 @@
   - Theme detection, SPA navigation handling
 - Build output: 93 KB total (both content scripts + shared code)
 
-### VS Code Extension (Built, needs testing)
+### VS Code Extension (Working)
 - Located at `extensions/vscode/`
 - Extension host (Node.js): JSONL watcher, webview provider, clipboard copy
 - Webview sidebar (Preact + Signals): same annotation UI as Chrome extension
 - **JSONL file watching**: monitors `~/.claude/projects/<encoded-path>/*.jsonl` for Claude Code assistant responses
+- Walks up parent directories to find matching Claude project dir (works from subfolders)
 - Extracts text content blocks from assistant messages, converts markdown → HTML via `marked`
 - Clipboard-based feedback: "Copy Feedback" button → copies KEEP/DROP text → user pastes into Claude Code
 - Theme detection: reads VS Code's `vscode-light`/`vscode-dark` body class
-- Build: extension host 78.5 KB (esbuild), webview 27.67 KB JS + 5.76 KB CSS (Vite)
-- **Not yet tested in Extension Development Host** — needs F5 testing
+- Build: extension host 79.2 KB (esbuild), webview 27.67 KB JS + 5.76 KB CSS (Vite)
+- **Tested end-to-end**: installed via .vsix, annotated response, copied feedback, pasted into Claude Code
 
 ### Not Yet Built
 - Chrome Web Store listing

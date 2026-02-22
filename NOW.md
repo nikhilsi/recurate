@@ -28,6 +28,12 @@
   - DOM overlay annotations (preserves HTML formatting)
 - Project restructure: `extension/` → `extensions/chrome/`
 - ChatGPT (chat.com) support — tested and working end-to-end
+- VS Code extension — working end-to-end:
+  - JSONL file watcher for Claude Code responses
+  - Webview sidebar with same annotation UI as Chrome (Preact + Signals)
+  - Markdown → HTML rendering, clipboard-based feedback
+  - Parent directory walking for project path resolution
+  - Tested: annotate → Copy Feedback → paste into Claude Code
 
 ---
 
@@ -45,15 +51,7 @@
 - [x] Create `lib/platforms/chatgpt.ts` platform module
 - [x] Test end-to-end on chat.com
 
-### 3. Chrome Web Store Submission
-- [ ] Store description — lead with the problem, not the feature
-- [ ] Screenshots showing before/after annotation quality
-- [ ] Minimal permissions (builds trust, speeds review)
-- [ ] 30-second demo video
-- [ ] Free forever for the extension
-- [ ] Review and submit
-
-### 4. VS Code Extension — Built, needs testing
+### 4. VS Code Extension — DONE
 - [x] Research Claude Code output capture (JSONL file watching)
 - [x] Scaffold VS Code extension project (`extensions/vscode/`)
 - [x] JSONL watcher — watches `~/.claude/projects/` for Claude Code responses
@@ -61,10 +59,24 @@
 - [x] Markdown → HTML rendering via `marked`
 - [x] Clipboard-based feedback (Copy Feedback → paste into Claude Code)
 - [x] Build succeeds (extension host 78.5 KB, webview 27.67 KB)
-- [ ] Test with F5 (Extension Development Host) in VS Code
-- [ ] Fix any issues found during testing
+- [x] Tested end-to-end via .vsix install (annotate → copy → paste)
 
-### 5. Ship
+### 5. VS Code Extension — Package & Ship
+- [ ] Publisher account on VS Code Marketplace
+- [ ] Extension icon (use same logo once created)
+- [ ] Marketplace description and README
+- [ ] Screenshots showing annotation flow
+- [ ] Publish to VS Code Marketplace
+
+### 6. Chrome Extension — Package & Ship
+- [ ] Store description — lead with the problem, not the feature
+- [ ] Screenshots showing before/after annotation quality
+- [ ] Minimal permissions (builds trust, speeds review)
+- [ ] 30-second demo video
+- [ ] Free forever for the extension
+- [ ] Review and submit to Chrome Web Store
+
+### 7. Ship
 - [ ] Publish Chrome extension to Chrome Web Store
 - [ ] Publish VS Code extension to VS Code Marketplace
 - [ ] Update recurate.ai with install links and screenshots
@@ -100,6 +112,9 @@
 - To test: `cd extensions/chrome && npm run dev`, load `.output/chrome-mv3-dev` in chrome://extensions
 - The extensions validate the core UX before building the Roundtable platform
 - ChatGPT content script follows the same architecture as claude.ai (platform module + content script)
+- To build VS Code extension: `cd extensions/vscode && npm install && npm run compile`
+- To package: `npx @vscode/vsce package --allow-missing-repository --allow-star-activation`
+- To install locally: `code --install-extension recurate-annotator-vscode-0.1.0.vsix`
 
 ---
 
