@@ -29,19 +29,33 @@ This isn't just a feature. It's a fundamentally different way to communicate wit
 
 **Nobody has built this yet.**
 
-## Two Products
+## Products
 
 ### Recurate Annotator — Chrome Extension
 
-A lightweight Chrome extension that adds annotation tools to any AI chat interface. Works on claude.ai, chat.com, grok.com, and gemini.google.com. No backend, no API keys — just install and your conversations immediately get better.
+A lightweight Chrome extension that adds annotation tools to AI chat interfaces. Works on **claude.ai** and **ChatGPT (chat.com)**. No backend, no API keys — just install and your conversations immediately get better.
 
-**Status:** In development
+- Side panel mirrors the AI's latest response
+- Select text → floating toolbar → highlight (keep) or strikethrough (drop)
+- Annotations auto-inject into the text box — zero-click feedback
+- Works with light and dark themes
 
-### Recurate Roundtable — Multi-LLM Platform
+**Status:** Working end-to-end on claude.ai and ChatGPT
 
-A web application that sends your question to multiple AI models simultaneously, synthesizes their perspectives into a shared context, and lets you curate across all of them. Each model benefits from the others' insights. By turn 3-4, the conversation reaches a depth no single model could achieve alone.
+### Recurate Annotator — VS Code Extension
 
-The annotation mechanism becomes even more powerful here — you're curating across multiple AI perspectives, shaping a shared memory that all models build on.
+Annotate **Claude Code** responses directly in VS Code. Same annotation UX, built for the terminal workflow.
+
+- Sidebar watches Claude Code's conversation files (JSONL)
+- Renders assistant text responses with full markdown formatting
+- Annotate → feedback auto-copied to clipboard → paste into Claude Code
+- Last 5 responses available with back/forward navigation
+
+**Status:** Working end-to-end, installed via .vsix
+
+### Recurate Roundtable — Multi-LLM Platform (Future)
+
+A web application that sends your question to multiple AI models simultaneously, synthesizes their perspectives into a shared context, and lets you curate across all of them.
 
 **Status:** Design phase — see [Design & Architecture](https://recurate.ai/design/)
 
@@ -82,10 +96,22 @@ Turn N: Every turn is sharper than the last
 
 | Component | Technology |
 |-----------|------------|
-| Chrome Extension | Manifest V3, Side Panel API |
+| Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
+| VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
 | Roundtable Frontend | React, TypeScript |
 | Roundtable Backend | Python, FastAPI |
 | LLM APIs | Anthropic, OpenAI, xAI, Google |
+
+## Project Structure
+
+```
+recurate/
+├── extensions/
+│   ├── chrome/          # Chrome extension (claude.ai + ChatGPT)
+│   └── vscode/          # VS Code extension (Claude Code)
+├── docs/                # MkDocs site (recurate.ai)
+└── platform/            # Roundtable (future)
+```
 
 ## Contributing
 

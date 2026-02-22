@@ -23,8 +23,18 @@ export type ConnectionStatus = 'disconnected' | 'connected' | 'watching' | 'read
 export type Theme = 'light' | 'dark';
 
 // VS Code extension ↔ webview message types
+export interface ResponseHistoryItem {
+  html: string;
+  text: string;
+  messageId: string;
+  timestamp: string;
+}
+
+// VS Code extension ↔ webview message types
 export type ExtensionMessage =
   | { type: 'RESPONSE_READY'; html: string; text: string; messageId: string }
+  | { type: 'RESPONSE_HISTORY'; responses: ResponseHistoryItem[] }
   | { type: 'COPY_FEEDBACK'; feedback: string }
   | { type: 'CONNECTION_STATUS'; status: ConnectionStatus }
-  | { type: 'THEME_CHANGED'; theme: Theme };
+  | { type: 'THEME_CHANGED'; theme: Theme }
+  | { type: 'WEBVIEW_READY' };

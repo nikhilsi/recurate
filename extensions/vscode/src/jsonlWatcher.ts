@@ -33,7 +33,6 @@ function encodeProjectPath(fsPath: string): string {
 
 /**
  * Find the most recently modified JSONL file in the project directory.
- * Excludes subagent files.
  */
 function findActiveSession(projectDir: string): string | null {
   if (!fs.existsSync(projectDir)) return null;
@@ -51,16 +50,36 @@ function findActiveSession(projectDir: string): string | null {
 }
 
 /**
- * Extract the latest assistant text response from a JSONL file.
- * Reads from the end of the file to find the most recent assistant message
- * with text content blocks.
+ * Read the tail of a file efficiently.
+ * For large JSONL files (25MB+), we only need the last ~50KB to find the latest assistant message.
  */
-function extractLatestAssistantText(filePath: string): ParsedResponse | null {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.trim().split('\n');
+function readTail(filePath: string, bytes: number = 64 * 1024): string {
+  const stat = fs.statSync(filePath);
+  if (stat.size <= bytes) {
+    return fs.readFileSync(filePath, 'utf-8');
+  }
 
-  // Walk backwards to find the last assistant message with text
-  for (let i = lines.length - 1; i >= 0; i--) {
+  const fd = fs.openSync(filePath, 'r');
+  const buffer = Buffer.alloc(bytes);
+  fs.readSync(fd, buffer, 0, bytes, stat.size - bytes);
+  fs.closeSync(fd);
+
+  const text = buffer.toString('utf-8');
+  // Skip the first partial line (we likely landed mid-line)
+  const firstNewline = text.indexOf('\n');
+  return firstNewline >= 0 ? text.slice(firstNewline + 1) : text;
+}
+
+/**
+ * Extract the last N assistant text responses from the tail of a JSONL file.
+ * Returns newest first.
+ */
+function extractRecentAssistantTexts(filePath: string, count: number = 5): ParsedResponse[] {
+  const content = readTail(filePath);
+  const lines = content.trim().split('\n');
+  const results: ParsedResponse[] = [];
+
+  for (let i = lines.length - 1; i >= 0 && results.length < count; i--) {
     try {
       const entry: JSONLMessage = JSON.parse(lines[i]);
 
@@ -69,17 +88,16 @@ function extractLatestAssistantText(filePath: string): ParsedResponse | null {
         entry.message?.role === 'assistant' &&
         Array.isArray(entry.message.content)
       ) {
-        // Extract only text blocks (ignore tool_use, thinking, etc.)
         const textParts = entry.message.content
           .filter(block => block.type === 'text' && block.text)
           .map(block => block.text as string);
 
         if (textParts.length > 0) {
-          return {
+          results.push({
             text: textParts.join('\n\n'),
             messageId: entry.uuid || crypto.randomUUID(),
             timestamp: entry.timestamp || new Date().toISOString(),
-          };
+          });
         }
       }
     } catch {
@@ -87,30 +105,30 @@ function extractLatestAssistantText(filePath: string): ParsedResponse | null {
     }
   }
 
-  return null;
+  return results;
 }
 
 export class JSONLWatcher implements vscode.Disposable {
   private watcher: fs.FSWatcher | null = null;
   private projectDir: string | null = null;
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
   private lastMessageId: string | null = null;
+  private responseHistory: ParsedResponse[] = [];
+  private currentStatus: string = 'disconnected';
   private onResponseCallback: ((response: ParsedResponse) => void) | null = null;
+  private onHistoryCallback: ((responses: ParsedResponse[]) => void) | null = null;
   private onStatusCallback: ((status: string) => void) | null = null;
-
-  constructor() {}
 
   /**
    * Start watching for Claude Code conversation updates.
-   * Walks up from the workspace path to find a matching Claude project directory,
-   * so it works even when the workspace is a subfolder of the project root.
+   * Walks up from the workspace path to find a matching Claude project directory.
    */
   start(workspacePath: string): void {
     const claudeDir = path.join(os.homedir(), '.claude', 'projects');
     this.projectDir = this.findProjectDir(claudeDir, workspacePath);
 
     if (!this.projectDir) {
-      this.onStatusCallback?.('disconnected');
-      // Watch for the exact path's directory to be created
+      this.setStatus('disconnected');
       const encodedPath = encodeProjectPath(workspacePath);
       this.watchForProjectDir(claudeDir, encodedPath);
       return;
@@ -120,9 +138,18 @@ export class JSONLWatcher implements vscode.Disposable {
   }
 
   /**
+   * Re-send the current status and response history.
+   * Called when the webview becomes visible after missing earlier messages.
+   */
+  resend(): void {
+    this.onStatusCallback?.(this.currentStatus);
+    if (this.responseHistory.length > 0) {
+      this.onHistoryCallback?.(this.responseHistory);
+    }
+  }
+
+  /**
    * Walk up from workspacePath to find a Claude project directory that exists.
-   * e.g. if workspace is /Users/foo/project/sub, checks:
-   *   -Users-foo-project-sub → -Users-foo-project → -Users-foo → ...
    */
   private findProjectDir(claudeDir: string, workspacePath: string): string | null {
     let current = workspacePath;
@@ -140,11 +167,11 @@ export class JSONLWatcher implements vscode.Disposable {
   }
 
   private watchForProjectDir(claudeDir: string, encodedPath: string): void {
-    // Poll for project dir creation (fs.watch on parent can be noisy)
-    const interval = setInterval(() => {
+    this.pollInterval = setInterval(() => {
       const dir = path.join(claudeDir, encodedPath);
       if (fs.existsSync(dir)) {
-        clearInterval(interval);
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        this.pollInterval = null;
         this.projectDir = dir;
         this.startWatching();
       }
@@ -154,22 +181,17 @@ export class JSONLWatcher implements vscode.Disposable {
   private startWatching(): void {
     if (!this.projectDir) return;
 
-    this.onStatusCallback?.('watching');
-
-    // Check for existing session immediately
+    this.setStatus('watching');
     this.checkForNewMessages();
 
-    // Watch the project directory for changes
     try {
-      this.watcher = fs.watch(this.projectDir, { recursive: false }, (eventType, filename) => {
+      this.watcher = fs.watch(this.projectDir, { recursive: false }, (_eventType, filename) => {
         if (filename && filename.endsWith('.jsonl')) {
-          // Debounce slightly — JSONL gets many rapid writes during streaming
           setTimeout(() => this.checkForNewMessages(), 300);
         }
       });
     } catch {
-      // Fallback: poll every 2 seconds
-      setInterval(() => this.checkForNewMessages(), 2000);
+      this.pollInterval = setInterval(() => this.checkForNewMessages(), 2000);
     }
   }
 
@@ -179,19 +201,29 @@ export class JSONLWatcher implements vscode.Disposable {
     const sessionFile = findActiveSession(this.projectDir);
     if (!sessionFile) return;
 
-    const response = extractLatestAssistantText(sessionFile);
-    if (!response) return;
+    const responses = extractRecentAssistantTexts(sessionFile, 5);
+    if (responses.length === 0) return;
 
-    // Only notify if this is a new message
-    if (response.messageId === this.lastMessageId) return;
-    this.lastMessageId = response.messageId;
+    const latest = responses[0];
+    if (latest.messageId === this.lastMessageId) return;
+    this.lastMessageId = latest.messageId;
+    this.responseHistory = responses;
 
-    this.onStatusCallback?.('ready');
-    this.onResponseCallback?.(response);
+    this.setStatus('ready');
+    this.onResponseCallback?.(latest);
+  }
+
+  private setStatus(status: string): void {
+    this.currentStatus = status;
+    this.onStatusCallback?.(status);
   }
 
   onResponse(callback: (response: ParsedResponse) => void): void {
     this.onResponseCallback = callback;
+  }
+
+  onHistory(callback: (responses: ParsedResponse[]) => void): void {
+    this.onHistoryCallback = callback;
   }
 
   onStatus(callback: (status: string) => void): void {
@@ -201,5 +233,9 @@ export class JSONLWatcher implements vscode.Disposable {
   dispose(): void {
     this.watcher?.close();
     this.watcher = null;
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 }

@@ -1,5 +1,9 @@
 import { useEffect } from 'preact/hooks';
-import { connectionStatus, setResponse, currentResponse, annotations, hasAnnotations } from './state/annotations';
+import {
+  connectionStatus, addResponse, setHistory, currentResponse,
+  responseHistory, currentIndex, annotations, hasAnnotations,
+  canGoNewer, canGoOlder, goNewer, goOlder,
+} from './state/annotations';
 import { formatFeedback } from '../shared/formatter';
 import { sendMessage, onMessage } from './messaging';
 import { StatusBar } from './components/StatusBar';
@@ -13,12 +17,20 @@ export function App() {
     const cleanup = onMessage((message: ExtensionMessage) => {
       switch (message.type) {
         case 'RESPONSE_READY':
-          setResponse({
+          addResponse({
             html: message.html,
             text: message.text,
             messageId: message.messageId,
             timestamp: Date.now(),
           });
+          break;
+        case 'RESPONSE_HISTORY':
+          setHistory(message.responses.map(r => ({
+            html: r.html,
+            text: r.text,
+            messageId: r.messageId,
+            timestamp: Date.now(),
+          })));
           break;
         case 'CONNECTION_STATUS':
           connectionStatus.value = message.status;
@@ -34,15 +46,25 @@ export function App() {
     const isLight = body.classList.contains('vscode-light');
     document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
 
+    // Tell the extension host we're ready for messages
+    sendMessage({ type: 'WEBVIEW_READY' });
+
     return cleanup;
   }, []);
 
-  const handleCopyFeedback = () => {
-    const feedback = formatFeedback(annotations.value);
-    if (feedback) {
-      sendMessage({ type: 'COPY_FEEDBACK', feedback });
+  // Auto-copy: whenever annotations change, copy feedback to clipboard
+  const annotationList = annotations.value;
+  useEffect(() => {
+    if (annotationList.length > 0) {
+      const feedback = formatFeedback(annotationList);
+      if (feedback) {
+        sendMessage({ type: 'COPY_FEEDBACK', feedback });
+      }
     }
-  };
+  }, [annotationList]);
+
+  const total = responseHistory.value.length;
+  const position = total > 0 ? total - currentIndex.value : 0;
 
   return (
     <div class="app">
@@ -54,15 +76,34 @@ export function App() {
 
       {currentResponse.value ? (
         <>
+          {total > 1 && (
+            <div class="response-nav">
+              <button
+                class="nav-btn"
+                onClick={goOlder}
+                disabled={!canGoOlder.value}
+                title="Older response"
+              >
+                ‹
+              </button>
+              <span class="nav-label">{position} of {total}</span>
+              <button
+                class="nav-btn"
+                onClick={goNewer}
+                disabled={!canGoNewer.value}
+                title="Newer response"
+              >
+                ›
+              </button>
+            </div>
+          )}
+
           <ResponseView />
           <AnnotationList />
 
           {hasAnnotations.value && (
-            <div class="copy-feedback-bar">
-              <button class="copy-feedback-btn" onClick={handleCopyFeedback}>
-                Copy Feedback
-              </button>
-              <span class="copy-feedback-hint">Paste into Claude Code</span>
+            <div class="clipboard-indicator">
+              Feedback copied to clipboard
             </div>
           )}
         </>

@@ -31,9 +31,12 @@
 - VS Code extension — working end-to-end:
   - JSONL file watcher for Claude Code responses
   - Webview sidebar with same annotation UI as Chrome (Preact + Signals)
-  - Markdown → HTML rendering, clipboard-based feedback
+  - Markdown → HTML rendering, auto-copy feedback to clipboard
   - Parent directory walking for project path resolution
-  - Tested: annotate → Copy Feedback → paste into Claude Code
+  - Response history (last 5) with back/forward navigation
+  - Sidebar persists across tab switches (WEBVIEW_READY handshake)
+  - Performance: reads only tail of JSONL file (not entire 25MB+)
+  - Tested: annotate → auto-copy → paste into Claude Code
 
 ---
 
@@ -57,9 +60,11 @@
 - [x] JSONL watcher — watches `~/.claude/projects/` for Claude Code responses
 - [x] Webview sidebar with shared annotation UI (Preact + Signals, same as Chrome)
 - [x] Markdown → HTML rendering via `marked`
-- [x] Clipboard-based feedback (Copy Feedback → paste into Claude Code)
-- [x] Build succeeds (extension host 78.5 KB, webview 27.67 KB)
-- [x] Tested end-to-end via .vsix install (annotate → copy → paste)
+- [x] Auto-copy feedback to clipboard on every annotation change
+- [x] Response history — last 5 responses with back/forward navigation
+- [x] Sidebar persistence — survives tab switching via WEBVIEW_READY handshake
+- [x] Performance — reads only tail of JSONL file (64KB, not entire file)
+- [x] Tested end-to-end via .vsix install (annotate → auto-copy → paste)
 
 ### 5. VS Code Extension — Package & Ship
 - [ ] Publisher account on VS Code Marketplace

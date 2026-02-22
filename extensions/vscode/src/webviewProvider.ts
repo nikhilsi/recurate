@@ -7,6 +7,7 @@ import { copyFeedbackToClipboard } from './clipboard';
 export class RecurateViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'recurate.annotator';
   private view: vscode.WebviewView | undefined;
+  private onReadyCallback: (() => void) | null = null;
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
@@ -30,8 +31,19 @@ export class RecurateViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage((message: ExtensionMessage) => {
       if (message.type === 'COPY_FEEDBACK') {
         copyFeedbackToClipboard(message.feedback);
+      } else if (message.type === 'WEBVIEW_READY') {
+        // Webview script has loaded and is listening — safe to send state
+        this.onReadyCallback?.();
       }
     });
+  }
+
+  /**
+   * Register a callback for when the webview becomes visible.
+   * Used by the watcher to re-send current state.
+   */
+  onReady(callback: () => void): void {
+    this.onReadyCallback = callback;
   }
 
   /**

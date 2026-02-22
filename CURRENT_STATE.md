@@ -50,8 +50,8 @@
 - Word-level selection snapping, no overlap (new replaces old)
 - Auto-inject feedback into text box (proactive injection, no Apply/Inject buttons)
 - Stateless LLM architecture for Roundtable — CC as sole persistent state
-- Project structure: `extensions/chrome/`, `extensions/vscode/` (future)
-- VS Code extension planned — same annotation UX, different host environment
+- Project structure: `extensions/chrome/`, `extensions/vscode/`
+- VS Code extension: JSONL file watching, clipboard auto-copy, response history (last 5)
 
 ### Chrome Extension (Working on ChatGPT)
 - `lib/platforms/chatgpt.ts` — DOM selectors, response extraction, ProseMirror injection
@@ -71,10 +71,13 @@
 - **JSONL file watching**: monitors `~/.claude/projects/<encoded-path>/*.jsonl` for Claude Code assistant responses
 - Walks up parent directories to find matching Claude project dir (works from subfolders)
 - Extracts text content blocks from assistant messages, converts markdown → HTML via `marked`
-- Clipboard-based feedback: "Copy Feedback" button → copies KEEP/DROP text → user pastes into Claude Code
+- **Performance**: reads only last 64KB of JSONL file (not entire 25MB+ file)
+- **Auto-copy to clipboard**: annotations automatically copy KEEP/DROP feedback to clipboard on every change
+- **Response history**: keeps last 5 responses with back/forward navigation
+- **Sidebar persistence**: webview sends WEBVIEW_READY on mount, extension re-sends state — survives tab switches
 - Theme detection: reads VS Code's `vscode-light`/`vscode-dark` body class
-- Build: extension host 79.2 KB (esbuild), webview 27.67 KB JS + 5.76 KB CSS (Vite)
-- **Tested end-to-end**: installed via .vsix, annotated response, copied feedback, pasted into Claude Code
+- Build: extension host 81 KB (esbuild), webview 28.5 KB JS + 6 KB CSS (Vite)
+- **Tested end-to-end**: installed via .vsix, annotated response, auto-copied feedback, pasted into Claude Code
 
 ### Not Yet Built
 - Chrome Web Store listing

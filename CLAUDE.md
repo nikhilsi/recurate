@@ -90,7 +90,8 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 | Component | Technology |
 |-----------|------------|
-| Chrome Extension | Manifest V3, Side Panel API, vanilla JS |
+| Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
+| VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
 | Roundtable Frontend | React, TypeScript |
 | Roundtable Backend | Python, FastAPI |
 | LLM APIs | Anthropic, OpenAI, xAI, Google |
@@ -124,20 +125,26 @@ recurate/
 │           └── text-box-problem.md  (Blog article)
 │
 ├── extensions/
-│   └── chrome/                  (Phase 0 — Chrome extension, WXT + Preact)
-│       ├── wxt.config.ts        (WXT + Vite + Preact configuration)
-│       ├── entrypoints/
-│       │   ├── background.ts    (Service worker)
-│       │   ├── claude.content.ts (Content script for claude.ai)
-│       │   └── sidepanel/       (Side panel UI — Preact components)
-│       └── lib/                 (Shared types, formatter, platform selectors)
+│   ├── chrome/                  (Chrome extension — claude.ai + ChatGPT)
+│   │   ├── wxt.config.ts        (WXT + Vite + Preact configuration)
+│   │   ├── entrypoints/
+│   │   │   ├── background.ts    (Service worker)
+│   │   │   ├── claude.content.ts (Content script for claude.ai)
+│   │   │   ├── chatgpt.content.ts (Content script for chat.com)
+│   │   │   └── sidepanel/       (Side panel UI — Preact components)
+│   │   └── lib/                 (Shared types, formatter, platform selectors)
+│   │
+│   └── vscode/                  (VS Code extension — Claude Code)
+│       ├── src/                 (Extension host: watcher, provider, clipboard)
+│       ├── webview/             (Sidebar UI — Preact, same components as Chrome)
+│       └── shared/              (Types, formatter shared between host + webview)
 │
-└── platform/                    (Phase 1 — Roundtable web app)
+└── platform/                    (Phase 1 — Roundtable web app, not yet built)
     ├── frontend/                (React + TypeScript)
     └── backend/                 (Python + FastAPI)
 ```
 
-**Note:** The `platform/` directory doesn't exist yet. See `docs/extension-architecture.md` for the full extension structure.
+**Note:** The `platform/` directory doesn't exist yet.
 
 ---
 
