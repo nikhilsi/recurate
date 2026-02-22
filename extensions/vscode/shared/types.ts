@@ -27,7 +27,7 @@ export interface ResponseHistoryItem {
   html: string;
   text: string;
   messageId: string;
-  timestamp: string;
+  timestamp: number;
 }
 
 // VS Code extension ↔ webview message types

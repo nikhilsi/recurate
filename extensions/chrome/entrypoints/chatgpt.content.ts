@@ -1,4 +1,4 @@
-import { extractLatestResponse, isStreaming, getEditor, getEditorText, setEditorContent, clearEditor, FEEDBACK_MARKER, SELECTORS } from '../lib/platforms/chatgpt';
+import { extractLatestResponse, isStreaming, getEditor, getEditorText, setEditorContent, clearEditor, FEEDBACK_MARKER } from '../lib/platforms/chatgpt';
 import type { ExtensionMessage, Theme } from '../lib/types';
 
 export default defineContentScript({
@@ -65,7 +65,7 @@ export default defineContentScript({
     // When editor gets focus, try to inject if pending
     document.addEventListener('focusin', (e) => {
       const editor = getEditor();
-      if (editor && (e.target === editor) && pendingFeedback) {
+      if (editor && editor.contains(e.target as Node) && pendingFeedback) {
         tryInjectFeedback();
       }
     });

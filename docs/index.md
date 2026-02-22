@@ -21,13 +21,19 @@ When the AI produces a detailed response and you agree with half, think one para
 
 These gestures communicate in seconds what would take paragraphs to type. The AI gets clear signal about what you valued and what you didn't, and the next response is better for it.
 
-## Two Products
+## The Products
 
 ### Recurate Annotator — Chrome Extension
 
-A lightweight Chrome extension that adds annotation tools to any AI chat interface. Works on claude.ai, chat.com, grok.com, and gemini.google.com. No backend, no API keys — just install and your conversations immediately get better.
+A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight and strikethrough. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai and chat.com.
 
-**Status:** In development
+**Status:** Built and working
+
+### Recurate Annotator — VS Code Extension
+
+The same annotation UX, built for the Claude Code terminal workflow. A VS Code sidebar that watches Claude Code's conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to your clipboard. You paste it into Claude Code when you're ready.
+
+**Status:** Built and working
 
 ### Recurate Roundtable — Multi-LLM Platform
 

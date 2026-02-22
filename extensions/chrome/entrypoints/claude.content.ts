@@ -1,4 +1,4 @@
-import { extractLatestResponse, isStreaming, getEditor, getEditorText, setEditorContent, clearEditor, FEEDBACK_MARKER, SELECTORS } from '../lib/platforms/claude';
+import { extractLatestResponse, isStreaming, getEditor, getEditorText, setEditorContent, clearEditor, FEEDBACK_MARKER } from '../lib/platforms/claude';
 import type { ExtensionMessage, Theme } from '../lib/types';
 
 export default defineContentScript({

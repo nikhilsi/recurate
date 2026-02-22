@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import type { ConnectionStatus } from '../shared/types';
 
 interface JSONLMessage {
   type: string;
@@ -114,10 +115,10 @@ export class JSONLWatcher implements vscode.Disposable {
   private pollInterval: ReturnType<typeof setInterval> | null = null;
   private lastMessageId: string | null = null;
   private responseHistory: ParsedResponse[] = [];
-  private currentStatus: string = 'disconnected';
+  private currentStatus: ConnectionStatus = 'disconnected';
   private onResponseCallback: ((response: ParsedResponse) => void) | null = null;
   private onHistoryCallback: ((responses: ParsedResponse[]) => void) | null = null;
-  private onStatusCallback: ((status: string) => void) | null = null;
+  private onStatusCallback: ((status: ConnectionStatus) => void) | null = null;
 
   /**
    * Start watching for Claude Code conversation updates.
@@ -213,7 +214,7 @@ export class JSONLWatcher implements vscode.Disposable {
     this.onResponseCallback?.(latest);
   }
 
-  private setStatus(status: string): void {
+  private setStatus(status: ConnectionStatus): void {
     this.currentStatus = status;
     this.onStatusCallback?.(status);
   }
@@ -226,7 +227,7 @@ export class JSONLWatcher implements vscode.Disposable {
     this.onHistoryCallback = callback;
   }
 
-  onStatus(callback: (status: string) => void): void {
+  onStatus(callback: (status: ConnectionStatus) => void): void {
     this.onStatusCallback = callback;
   }
 

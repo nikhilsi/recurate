@@ -1,8 +1,10 @@
 # Recurate Annotator — Chrome Extension Architecture
 
-**Status:** Implementation-ready
+**Status:** Built and working
 **Date:** February 21, 2026
 **Target:** V1 — claude.ai + ChatGPT (chat.com)
+
+> **See also:** [VS Code Extension Architecture](vscode-extension-architecture.md) for the Claude Code terminal workflow variant.
 
 ---
 
@@ -85,7 +87,6 @@ extensions/chrome/
 │   │   │   ├── ResponseView.tsx       #   Renders AI response with annotation overlays
 │   │   │   ├── AnnotationToolbar.tsx  #   Floating ✓ / ✗ / ↺ toolbar
 │   │   │   ├── AnnotationList.tsx     #   Summary list with delete buttons
-│   │   │   ├── FeedbackPreview.tsx    #   Preview of structured text before injection
 │   │   │   └── StatusBar.tsx          #   Connection status, "Listening for responses..."
 │   │   ├── state/
 │   │   │   └── annotations.ts        #   Preact Signals — all annotation state + actions
@@ -769,4 +770,4 @@ The side panel, state management, and formatter are platform-agnostic — they r
 
 ---
 
-*This document captures the complete extension architecture as of February 21, 2026. Updated with ChatGPT support and proactive injection flow. A developer can build from this document and the parent design doc (docs/design.md) without additional context.*
+*This document captures the Chrome extension architecture as of February 21, 2026. The extension is built and working with claude.ai and ChatGPT support and proactive injection flow. For the VS Code extension variant, see [VS Code Extension Architecture](vscode-extension-architecture.md).*

@@ -81,4 +81,5 @@ nav:
   - Documentation:
     - Product Brief: product_brief.md
     - Design & Architecture: design.md
-    - Extension Architecture: extension-architecture.md
+    - Chrome Extension Architecture: extension-architecture.md
+    - VS Code Extension Architecture: vscode-extension-architecture.md

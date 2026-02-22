@@ -89,6 +89,8 @@ Turn N: Every turn is sharper than the last
 ## Documentation
 
 - **[Design & Architecture](https://recurate.ai/design/)** — Complete design and architecture document
+- **[Chrome Extension Architecture](https://recurate.ai/extension-architecture/)** — Implementation details for the Chrome extension
+- **[VS Code Extension Architecture](https://recurate.ai/vscode-extension-architecture/)** — Implementation details for the VS Code extension
 - **[Product Brief](https://recurate.ai/product_brief/)** — Non-technical product brief — the "why" and "what"
 - **[Blog: The Text Box Problem](https://recurate.ai/blog/text-box-problem)** — Why the text box is AI's biggest UX blind spot
 

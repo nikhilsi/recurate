@@ -23,25 +23,33 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     watcher.onResponse(async (response) => {
-      const html = await marked.parse(response.text);
-      provider.postMessage({
-        type: 'RESPONSE_READY',
-        html,
-        text: response.text,
-        messageId: response.messageId,
-      });
+      try {
+        const html = await marked.parse(response.text);
+        provider.postMessage({
+          type: 'RESPONSE_READY',
+          html,
+          text: response.text,
+          messageId: response.messageId,
+        });
+      } catch (err) {
+        console.error('[Recurate] Failed to parse markdown:', err);
+      }
     });
 
     watcher.onHistory(async (responses) => {
-      const items: ResponseHistoryItem[] = await Promise.all(
-        responses.map(async (r) => ({
-          html: await marked.parse(r.text),
-          text: r.text,
-          messageId: r.messageId,
-          timestamp: r.timestamp,
-        }))
-      );
-      provider.postMessage({ type: 'RESPONSE_HISTORY', responses: items });
+      try {
+        const items: ResponseHistoryItem[] = await Promise.all(
+          responses.map(async (r) => ({
+            html: await marked.parse(r.text),
+            text: r.text,
+            messageId: r.messageId,
+            timestamp: Date.parse(r.timestamp) || Date.now(),
+          }))
+        );
+        provider.postMessage({ type: 'RESPONSE_HISTORY', responses: items });
+      } catch (err) {
+        console.error('[Recurate] Failed to parse response history:', err);
+      }
     });
 
     // When the sidebar opens (or reopens), re-send current state

@@ -14,9 +14,10 @@
 
 ### Documentation (Complete)
 - README.md — project overview and two-product vision
-- docs/design.md — comprehensive design & architecture (implementation-ready)
+- docs/design.md — comprehensive design & architecture (Phase 0 implemented)
 - docs/product_brief.md — non-technical product brief
 - docs/extension-architecture.md — Chrome extension technical architecture
+- docs/vscode-extension-architecture.md — VS Code extension technical architecture
 - Blog article — docs/blog/posts/text-box-problem.md
 - CLAUDE.md — development rules and workflow
 - Tracking docs — CHANGELOG.md, CURRENT_STATE.md, NOW.md

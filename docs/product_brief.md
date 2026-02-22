@@ -49,11 +49,13 @@ It sounds simple, but no one has built it. Not Anthropic, not OpenAI, not Google
 
 This plays out in two phases:
 
-### Phase 0: Recurate Annotator — A Chrome Extension (ship first, ship fast)
+### Phase 0: Recurate Annotator — Browser + Editor Extensions (ship first, ship fast)
 
-A lightweight Chrome extension that works on claude.ai, chat.com, grok.com — any LLM chat site. It opens a side panel, mirrors the AI's latest response, and lets you highlight/strikethrough. When you send your next message, it auto-generates structured feedback and drops it into the text box.
+**Chrome Extension:** Works on claude.ai and chat.com. Opens a side panel, mirrors the AI's latest response, and lets you highlight/strikethrough. Annotations auto-inject as structured KEEP/DROP feedback into the platform's text box. No backend, no API keys — install and your conversations immediately get better. Built and working.
 
-No backend. No API keys. No new app to learn. You install it and your existing LLM conversations immediately get better.
+**VS Code Extension:** The same annotation UX, built for the Claude Code terminal workflow. A sidebar that watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. You paste into Claude Code when ready. Built and working.
+
+Both extensions share the same core: Preact + Preact Signals UI, the same annotation components (ResponseView, AnnotationToolbar, AnnotationList), and the same KEEP/DROP feedback format. What differs is how they capture the AI's response (DOM extraction vs. JSONL file watching) and how they deliver feedback (text box injection vs. clipboard).
 
 **This is a standalone product with a real audience.** Anyone who uses LLMs for more than casual questions would benefit.
 
@@ -67,7 +69,7 @@ The annotation mechanism from Phase 0 becomes even more powerful here: you're no
 
 ### Why this sequence?
 
-The extension ships in weeks, not months. It validates the core UX idea (annotation) with real users. It builds the habit. And it creates natural demand for the platform: "I love annotating on Claude... but what if I could do this across all my AI tools at once?"
+The extensions ship in weeks, not months. They validate the core UX idea (annotation) with real users across two workflows — web chat and terminal. They build the habit. And they create natural demand for the platform: "I love annotating on Claude... but what if I could do this across all my AI tools at once?"
 
 ---
 
@@ -83,7 +85,7 @@ The extension ships in weeks, not months. It validates the core UX idea (annotat
 
 A few questions I'm noodling on that are very much in your wheelhouse:
 
-1. **Is annotation a feature or a product?** The Chrome extension packages it as a product. But would users install an extension for this, or does it need to be native to a platform to get adoption? (My instinct: the problem is painful enough that power users would install an extension. But I'm biased.)
+1. **Is annotation a feature or a product?** The Chrome and VS Code extensions package it as a product. But would users install an extension for this, or does it need to be native to a platform to get adoption? (My instinct: the problem is painful enough that power users would install an extension. But I'm biased.)
 
 2. **Fast path vs. power path balance.** The design lets users either just keep chatting (fast path, no annotation) or pause to annotate before continuing (power path). Is that the right UX, or does the option to annotate create decision fatigue? Should annotation be more ambient/passive?
 

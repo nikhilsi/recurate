@@ -1,8 +1,8 @@
 # Recurate: Complete Design & Architecture Document
 ### recurate.ai — "Don't just chat, recurate."
 
-**Status:** Conceptual Design — Pre-Implementation
-**Date:** February 21, 2026
+**Status:** Phase 0 Complete (Chrome + VS Code extensions built and working) — Roundtable in design
+**Date:** February 21, 2026 (last updated: February 21, 2026)
 **Domain:** recurate.ai (registered)
 **Author:** Nikhil Singhal (concept & direction) + Claude (analysis & documentation)
 **Audience:** This document is comprehensive enough for a developer to pick up and begin implementation without additional context.
@@ -63,14 +63,18 @@ Problem 1.1 (text-box-only input) exists within every single-model conversation.
 
 The vision is delivered through two products, built in sequence, sharing a common design language and core feature (the annotation mechanism):
 
-### Phase 0: Recurate Annotator — Chrome Extension (Standalone Product)
+### Phase 0: Recurate Annotator — Extensions (Standalone Products)
 
-A Chrome extension that adds a **side panel** to any web-based LLM chat interface. The side panel mirrors the LLM's most recent response and allows the user to highlight (keep/emphasize) and strikethrough (discard/de-emphasize) portions of it. When the user is ready to send their next message, the extension auto-generates structured feedback from the annotations and injects it into the chat's text box alongside the user's new question.
+Extensions that add annotation tools to existing AI workflows. Both share the same core UI (Preact + Preact Signals) and annotation components, but differ in how they capture AI output and deliver feedback.
+
+**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users highlight/strikethrough. Structured KEEP/DROP feedback auto-injects into the platform's text box. Works on claude.ai and chat.com. **Built and working.**
+
+**VS Code Extension** — A sidebar for the Claude Code terminal workflow. Watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. User pastes into Claude Code when ready. **Built and working.**
 
 - **Solves:** Problem 1.1 (text-box-only input)
-- **Works on:** claude.ai, chat.com, grok.com, gemini.google.com — any web-based LLM chat
+- **Chrome works on:** claude.ai, chat.com (web-based LLM chat)
+- **VS Code works on:** Claude Code in VS Code terminal
 - **Requires:** No backend, no API keys, no new interface to learn
-- **Time to build:** Weeks, not months
 - **Target user:** Anyone who uses LLMs for substantive conversations on desktop
 
 ### Phase 1: Recurate Roundtable — Web Platform
@@ -88,17 +92,20 @@ The Chrome extension connects to the Roundtable platform. Users can annotate res
 
 ### Why This Sequencing
 
-1. **The annotation mechanism is the most defensible feature.** Shipping it first as a standalone product validates the core UX innovation independently.
-2. **Adoption barrier is minimal for the extension.** Users don't switch tools — they enhance the tools they already use.
-3. **The extension is a trojan horse.** Once users build the habit of annotating LLM responses, the natural next step is "what if I could do this across models?" The extension creates demand for the platform.
-4. **Portfolio value.** A shipped, installable Chrome extension demonstrates product thinking and the ability to ship — tangible and demonstrable.
+1. **The annotation mechanism is the most defensible feature.** Shipping it first as standalone products validates the core UX innovation independently.
+2. **Adoption barrier is minimal for extensions.** Users don't switch tools — they enhance the tools they already use.
+3. **The extensions are a trojan horse.** Once users build the habit of annotating LLM responses, the natural next step is "what if I could do this across models?" The extensions create demand for the platform.
+4. **Portfolio value.** Shipped, installable extensions across two surfaces (browser + editor) demonstrate product thinking and the ability to ship — tangible and demonstrable.
 5. **Risk management.** If a major LLM provider builds annotation natively (which validates the idea), the multi-model platform remains defensible because it's cross-platform.
+6. **Two workflows, one UX.** The Chrome extension covers the web chat workflow. The VS Code extension covers the terminal/editor workflow. Together, they reach developers where they actually work.
 
 ---
 
-## 3. Product A: Recurate Annotator (Chrome Extension)
+## 3. Product A: Recurate Annotator (Extensions)
 
-### 3.1 Core Concept
+The Recurate Annotator ships as two extensions sharing the same annotation UX: a Chrome extension for web-based LLM chat and a VS Code extension for the Claude Code terminal workflow. This section covers the Chrome extension in detail. See the [VS Code Extension Architecture](vscode-extension-architecture.md) for the VS Code variant.
+
+### 3.1 Core Concept (Chrome Extension)
 
 A Chrome extension that opens a **side panel** when the user is on a supported LLM chat site. The side panel displays the most recent AI response and provides annotation tools (highlight and strikethrough). When annotations are complete and the user composes their next message, the extension generates structured feedback text and injects it into the platform's text input box.
 
@@ -112,14 +119,19 @@ Two approaches were considered:
 
 **Decision: Side panel approach.** Platform-agnostic, robust, lower maintenance. Accepted trade-off: slightly less integrated feel. Note: side panels do not work on mobile browsers, but all serious/substantive LLM conversations happen on desktop — mobile is not the target use case.
 
-### 3.3 Supported Platforms (V1)
+### 3.3 Supported Platforms
+
+**Currently built:**
 
 - claude.ai (Anthropic Claude)
 - chat.com (OpenAI ChatGPT)
+
+**Planned:**
+
 - grok.com (xAI Grok)
 - gemini.google.com (Google Gemini)
 
-Additional platforms can be added later. The side panel approach means adding a platform is primarily about detecting when the user is on a supported site and extracting the latest response content.
+Additional platforms can be added by creating a new platform module (`lib/platforms/<name>.ts`) and content script (`entrypoints/<name>.content.ts`). The side panel and annotation components are platform-agnostic.
 
 ### 3.4 User Flow
 
@@ -161,20 +173,48 @@ The LLM itself does the heavy lifting of interpreting the structured feedback. E
 
 ### 3.6 Technical Architecture (Chrome Extension)
 
+Built with WXT (extension framework), Preact + Preact Signals (UI), TypeScript, and Vite. See [Extension Architecture](extension-architecture.md) for the full implementation-ready specification.
+
 ```
-Chrome Extension
-├── manifest.json (V3 manifest, permissions for supported sites)
-├── background.js (service worker — manages side panel lifecycle)
-├── sidepanel/
-│   ├── sidepanel.html (annotation UI)
-│   ├── sidepanel.js (annotation logic, text generation)
-│   └── sidepanel.css (styling for highlight/strikethrough)
-├── content-scripts/
-│   ├── extractor.js (reads latest AI response from page DOM)
-│   └── injector.js (injects structured feedback into text input)
-└── shared/
-    ├── platforms.js (per-platform DOM selectors for extraction/injection)
-    └── formatter.js (converts annotations to structured text output)
+extensions/chrome/
+├── wxt.config.ts              (WXT + Vite + Preact configuration)
+├── entrypoints/
+│   ├── background.ts          (service worker — message relay, side panel)
+│   ├── sidepanel/             (Preact side panel UI)
+│   │   ├── App.tsx            (root component)
+│   │   ├── components/        (ResponseView, AnnotationToolbar, AnnotationList, StatusBar)
+│   │   └── state/annotations.ts (Preact Signals state)
+│   ├── claude.content.ts      (content script for claude.ai)
+│   └── chatgpt.content.ts     (content script for chat.com)
+├── lib/
+│   ├── types.ts               (shared TypeScript types)
+│   ├── formatter.ts           (annotations → KEEP/DROP feedback text)
+│   └── platforms/             (per-platform DOM selectors and extraction)
+│       ├── claude.ts
+│       └── chatgpt.ts
+└── public/icons/              (extension icons)
+```
+
+### 3.6b Technical Architecture (VS Code Extension)
+
+Built with esbuild (extension host), Vite + Preact (webview), TypeScript, and marked (markdown rendering). See [VS Code Extension Architecture](vscode-extension-architecture.md) for the full specification.
+
+```
+extensions/vscode/
+├── src/                       (extension host — Node.js)
+│   ├── extension.ts           (activation, registers sidebar, wires messaging)
+│   ├── jsonlWatcher.ts        (watches Claude Code JSONL files)
+│   ├── webviewProvider.ts     (WebviewViewProvider for sidebar)
+│   └── clipboard.ts           (copies feedback to system clipboard)
+├── webview/                   (sidebar UI — Preact, runs in browser sandbox)
+│   ├── App.tsx                (root component — same UX as Chrome)
+│   ├── messaging.ts           (postMessage adapter replacing browser.runtime)
+│   ├── components/            (ResponseView, AnnotationToolbar, AnnotationList, StatusBar)
+│   └── state/annotations.ts  (Preact Signals state + response history)
+├── shared/                    (shared between host and webview)
+│   ├── types.ts               (TypeScript types)
+│   └── formatter.ts           (KEEP/DROP feedback formatter)
+└── dist/                      (build output)
 ```
 
 **Key technical considerations:**
@@ -295,14 +335,16 @@ The user reads the response(s), annotates (highlights and/or strikethroughs), an
 
 **The user controls the pace.** Most turns will use the fast path. The power path is reserved for turns that feel pivotal — where a model said something surprisingly good or bad, where the conversation is at a fork, or where the user wants to steer direction strongly.
 
-### 5.5 How Annotations Differ Between the Two Products
+### 5.5 How Annotations Differ Across Products
 
-| Aspect | Chrome Extension (Product A) | Multi-LLM Roundtable (Product B) |
-|--------|------------------------------|----------------------------------|
-| What gets annotated | Single model's response | Multiple models' responses |
-| What happens after annotation | Structured text injected into text box | Re-synthesis API call produces refined CC |
-| Backend required | No | Yes |
-| User trigger | Implicit (annotations are formatted when user types next message) or explicit ("Apply annotations" button) | Explicit ("Re-synthesize" button) |
+| Aspect | Chrome Extension | VS Code Extension | Multi-LLM Roundtable |
+|--------|-----------------|-------------------|---------------------|
+| What gets annotated | Single model's web response | Claude Code's text response | Multiple models' responses |
+| How AI output is captured | DOM extraction via content script | JSONL file watching | Direct API responses |
+| What happens after annotation | Structured text auto-injected into text box | Feedback auto-copied to clipboard | Re-synthesis API call produces refined CC |
+| Backend required | No | No | Yes |
+| User trigger | Automatic (proactive injection into editor) | Automatic (auto-copy on every annotation change) | Explicit ("Re-synthesize" button) |
+| Response history | Latest response only | Last 5 responses with navigation | Full conversation history |
 
 ### 5.6 The Three-Step Flow in the Multi-LLM Platform
 
@@ -685,14 +727,26 @@ Two things are novel in this design:
 
 ## 11. Technical Stack
 
-### 11.1 Chrome Extension (Product A)
+### 11.1 Chrome Extension
 
 | Component | Technology |
 |-----------|------------|
-| Extension framework | Chrome Extension Manifest V3 |
-| Side panel UI | HTML/CSS/JS (vanilla or lightweight framework) |
-| Content scripts | JavaScript (DOM reading and text injection) |
-| Storage | Chrome `storage.local` API |
+| Extension framework | WXT (Manifest V3, file-based entrypoints, auto-manifest, HMR) |
+| Side panel UI | Preact + Preact Signals (4KB runtime, fine-grained reactivity) |
+| Content scripts | TypeScript (DOM observation, response extraction, feedback injection) |
+| Build | Vite (via WXT) with @preact/preset-vite |
+| Language | TypeScript (all code) |
+
+### 11.1b VS Code Extension
+
+| Component | Technology |
+|-----------|------------|
+| Extension host | Node.js (VS Code Extension API) |
+| Extension host bundler | esbuild (CJS output) |
+| Sidebar UI | Preact + Preact Signals (same components as Chrome extension) |
+| Sidebar bundler | Vite with @preact/preset-vite |
+| Markdown rendering | marked (~30KB, converts JSONL text to HTML) |
+| Language | TypeScript (all code) |
 
 ### 11.2 Multi-LLM Roundtable (Product B)
 
@@ -707,7 +761,7 @@ Two things are novel in this design:
 
 ### 11.3 Shared Design Language
 
-Both products use the same annotation UX patterns (highlight = yellow/green emphasis, strikethrough = faded + line through). If a user migrates from the extension to the platform, the gesture language is already familiar.
+All products use the same annotation UX patterns (highlight = green emphasis, strikethrough = red + line through) and the same KEEP/DROP feedback format. The Chrome and VS Code extensions share ~70% of their UI code — the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), the same Signals-based state management, and the same CSS. If a user moves between the browser and VS Code, the annotation experience is identical.
 
 ---
 
@@ -721,14 +775,14 @@ Both products use the same annotation UX patterns (highlight = yellow/green emph
 | 2 | **Synthesis model selection** | Cheap model, frontier model, rotating, or Anthropic Compaction API? See Section 6.4 |
 | 3 | **Auto-synthesis prompt** | The harder prompt — must infer consensus, tensions, insights without user guidance |
 | 4 | **User-refined synthesis prompt** | Easier — follows user annotation signals. But format of annotation input needs definition |
-| 5 | **Annotation UX design** | Text selection mechanism, floating toolbar, visual treatment of highlights/strikethroughs. Must be faster than typing. |
+| 5 | ~~**Annotation UX design**~~ | **Resolved.** Built and working in both extensions. Text selection → floating toolbar (highlight/strikethrough/clear) → DOM overlay with `<mark>`/`<del>` wrappers. Faster than typing. |
 | 6 | **Annotation → synthesis translation** | How do highlights and strikethroughs get represented in the synthesis prompt? Quoted text with labels? Structured JSON? |
 
 ### 12.2 Important (Resolve during implementation)
 
 | # | Item | Notes |
 |---|------|-------|
-| 7 | **Platform DOM selectors** (Extension) | Per-platform selectors for extracting latest AI response and injecting text into input field |
+| 7 | ~~**Platform DOM selectors**~~ (Extension) | **Resolved for claude.ai and ChatGPT.** See [Extension Architecture](extension-architecture.md) Sections 7 and 8 for selector details. Grok and Gemini selectors still TBD. |
 | 8 | **Error handling for API failures** | What happens if one model's API is down? Skip it? Show error? Retry? |
 | 9 | **Streaming responses** | Do we stream individual model responses as they arrive, or wait for all? Streaming is better UX but adds complexity |
 | 10 | **Model configuration UI** | How does the user select which models to include? API key management? |
@@ -744,29 +798,45 @@ Both products use the same annotation UX patterns (highlight = yellow/green emph
 | 15 | **Analytics** | Model agreement/disagreement patterns over time |
 | 16 | **Extension ↔ Platform integration** (Phase 2) | Extension annotations feeding into platform CC |
 
-### 12.4 Pre-Implementation
+### 12.4 Resolved / Completed
 
 | # | Item | Notes |
 |---|------|-------|
-| 17 | **Naming and positioning** | To be discussed after design is locked, before implementation begins |
-| 18 | **Manual validation test** | Take a real multi-LLM question, manually create the ideal CC, test if feeding it back improves responses. Validates the core hypothesis. |
+| 17 | ~~**Naming and positioning**~~ | **Resolved.** Brand is Recurate (recurate.ai). Tagline: "Don't just chat, recurate." |
+| 18 | **Manual validation test** | Take a real multi-LLM question, manually create the ideal CC, test if feeding it back improves responses. Validates the core hypothesis. (Applicable to Roundtable only — annotation UX validated through daily use of Chrome + VS Code extensions.) |
 
 ---
 
 ## 13. Phased Roadmap
 
-### Phase 0: Recurate Annotator Chrome Extension
+### Phase 0: Recurate Annotator Extensions
 
-**Goal:** Ship the annotation mechanism as a standalone product under the Recurate brand.
+**Goal:** Ship the annotation mechanism as standalone products under the Recurate brand.
 
-**Scope:**
-- Chrome extension with side panel
-- Support for claude.ai, chat.com, grok.com, gemini.google.com
-- Highlight and strikethrough annotation
-- Structured feedback text generation and injection
+**Chrome Extension — Built and working.**
+
+- Side panel annotation on claude.ai and chat.com
+- Highlight and strikethrough with floating toolbar
+- Proactive feedback auto-injection into platform text box
 - No backend, no API keys, fully client-side
+- Tech: WXT, Preact, Preact Signals, TypeScript, Vite
 
-**Success criteria:** The extension noticeably improves the quality of multi-turn LLM conversations by giving users an efficient way to signal what they valued and what they didn't.
+**VS Code Extension — Built and working.**
+
+- Sidebar annotation for Claude Code terminal workflow
+- Watches JSONL conversation files, renders markdown
+- Last 5 responses with back/forward navigation
+- Auto-copy feedback to clipboard on every annotation change
+- WEBVIEW_READY handshake for sidebar persistence
+- Tech: esbuild, Preact, Preact Signals, TypeScript, Vite, marked
+
+**Remaining Phase 0 work:**
+
+- Chrome Web Store packaging and submission
+- VS Code Marketplace packaging and submission
+- Add grok.com and gemini.google.com platform support to Chrome extension
+
+**Success criteria:** The extensions noticeably improve the quality of multi-turn LLM conversations by giving users an efficient way to signal what they valued and what they didn't.
 
 ### Phase 1: Recurate Roundtable Platform
 
@@ -809,6 +879,13 @@ Both products use the same annotation UX patterns (highlight = yellow/green emph
 | 8 | **External input (docs/links) is V1; prior conversation recovery is V2** | Mirrors how claude.ai and ChatGPT evolved — none launched with external input on V1. Reduces initial scope. |
 | 9 | **Naming discussion after design, before implementation** | Focus on substance first. Naming shapes user perception and should be deliberate — not rushed. |
 | 10 | **Brand name: Recurate (recurate.ai)** | "Curate" is the base word — exactly what the user does (curating AI responses through annotation). "Re-curate" is the action — every turn, the conversation gets re-curated. Unique, ownable, pronounceable, elevated. Works for both the Chrome extension (Recurate Annotator) and the platform (Recurate Roundtable). Tagline: "Don't just chat, recurate." |
+| 11 | **VS Code extension for Claude Code** | Claude Code users work in the terminal, not the web UI. The JSONL file watcher approach captures assistant text responses without any unstable APIs. Clipboard-based feedback delivery (vs. terminal injection) is the safe V1 — no risk of disrupting an active session. |
+| 12 | **JSONL file watching (not terminal API)** | Claude Code saves conversations to `~/.claude/projects/<encoded-path>/<session-id>.jsonl`. Watching these files is reliable and stable. The VS Code terminal API (`onDidWriteTerminalData`) is proposed/unstable and wouldn't give structured message data. Hooks capture tool events, not text responses. |
+| 13 | **Shared UI components across extensions** | Both extensions use the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), same Signals state, same CSS, same KEEP/DROP formatter. Only the messaging layer and data source differ. This ensures consistent UX and reduces maintenance. |
+| 14 | **Auto-copy to clipboard** | VS Code extension copies formatted feedback to clipboard on every annotation change. No explicit "copy" action needed — the clipboard always has the latest feedback. User pastes into Claude Code when ready. Reduces friction to near-zero. |
+| 15 | **Response history (last 5)** | VS Code extension keeps the last 5 assistant responses with back/forward navigation. Unlike the Chrome extension (which gets a new response on every AI turn), the VS Code sidebar may be opened after several responses have passed. History lets users annotate any recent response. |
+| 16 | **WEBVIEW_READY handshake** | VS Code destroys webviews when the sidebar is hidden. The WEBVIEW_READY pattern (webview signals when mounted, extension re-sends state) ensures the sidebar always restores correctly, even after tab switching. |
+| 17 | **WXT + Preact for Chrome extension** | WXT chosen over Plasmo for smaller bundle and active maintenance. Preact chosen over React (4KB vs 40KB runtime), Svelte (familiarity), Lit (weak state management), and vanilla JS (too much interactive complexity for manual DOM management). |
 
 ---
 
@@ -832,4 +909,4 @@ This design emerged from an iterative conceptual discussion in February 2026. Th
 
 ---
 
-*This document captures the complete state of the design as of February 21, 2026. It is a living document intended to be comprehensive enough for implementation to begin from this document alone. All open items are explicitly marked as TBD in Section 12.*
+*This document captures the complete state of the design as of February 21, 2026. Phase 0 (Chrome + VS Code extensions) is built and working. The Roundtable platform remains in design. All open items are explicitly marked in Section 12.*

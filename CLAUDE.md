@@ -70,13 +70,14 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 ### Two Products
 
-**Phase 0: Recurate Annotator (Chrome Extension)**
-- Side panel that mirrors the AI's latest response
-- Highlight (carry forward) and strikethrough (drop it) annotation
-- Auto-generates structured feedback, injects into the platform's text box
-- Works on claude.ai, chat.com, grok.com, gemini.google.com
+**Phase 0: Recurate Annotator (Extensions)**
+
+*Chrome Extension* — Side panel annotation for web-based AI chat. Highlight/strikethrough → structured feedback auto-injects into text box. Works on claude.ai and chat.com. Built and working.
+
+*VS Code Extension* — Sidebar annotation for Claude Code terminal workflow. Watches JSONL files, renders markdown, auto-copies feedback to clipboard. Built and working.
+
 - No backend, no API keys, fully client-side
-- **This ships first.**
+- Shared Preact + Signals UI across both extensions
 
 **Phase 1: Recurate Roundtable (Web Platform)**
 - Send one question to multiple LLMs simultaneously
@@ -84,7 +85,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 - Annotation mechanism built natively (curate across models)
 - Stateless architecture — each LLM call gets CC + new question, no per-model state
 - React frontend + Python/FastAPI backend
-- **Ships after the extension validates the annotation UX.**
+- **Ships after the extensions validate the annotation UX.**
 
 ### Tech Stack
 
@@ -115,6 +116,8 @@ recurate/
 │   ├── CNAME                    (Custom domain: recurate.ai)
 │   ├── product_brief.md         (Non-technical product brief)
 │   ├── design.md                (Complete design & architecture)
+│   ├── extension-architecture.md (Chrome extension architecture)
+│   ├── vscode-extension-architecture.md (VS Code extension architecture)
 │   ├── overrides/
 │   │   └── main.html            (OG meta tags)
 │   ├── assets/images/           (Logo, favicon, social card)
@@ -162,9 +165,9 @@ recurate/
 
 ## Current Limitations
 
-- No code written yet — design phase only
-- No website — MkDocs setup pending (see SITE_SETUP_GUIDE.md)
+- Chrome extension supports claude.ai and chat.com only — grok.com and gemini.google.com planned
+- Not yet published to Chrome Web Store or VS Code Marketplace
 - No logo or visual identity
-- CC schema not yet defined (critical open item — see docs/design.md Section 6.3)
-- Synthesis model not yet selected (critical open item — see docs/design.md Section 6.4)
-- DOM selectors for each LLM platform not yet researched
+- CC schema not yet defined (critical open item for Roundtable — see docs/design.md Section 6.3)
+- Synthesis model not yet selected (critical open item for Roundtable — see docs/design.md Section 6.4)
+- Roundtable platform not yet built

@@ -79,9 +79,11 @@ Maybe it's because annotation feels like a "small" UX improvement compared to a 
 
 We're building **Recurate** — tools that let you curate AI conversations instead of just chatting through them.
 
-First up is a **Chrome extension** that works on any AI chat site. It adds a side panel where you can annotate the AI's response before sending your next message. No backend, no API keys — just install and your conversations get better.
+We've built a **Chrome extension** that works on claude.ai and ChatGPT. It adds a side panel where you can annotate the AI's response — annotations auto-inject as structured feedback into the platform's text box. No backend, no API keys — just install and your conversations get better.
 
-Next is a **multi-model platform** where you can ask questions across multiple AIs simultaneously and curate across all of them, building a shared conversation that's richer than any single model could produce.
+We've also built a **VS Code extension** for the Claude Code terminal workflow. Same annotation UX, but it watches Claude Code's conversation files and auto-copies feedback to your clipboard. If you spend your day in VS Code with Claude Code, this is where annotation meets your actual workflow.
+
+Next up is a **multi-model platform** where you can ask questions across multiple AIs simultaneously and curate across all of them, building a shared conversation that's richer than any single model could produce.
 
 The name comes from the core action: you **curate** the AI's response, and every turn, the conversation gets **re-curated** — refined, improved, more aligned with what you actually care about.
 
