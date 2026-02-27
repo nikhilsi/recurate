@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.0] - 2026-02-21
+
+### Changed
+- Chrome extension: empty state now mentions both Claude and ChatGPT (was Claude-only)
+- Chrome extension: StatusBar "Connected" label is now platform-agnostic
+- Chrome extension: manifest description rewritten for store discoverability
+- VS Code extension: README rewritten as marketplace page (architecture docs preserved on recurate.ai)
+- VS Code extension: package.json metadata — categories, keywords, repository, homepage, narrowed activation
+
+### Added
+- VS Code extension: `.vscodeignore` for clean VSIX packaging (258 KB → 40 KB)
+- Chrome extension: `STORE_LISTING.md` with Chrome Web Store description text (short + detailed)
+
+### Removed
+- Chrome extension: dead `RESPONSE_STREAMING` message type (defined but never used)
+
+---
+
 ## [0.6.0] - 2026-02-21
 
 ### Added

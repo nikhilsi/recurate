@@ -8,7 +8,7 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Recurate Annotator',
-    description: "Don't just chat, recurate. Annotation tools for AI conversations.",
+    description: "Highlight and strikethrough AI responses on Claude and ChatGPT. Your annotations become structured feedback — the AI's next reply is better.",
     version: '0.1.0',
     permissions: ['sidePanel', 'activeTab'],
     icons: {

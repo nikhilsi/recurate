@@ -24,7 +24,6 @@ export type Theme = 'light' | 'dark';
 
 // Chrome runtime message types
 export type ExtensionMessage =
-  | { type: 'RESPONSE_STREAMING'; html: string; messageId: string }
   | { type: 'RESPONSE_READY'; html: string; text: string; messageId: string }
   | { type: 'INJECT_FEEDBACK'; feedback: string }
   | { type: 'PENDING_FEEDBACK'; feedback: string | null }

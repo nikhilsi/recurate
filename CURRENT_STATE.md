@@ -88,9 +88,17 @@
 - Site: SVG logo in header, 32px PNG favicon, 1200x630 social card PNG
 - Generation scripts: `scripts/generate-icons.mjs`, `scripts/generate-social-card.mjs` (sharp)
 
+### Marketplace Prep (Ready for Publishing)
+- VS Code: README rewritten for marketplace (problem-first), package.json polished (categories, keywords, activation), .vscodeignore (VSIX 258 KB → 40 KB)
+- Chrome: store listing drafted (STORE_LISTING.md — short + detailed descriptions), manifest description rewritten for discoverability
+- Chrome: code polished — empty state mentions ChatGPT, platform-agnostic status label, dead code removed
+- Build output: Chrome 100 KB, VS Code VSIX 40 KB
+
 ### Not Yet Built
-- Chrome Web Store listing
-- Settings/config page
+- Chrome Web Store account + submission
+- VS Code Marketplace publisher account + submission
+- Screenshots and demo video
+- Settings/config page (deferred to V1.1)
 - Platform (Roundtable) — design phase only
 
 ---

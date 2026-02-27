@@ -6,11 +6,20 @@
   "publisher": "recurate",
   "icon": "icon.png",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikhilsi/recurate"
+  },
+  "homepage": "https://recurate.ai",
+  "bugs": {
+    "url": "https://github.com/nikhilsi/recurate/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "activationEvents": ["*"],
+  "categories": ["Machine Learning", "Other"],
+  "keywords": ["claude", "claude-code", "ai", "annotation", "feedback"],
+  "activationEvents": ["onView:recurate.annotator"],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {

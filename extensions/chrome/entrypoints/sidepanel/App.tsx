@@ -71,7 +71,7 @@ export function App() {
       ) : (
         <div class="empty-state">
           <p>Waiting for an AI response...</p>
-          <p class="hint">Navigate to a conversation on claude.ai and send a message.</p>
+          <p class="hint">Navigate to a conversation on claude.ai or ChatGPT and send a message.</p>
         </div>
       )}
     </div>

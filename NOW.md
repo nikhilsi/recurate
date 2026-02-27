@@ -77,18 +77,22 @@
 - [x] Tested end-to-end via .vsix install (annotate → auto-copy → paste)
 
 ### 5. VS Code Extension — Package & Ship
-- [ ] Publisher account on VS Code Marketplace
-- [ ] Extension icon (use same logo once created)
-- [ ] Marketplace description and README
+- [ ] Publisher account on VS Code Marketplace (publisher name must match `"recurate"`)
+- [x] Extension icon (128px marketplace PNG + monochrome activity bar SVG)
+- [x] Marketplace description and README (rewritten for marketplace, problem-first)
+- [x] package.json metadata (categories, keywords, repository, narrowed activation)
+- [x] .vscodeignore (VSIX 258 KB → 40 KB, source excluded)
 - [ ] Screenshots showing annotation flow
 - [ ] Publish to VS Code Marketplace
 
 ### 6. Chrome Extension — Package & Ship
-- [ ] Store description — lead with the problem, not the feature
+- [x] Store description — leads with the problem, not the feature (STORE_LISTING.md)
+- [x] Manifest description rewritten for discoverability
 - [ ] Screenshots showing before/after annotation quality
-- [ ] Minimal permissions (builds trust, speeds review)
+- [x] Minimal permissions — only `sidePanel` + `activeTab`
 - [ ] 30-second demo video
-- [ ] Free forever for the extension
+- [x] Free forever for the extension
+- [x] Code polish — empty state mentions ChatGPT, platform-agnostic status, dead code removed
 - [ ] Review and submit to Chrome Web Store
 
 ### 7. Ship
@@ -100,10 +104,10 @@
 
 ## Polish (Before Ship)
 
-- [ ] Handle edge cases (long responses, code blocks, empty selections)
-- [ ] SPA navigation handling (conversation switching on claude.ai)
-- [ ] Error states (selector failures, injection failures)
-- [ ] Settings/config page (auto-inject vs manual confirmation toggle)
+- [x] Handle edge cases (long responses, code blocks, empty selections) — covered in both extensions
+- [x] SPA navigation handling (conversation switching on claude.ai) — URL change detection via MutationObserver
+- [x] Error states (selector failures, injection failures) — graceful fallbacks, silent recovery
+- [ ] Settings/config page (auto-inject vs manual confirmation toggle) — deferred to V1.1
 - [ ] Test on multiple claude.ai conversations
 
 ---
@@ -128,7 +132,7 @@
 - The extensions validate the core UX before building the Roundtable platform
 - ChatGPT content script follows the same architecture as claude.ai (platform module + content script)
 - To build VS Code extension: `cd extensions/vscode && npm install && npm run compile`
-- To package: `npx @vscode/vsce package --allow-missing-repository --allow-star-activation`
+- To package: `cd extensions/vscode && npx @vscode/vsce package`
 - To install locally: `code --install-extension recurate-annotator-vscode-0.1.0.vsix`
 
 ---

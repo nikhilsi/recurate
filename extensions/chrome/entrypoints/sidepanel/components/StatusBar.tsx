@@ -2,7 +2,7 @@ import { connectionStatus } from '../state/annotations';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   disconnected: { label: 'Not connected', color: '#9ca3af' },
-  connected: { label: 'Connected to claude.ai', color: '#22c55e' },
+  connected: { label: 'Connected', color: '#22c55e' },
   streaming: { label: 'AI is responding...', color: '#3b82f6' },
   ready: { label: 'Response ready', color: '#22c55e' },
 };
