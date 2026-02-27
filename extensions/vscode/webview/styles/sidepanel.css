@@ -240,6 +240,27 @@ body {
   color: var(--text-muted);
 }
 
+.annotation-list-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+}
+
+.toggle-chevron {
+  display: inline-block;
+  transition: transform 0.15s;
+}
+
+.toggle-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
 .clear-all-btn {
   background: none;
   border: none;
@@ -267,6 +288,7 @@ body {
   border-radius: 6px;
   margin-bottom: 4px;
   font-size: 12px;
+  cursor: pointer;
   transition: background 0.15s;
 }
 

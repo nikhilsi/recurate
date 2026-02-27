@@ -37,7 +37,7 @@ function getTextOffset(container: Node, targetNode: Node, targetOffset: number):
  * Processes annotations from highest to lowest offset so that wrapping
  * (which splits text nodes) doesn't invalidate earlier offsets.
  */
-function applyAnnotationsToDOM(container: HTMLElement, annotationList: Annotation[]) {
+function applyAnnotationsToDOM(container: HTMLElement, annotationList: Annotation[], onRemove: (id: string) => void) {
   if (annotationList.length === 0) return;
 
   // Build a flat list of text nodes with their global character offsets
@@ -76,6 +76,13 @@ function applyAnnotationsToDOM(container: HTMLElement, annotationList: Annotatio
         const wrapper = document.createElement(tagName);
         wrapper.className = cls;
         wrapper.dataset.annotationId = ann.id;
+        wrapper.addEventListener('click', (e) => {
+          // Only remove on a true click, not at the end of a text selection drag
+          const sel = document.getSelection();
+          if (sel && !sel.isCollapsed) return;
+          e.stopPropagation();
+          onRemove(ann.id);
+        });
         range.surroundContents(wrapper);
       } catch {
         // surroundContents can fail if range crosses element boundaries — skip gracefully
@@ -101,9 +108,18 @@ export function ResponseView() {
     // Always start from the original HTML
     container.innerHTML = response.html;
 
-    // Apply annotation wrappers to the DOM
-    applyAnnotationsToDOM(container, annotationList);
+    // Apply annotation wrappers to the DOM (click wrapper → remove annotation)
+    applyAnnotationsToDOM(container, annotationList, removeAnnotation);
   }, [response, annotationList]);
+
+  // Dismiss toolbar on scroll
+  useEffect(() => {
+    const container = containerRef.current?.parentElement; // .response-view
+    if (!container) return;
+    const onScroll = () => { selectionInfo.value = null; };
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => container.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handlePointerUp = useCallback(() => {
     // Delay slightly to let the browser finalize the selection

@@ -18,7 +18,7 @@ export interface ResponseData {
   timestamp: number;
 }
 
-export type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready';
+export type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready' | 'error';
 
 export type Theme = 'light' | 'dark';
 
@@ -28,4 +28,6 @@ export type ExtensionMessage =
   | { type: 'INJECT_FEEDBACK'; feedback: string }
   | { type: 'PENDING_FEEDBACK'; feedback: string | null }
   | { type: 'CONNECTION_STATUS'; status: ConnectionStatus }
-  | { type: 'THEME_CHANGED'; theme: Theme };
+  | { type: 'THEME_CHANGED'; theme: Theme }
+  | { type: 'EXTRACTION_FAILED' }
+  | { type: 'INJECTION_FAILED'; feedback: string };

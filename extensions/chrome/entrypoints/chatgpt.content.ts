@@ -46,7 +46,10 @@ export default defineContentScript({
       const editorText = getEditorText();
 
       if (editorText === '' || editorTextIsOnlyOurFeedback(editorText)) {
-        setEditorContent(pendingFeedback);
+        const success = setEditorContent(pendingFeedback);
+        if (!success) {
+          sendMessage({ type: 'INJECTION_FAILED', feedback: pendingFeedback });
+        }
       }
     }
 
@@ -134,7 +137,11 @@ export default defineContentScript({
       if (isStreaming()) return;
 
       const response = extractLatestResponse();
-      if (!response) return;
+      if (!response) {
+        sendMessage({ type: 'EXTRACTION_FAILED' });
+        sendMessage({ type: 'CONNECTION_STATUS', status: 'error' });
+        return;
+      }
 
       const responseHash = response.text.slice(0, 100);
       if (responseHash === lastMessageId) return;

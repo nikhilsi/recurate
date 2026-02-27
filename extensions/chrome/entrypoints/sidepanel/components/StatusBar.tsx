@@ -5,6 +5,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   connected: { label: 'Connected', color: '#22c55e' },
   streaming: { label: 'AI is responding...', color: '#3b82f6' },
   ready: { label: 'Response ready', color: '#22c55e' },
+  error: { label: 'Could not detect response', color: '#ef4444' },
 };
 
 export function StatusBar() {
