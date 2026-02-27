@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.8.0] - 2026-02-27
+
+### Added
+- **"Dig deeper" annotation gesture** (blue, ⤵) — select text and mark it for elaboration. Generates EXPLORE DEEPER section in feedback.
+- **"Verify this" annotation gesture** (amber, ?) — select text and flag it for fact-checking. Generates VERIFY section in feedback.
+- Both new gestures work identically in Chrome and VS Code extensions.
+- TYPE_CONFIG lookup map in ResponseView replaces hardcoded ternary for annotation type → DOM element mapping.
+- TYPE_ICON map in AnnotationList for scalable icon display.
+- Computed signals `deeperAnnotations` and `verifyAnnotations` in both extensions.
+
+### Changed
+- Toolbar now shows 5 buttons in a single row: ✓ ✗ ⤵ ? ↺ (was ✓ ✗ ↺)
+- Formatter output now includes EXPLORE DEEPER and VERIFY sections alongside KEEP and DROP
+- Annotation list summary shows explore and verify counts
+- All documentation updated for V1.1 gestures (14 files)
+
+---
+
 ## [0.7.0] - 2026-02-21
 
 ### Changed

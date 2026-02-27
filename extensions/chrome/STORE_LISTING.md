@@ -6,7 +6,7 @@ Copy-paste these into the Chrome Web Store developer dashboard.
 
 ## Short Description (132 chars max)
 
-Highlight and strikethrough AI responses on Claude and ChatGPT. Annotations auto-inject as feedback. Better conversations, no typing.
+Annotate AI responses on Claude and ChatGPT — highlight, strikethrough, dig deeper, verify. Feedback auto-injects. No typing needed.
 
 ---
 
@@ -18,19 +18,21 @@ Every AI chat gives you a text box as the only way to respond. When the AI gives
 
 THE SOLUTION
 
-Recurate adds annotation tools to AI conversations. A side panel mirrors the AI's latest response, and you can highlight what matters and strikethrough what doesn't.
+Recurate adds annotation tools to AI conversations. A side panel mirrors the AI's latest response, and you can annotate what matters and what doesn't.
 
 - Highlight (green) = "This is valuable. Keep going here."
 - Strikethrough (red) = "This is wrong. Drop it."
+- Dig deeper (blue) = "Elaborate on this. I want more detail."
+- Verify (amber) = "Fact-check this. I'm not sure it's right."
 
-Annotations are automatically injected into the chat's text box as structured KEEP/DROP feedback. When you send your next message, the AI knows exactly what you valued and what you didn't.
+Annotations are automatically injected into the chat's text box as structured feedback (KEEP/DROP/EXPLORE DEEPER/VERIFY). When you send your next message, the AI knows exactly what you valued, what you didn't, and what you want explored or verified.
 
 HOW IT WORKS
 
 1. Click the Recurate icon to open the side panel
 2. Chat with the AI as usual
 3. When the AI responds, the side panel shows the response
-4. Select text and use the floating toolbar to highlight or strikethrough
+4. Select text and use the floating toolbar to highlight, strikethrough, dig deeper, or verify
 5. Your annotations appear in the text box automatically
 6. Type your next question below the feedback and send
 

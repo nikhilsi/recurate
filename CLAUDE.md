@@ -72,7 +72,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 **Phase 0: Recurate Annotator (Extensions)**
 
-*Chrome Extension* — Side panel annotation for web-based AI chat. Highlight/strikethrough → structured feedback auto-injects into text box. Works on claude.ai and chat.com. Built and working.
+*Chrome Extension* — Side panel annotation for web-based AI chat. Highlight/strikethrough/dig deeper/verify → structured feedback auto-injects into text box. Works on claude.ai and chat.com. Built and working.
 
 *VS Code Extension* — Sidebar annotation for Claude Code terminal workflow. Watches JSONL files, renders markdown, auto-copies feedback to clipboard. Built and working.
 
@@ -153,7 +153,7 @@ recurate/
 
 ## Key Concepts
 
-- **Annotation** — Highlight (carry forward) and strikethrough (drop it) gestures on AI responses. The core UX innovation.
+- **Annotation** — Highlight (carry forward), strikethrough (drop it), dig deeper (elaborate), and verify (fact-check) gestures on AI responses. The core UX innovation.
 - **Condensed Context (CC)** — Rolling synthesized summary of a multi-model conversation. Sole persistent state for the Roundtable. Re-generated every turn.
 - **Fast path** — User just asks their next question without annotating. Zero friction.
 - **Power path** — User annotates before proceeding. The AI's next response is better because it got explicit signal.

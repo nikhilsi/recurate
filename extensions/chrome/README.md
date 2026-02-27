@@ -1,6 +1,6 @@
 # Recurate Annotator — Chrome Extension
 
-Annotate AI responses with highlight and strikethrough gestures. Works on **claude.ai** and **ChatGPT (chat.com)**.
+Annotate AI responses with highlight, strikethrough, dig deeper, and verify gestures. Works on **claude.ai** and **ChatGPT (chat.com)**.
 
 ## What It Does
 
@@ -8,8 +8,10 @@ A Chrome side panel that mirrors the AI's latest response and lets you annotate 
 
 - **Highlight** (green) — "Keep this, carry it forward"
 - **Strikethrough** (red) — "Drop this, it's wrong or irrelevant"
+- **Dig deeper** (blue) — "Elaborate on this, I want more detail"
+- **Verify** (amber) — "Fact-check this, I'm not sure it's right"
 
-Annotations are automatically injected into the AI's text box as structured KEEP/DROP feedback. The AI's next response is better because it got explicit signal about what you valued.
+Annotations are automatically injected into the AI's text box as structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback. The AI's next response is better because it got explicit signal about what you valued.
 
 ## How to Build
 
@@ -65,8 +67,8 @@ Production build output: `.output/chrome-mv3/`
 
 1. AI finishes responding → content script extracts HTML → sends `RESPONSE_READY` via background
 2. Side panel renders HTML in ResponseView
-3. User selects text → floating toolbar → highlight or strikethrough
-4. Annotation state updates → `formatFeedback()` generates KEEP/DROP text
+3. User selects text → floating toolbar → highlight, strikethrough, dig deeper, or verify
+4. Annotation state updates → `formatFeedback()` generates KEEP/DROP/EXPLORE DEEPER/VERIFY text
 5. Side panel sends `PENDING_FEEDBACK` → background relays → content script
 6. Content script injects feedback into the AI's text box (ProseMirror editor)
 7. When user sends next message, feedback is included automatically
@@ -96,7 +98,7 @@ Adding a new platform means creating a new platform module and content script fo
 | `entrypoints/sidepanel/state/annotations.ts` | Annotation state (Preact Signals) |
 | `lib/platforms/claude.ts` | claude.ai DOM selectors and extraction |
 | `lib/platforms/chatgpt.ts` | ChatGPT DOM selectors and extraction |
-| `lib/formatter.ts` | Formats annotations into KEEP/DROP feedback text |
+| `lib/formatter.ts` | Formats annotations into KEEP/DROP/EXPLORE DEEPER/VERIFY feedback text |
 | `lib/types.ts` | Shared TypeScript types |
 
 ## Tech Stack
@@ -111,9 +113,9 @@ Adding a new platform means creating a new platform module and content script fo
 1. ResponseView renders the AI's HTML response in the side panel
 2. User selects text → `handlePointerUp` computes character offsets via TreeWalker
 3. Selection snaps to word boundaries
-4. Floating toolbar appears → user clicks highlight or strikethrough
+4. Floating toolbar appears → user clicks highlight, strikethrough, dig deeper, or verify
 5. Annotation stored as `{ id, type, text, startOffset, endOffset }`
-6. DOM overlay: TreeWalker walks text nodes, `Range.surroundContents()` wraps annotated ranges with `<mark>` or `<del>`
+6. DOM overlay: TreeWalker walks text nodes, `Range.surroundContents()` wraps annotated ranges with `<mark>` (highlight/deeper/verify) or `<del>` (strikethrough)
 7. Original HTML is always preserved — annotations are re-applied from scratch on every change
 
 ## Platform-Specific Details

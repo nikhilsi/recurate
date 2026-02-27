@@ -1,6 +1,4 @@
-// Annotation types — V1: highlight, strikethrough
-// V1.1 will add: 'deeper' | 'question'
-export type AnnotationType = 'highlight' | 'strikethrough';
+export type AnnotationType = 'highlight' | 'strikethrough' | 'deeper' | 'verify';
 
 export interface Annotation {
   id: string;

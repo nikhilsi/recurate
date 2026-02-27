@@ -18,10 +18,12 @@ It doesn't. The conversation drifts. Context is lost. You start over.
 
 ## The Idea
 
-What if you could **highlight** and **strikethrough** parts of an AI response instead?
+What if you could **annotate** parts of an AI response instead?
 
-- **Highlight** = "This matters. Carry this forward."
-- **Strikethrough** = "This is wrong or irrelevant. Drop it."
+- **Highlight** (green) = "This matters. Carry this forward."
+- **Strikethrough** (red) = "This is wrong or irrelevant. Drop it."
+- **Dig deeper** (blue) = "Elaborate on this. I want more detail."
+- **Verify** (amber) = "Fact-check this. I'm not sure it's right."
 
 These gestures communicate in seconds what would take paragraphs to type. The AI gets clear signal about what you valued and what you didn't, and the next response is better for it.
 
@@ -36,7 +38,7 @@ This isn't just a feature. It's a fundamentally different way to communicate wit
 A lightweight Chrome extension that adds annotation tools to AI chat interfaces. Works on **claude.ai** and **ChatGPT (chat.com)**. No backend, no API keys — just install and your conversations immediately get better.
 
 - Side panel mirrors the AI's latest response
-- Select text → floating toolbar → highlight (keep) or strikethrough (drop)
+- Select text → floating toolbar → highlight, strikethrough, dig deeper, or verify
 - Annotations auto-inject into the text box — zero-click feedback
 - Works with light and dark themes
 
@@ -64,12 +66,13 @@ A web application that sends your question to multiple AI models simultaneously,
 ```
 Turn 1: You ask a question
         → AI responds with a detailed answer
-        → You highlight the brilliant parts, strikethrough the wrong parts
+        → You highlight the brilliant parts, strikethrough the wrong parts,
+          flag what needs elaboration or fact-checking
         → The AI carries forward what you valued
 
 Turn 2: You ask a follow-up
         → The AI's response is already better — informed by your curation
-        → You highlight and strikethrough again
+        → You annotate again
         → The conversation compounds in quality
 
 Turn N: Every turn is sharper than the last

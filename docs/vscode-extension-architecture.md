@@ -28,15 +28,15 @@
 
 ## 1. Overview
 
-The Recurate Annotator VS Code Extension brings the same annotation UX as the Chrome extension to the Claude Code terminal workflow. A VS Code sidebar watches Claude Code's conversation files, renders assistant text responses with full markdown formatting, and lets users annotate with highlight (keep) and strikethrough (drop). Feedback auto-copies to clipboard on every annotation change — the user pastes into Claude Code when ready.
+The Recurate Annotator VS Code Extension brings the same annotation UX as the Chrome extension to the Claude Code terminal workflow. A VS Code sidebar watches Claude Code's conversation files, renders assistant text responses with full markdown formatting, and lets users annotate with highlight (keep), strikethrough (drop), dig deeper (elaborate), and verify (fact-check). Feedback auto-copies to clipboard on every annotation change — the user pastes into Claude Code when ready.
 
 **Core loop:**
 
 1. Claude Code writes to a JSONL conversation file → `fs.watch()` fires → watcher reads the file tail
 2. Watcher extracts the latest assistant text → extension host converts markdown to HTML via `marked`
 3. HTML sent to webview sidebar via `postMessage`
-4. User annotates (highlight / strikethrough) via floating toolbar
-5. `formatFeedback()` generates structured KEEP/DROP text → auto-copies to clipboard
+4. User annotates (highlight / strikethrough / dig deeper / verify) via floating toolbar
+5. `formatFeedback()` generates structured KEEP/DROP/EXPLORE DEEPER/VERIFY text → auto-copies to clipboard
 6. User pastes (`Cmd+V` / `Ctrl+V`) into Claude Code terminal
 
 **Key difference from Chrome extension:** The Chrome extension captures AI output by reading the DOM and injects feedback into the platform's text box. The VS Code extension captures output from JSONL files and delivers feedback via clipboard. The annotation UI is identical.
@@ -87,14 +87,14 @@ extensions/vscode/
 │   ├── vscode.d.ts                    # Type declaration for acquireVsCodeApi
 │   ├── components/
 │   │   ├── ResponseView.tsx           # Renders response with DOM overlay annotations
-│   │   ├── AnnotationToolbar.tsx      # Floating ✓ / ✗ / ↺ toolbar
+│   │   ├── AnnotationToolbar.tsx      # Floating ✓ / ✗ / ⤵ / ? / ↺ toolbar
 │   │   ├── AnnotationList.tsx         # Annotation summary with delete buttons
 │   │   └── StatusBar.tsx              # Connection status indicator
 │   ├── state/
 │   │   └── annotations.ts            # Preact Signals — annotation + response history state
 │   └── styles/
 │       ├── sidepanel.css              # Layout, typography, navigation, clipboard indicator
-│       └── annotations.css           # Highlight/strikethrough visual treatment
+│       └── annotations.css           # Annotation visual treatment (highlight, strikethrough, deeper, verify)
 │
 ├── shared/                            # Shared between extension host + webview
 │   ├── types.ts                       # TypeScript types (Annotation, ResponseData, messages)
@@ -223,6 +223,8 @@ App.tsx
 ├── AnnotationToolbar            # Floating toolbar (appears on text selection)
 │   ├── ✓ Highlight button
 │   ├── ✗ Strikethrough button
+│   ├── ⤵ Dig deeper button
+│   ├── ? Verify button
 │   └── ↺ Clear button (when selection overlaps existing annotation)
 ├── AnnotationList               # "3 highlights, 1 strikethrough" + item list
 │   └── AnnotationItem × N      # Each annotation with type icon + text preview + delete
@@ -423,7 +425,7 @@ The sidebar shows a green "Feedback copied to clipboard" indicator when annotati
 
 ### Feedback format
 
-The KEEP/DROP format is identical to the Chrome extension:
+The feedback format is identical to the Chrome extension:
 
 ```
 [Feedback on your previous response]
@@ -434,6 +436,12 @@ KEEP — I found these points valuable:
 
 DROP — Please disregard or reconsider:
 - "For straightforward questions this adds no value..."
+
+EXPLORE DEEPER — Need more detail on:
+- "The synthesis prompt design..."
+
+VERIFY — Please double-check:
+- "Cost per turn is approximately $0.02..."
 
 [Your message below]
 ```
@@ -461,7 +469,7 @@ The Chrome and VS Code extensions share ~70% of their UI code:
 | `AnnotationList.tsx` | 100% | No platform APIs used |
 | `StatusBar.tsx` | 90% | Different status labels ("Connected to claude.ai" vs "Connected") |
 | `annotations.ts` (state) | 90% | VS Code version adds response history + navigation |
-| `formatter.ts` | 100% | Pure function, zero dependencies |
+| `formatter.ts` | 100% | Pure function, zero dependencies (KEEP/DROP/EXPLORE DEEPER/VERIFY) |
 | `types.ts` | 90% | VS Code adds `WEBVIEW_READY`, `RESPONSE_HISTORY` message types |
 | `annotations.css` | 100% | Identical visual treatment |
 | `sidepanel.css` | 90% | VS Code adds navigation bar + clipboard indicator styles |

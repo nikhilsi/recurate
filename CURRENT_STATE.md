@@ -34,21 +34,21 @@
 - **Tested and working end-to-end on claude.ai:**
   - Response detection via MutationObserver on `data-is-streaming`
   - Response extraction and rendering in side panel (preserves HTML formatting)
-  - Annotation UX: text selection → floating toolbar → highlight (green ✓) / strikethrough (red ✗)
+  - Annotation UX: text selection → floating toolbar → highlight (green ✓) / strikethrough (red ✗) / dig deeper (blue ⤵) / verify (amber ?)
   - DOM overlay annotations — `<mark>`/`<del>` wrappers applied via TreeWalker, preserves all formatting
   - Word-level selection snapping — partial word selections expand to full word boundaries
   - Auto-inject feedback into text box — annotations appear in claude.ai's input as user annotates, zero-click flow
   - Light/dark theme — side panel matches claude.ai's theme via CSS variables + content script detection
   - Background service worker — message relay between content script and side panel
   - State management via Preact Signals
-  - Structured feedback formatter (KEEP/DROP format)
+  - Structured feedback formatter (KEEP/DROP/EXPLORE DEEPER/VERIFY format)
 
 ### Design Decisions (Locked)
 - Chrome extension first (Phase 0), then Roundtable platform (Phase 1)
 - Side panel approach (not DOM injection) for the extension
 - WXT + Preact + Signals (not Svelte — familiarity for faster development)
 - claude.ai first, then ChatGPT (chat.com), then other platforms
-- Annotation UX: floating toolbar with ✓ (green), ✗ (red), ↺ (gray)
+- Annotation UX: floating toolbar with ✓ (green), ✗ (red), ⤵ (blue), ? (amber), ↺ (gray)
 - Word-level selection snapping, no overlap (new replaces old)
 - Auto-inject feedback into text box (proactive injection, no Apply/Inject buttons)
 - Stateless LLM architecture for Roundtable — CC as sole persistent state
@@ -74,7 +74,7 @@
 - Walks up parent directories to find matching Claude project dir (works from subfolders)
 - Extracts text content blocks from assistant messages, converts markdown → HTML via `marked`
 - **Performance**: reads only last 64KB of JSONL file (not entire 25MB+ file)
-- **Auto-copy to clipboard**: annotations automatically copy KEEP/DROP feedback to clipboard on every change
+- **Auto-copy to clipboard**: annotations automatically copy KEEP/DROP/EXPLORE DEEPER/VERIFY feedback to clipboard on every change
 - **Response history**: keeps last 5 responses with back/forward navigation
 - **Sidebar persistence**: webview sends WEBVIEW_READY on mount, extension re-sends state — survives tab switches
 - Theme detection: reads VS Code's `vscode-light`/`vscode-dark` body class
@@ -106,7 +106,7 @@
 ## Open Design Items
 
 ### Resolved (Extension)
-- ~~Annotation UX design~~ → floating toolbar with ✓/✗/↺ icons
+- ~~Annotation UX design~~ → floating toolbar with ✓/✗/⤵/?/↺ icons
 - ~~Annotation → feedback format~~ → KEEP/DROP structured text
 - ~~Platform DOM selectors~~ → claude.ai selectors documented (data-is-streaming, ProseMirror)
 - ~~Tech stack~~ → WXT + Preact + Signals + TypeScript
@@ -129,9 +129,11 @@
 3. Auto-synthesis prompt design
 4. User-refined synthesis prompt design
 
-### Upcoming (Extension V1.1)
-- ⤵ "Dig deeper" annotation gesture
-- ? "Verify this" annotation gesture
+### Shipped (Extension V1.1)
+- ⤵ "Dig deeper" annotation gesture (blue, EXPLORE DEEPER section in feedback)
+- ? "Verify this" annotation gesture (amber, VERIFY section in feedback)
+
+### Upcoming (Extension V1.2)
 - Settings page (auto-inject vs manual confirmation toggle)
 
 ---

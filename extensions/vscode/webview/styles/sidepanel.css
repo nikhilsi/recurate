@@ -311,6 +311,14 @@ body {
   color: #ef4444;
 }
 
+.annotation-item-deeper .annotation-item-icon {
+  color: #3b82f6;
+}
+
+.annotation-item-verify .annotation-item-icon {
+  color: #f59e0b;
+}
+
 .annotation-item-text {
   flex: 1;
   color: var(--text-muted);

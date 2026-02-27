@@ -1,6 +1,6 @@
 # Recurate Annotator
 
-**Annotate Claude Code's responses. Highlight what matters. Strikethrough what doesn't.**
+**Annotate Claude Code's responses. Highlight what matters. Strikethrough what doesn't. Dig deeper. Verify.**
 
 ## The Problem
 
@@ -8,10 +8,12 @@ Claude Code gives long, detailed responses. You agree with half and disagree wit
 
 ## The Solution
 
-Recurate adds a sidebar to VS Code where you can **highlight** and **strikethrough** parts of Claude Code's responses:
+Recurate adds a sidebar to VS Code where you can **annotate** parts of Claude Code's responses:
 
 - **Highlight** (green) — "This is valuable. Keep it."
 - **Strikethrough** (red) — "This is wrong. Drop it."
+- **Dig deeper** (blue) — "Elaborate on this. I want more detail."
+- **Verify** (amber) — "Fact-check this. I'm not sure it's right."
 
 Annotations auto-copy as structured feedback to your clipboard. Paste into Claude Code. Its next response is better because it got explicit signal.
 

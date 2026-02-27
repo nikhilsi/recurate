@@ -27,7 +27,7 @@
 
 ## 1. Overview
 
-The Recurate Annotator is a Chrome extension that adds a side panel to AI chat interfaces. The side panel displays the AI's latest response and provides annotation tools — highlight (keep/carry forward) and strikethrough (drop/discard). When the user is ready, the extension generates structured feedback text and injects it into the platform's native text box alongside the user's next question.
+The Recurate Annotator is a Chrome extension that adds a side panel to AI chat interfaces. The side panel displays the AI's latest response and provides annotation tools — highlight (keep/carry forward), strikethrough (drop/discard), dig deeper (elaborate), and verify (fact-check). The extension generates structured feedback text and injects it into the platform's native text box alongside the user's next question.
 
 **V1 scope:** claude.ai and ChatGPT (chat.com). Additional platforms (grok.com, gemini.google.com) follow the same architecture with platform-specific selectors.
 
@@ -36,7 +36,7 @@ The Recurate Annotator is a Chrome extension that adds a side panel to AI chat i
 1. Content script detects AI response completion on the platform
 2. Content script extracts response HTML → sends to side panel via background service worker
 3. Side panel renders the response with annotation capabilities
-4. User annotates (highlight / strikethrough) via floating toolbar
+4. User annotates (highlight / strikethrough / dig deeper / verify) via floating toolbar
 5. Structured feedback auto-injects into the platform's text box (zero-click flow)
 6. User types their message after the feedback and sends normally
 
@@ -85,14 +85,14 @@ extensions/chrome/
 │   │   ├── App.tsx                    #   Root component — layout + state wiring
 │   │   ├── components/
 │   │   │   ├── ResponseView.tsx       #   Renders AI response with annotation overlays
-│   │   │   ├── AnnotationToolbar.tsx  #   Floating ✓ / ✗ / ↺ toolbar
+│   │   │   ├── AnnotationToolbar.tsx  #   Floating ✓ / ✗ / ⤵ / ? / ↺ toolbar
 │   │   │   ├── AnnotationList.tsx     #   Summary list with delete buttons
 │   │   │   └── StatusBar.tsx          #   Connection status, "Listening for responses..."
 │   │   ├── state/
 │   │   │   └── annotations.ts        #   Preact Signals — all annotation state + actions
 │   │   └── styles/
 │   │       ├── sidepanel.css          #   Global layout, typography
-│   │       └── annotations.css        #   Highlight/strikethrough visual treatment
+│   │       └── annotations.css        #   Annotation visual treatment (highlight, strikethrough, deeper, verify)
 │   │
 │   ├── claude.content.ts              # Content script for claude.ai
 │   │                                  #   - MutationObserver on data-is-streaming
@@ -134,6 +134,8 @@ App.tsx
 ├── AnnotationToolbar            # Floating toolbar (appears on text selection)
 │   ├── ✓ Highlight button
 │   ├── ✗ Strikethrough button
+│   ├── ⤵ Dig deeper button
+│   ├── ? Verify button
 │   └── ↺ Clear button (when selection overlaps existing annotation)
 ├── AnnotationList               # "3 highlights, 1 strikethrough" + item list
 │   └── AnnotationItem × N      # Each annotation with type icon + text preview + delete
@@ -165,7 +167,7 @@ Side Panel (App.tsx)
 ResponseView
     ↓ (user selects text)
 AnnotationToolbar
-    ↓ (user clicks ✓ or ✗)
+    ↓ (user clicks ✓, ✗, ⤵, or ?)
 annotations signal updates
     ↓ (auto — PENDING_FEEDBACK message)
 Background (relay)
@@ -188,7 +190,7 @@ All state lives in Preact Signals, defined in `state/annotations.ts`. Signals pr
 
 interface Annotation {
   id: string;                          // crypto.randomUUID()
-  type: 'highlight' | 'strikethrough'; // V1.1 adds: 'deeper' | 'question'
+  type: 'highlight' | 'strikethrough' | 'deeper' | 'verify';
   text: string;                        // The selected text
   startOffset: number;                 // Character offset in response text
   endOffset: number;                   // Character offset in response text
@@ -202,7 +204,7 @@ interface ResponseData {
   timestamp: number;
 }
 
-type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready';
+type ConnectionStatus = 'disconnected' | 'connected' | 'streaming' | 'ready' | 'error';
 
 type Theme = 'light' | 'dark';
 
@@ -555,15 +557,17 @@ export function setEditorContent(text: string): boolean {
 When the user selects text in the ResponseView, a floating toolbar appears near the selection:
 
 ```
-┌─────────────────┐
-│  ✓   ✗   ↺     │
-└─────────────────┘
+┌───────────────────────┐
+│  ✓   ✗   ⤵   ?   ↺  │
+└───────────────────────┘
 ```
 
 | Icon | Color | Action | When visible |
 |------|-------|--------|-------------|
 | **✓** | Green (#22c55e) | Highlight — carry forward | Always (when text selected) |
 | **✗** | Red (#ef4444) | Strikethrough — discard | Always (when text selected) |
+| **⤵** | Blue (#3b82f6) | Dig deeper — elaborate | Always (when text selected) |
+| **?** | Amber (#f59e0b) | Verify — fact-check | Always (when text selected) |
 | **↺** | Gray (#9ca3af) | Clear annotation | Only when selection overlaps existing annotation |
 
 **Positioning:** The toolbar appears above the selection, centered horizontally. Uses `position: fixed` with coordinates from `Range.getBoundingClientRect()`. If too close to the top of the panel, it appears below the selection instead.
@@ -576,20 +580,24 @@ When the user selects text in the ResponseView, a floating toolbar appears near 
 |------------|--------|
 | **Highlight** | `background-color: rgba(34, 197, 94, 0.2)` (light green), `border-left: 3px solid #22c55e` |
 | **Strikethrough** | `text-decoration: line-through`, `opacity: 0.5`, `background-color: rgba(239, 68, 68, 0.1)` (light red) |
+| **Dig deeper** | `background-color: rgba(59, 130, 246, 0.2)` (light blue), `border-left: 3px solid #3b82f6` |
+| **Verify** | `background-color: rgba(245, 158, 11, 0.2)` (light amber), `border-left: 3px solid #f59e0b` |
 
-Annotations are rendered by wrapping the annotated text ranges in `<mark>` (highlight) or `<del>` (strikethrough) elements within the ResponseView.
+Annotations are rendered by wrapping the annotated text ranges in `<mark>` (highlight, deeper, verify) or `<del>` (strikethrough) elements within the ResponseView.
 
 ### Annotation list
 
 Below the response view, a collapsible list shows all annotations:
 
 ```
-Annotations (3 highlights, 1 strikethrough)
+Annotations (3 highlights, 1 strikethrough, 1 explore, 1 verify)
 ─────────────────────────────────────
 ✓  "The stateless API approach eliminates..."     [×]
 ✓  "Token cost is approximately 2.5-3x..."        [×]
 ✓  "Each model benefits from..."                  [×]
 ✗  "For straightforward questions..."             [×]
+⤵  "The synthesis prompt design..."               [×]
+?  "Cost per turn is approximately $0.02..."      [×]
 ```
 
 - Each item shows the annotation type icon, a text preview (truncated), and a delete button.
@@ -598,8 +606,8 @@ Annotations (3 highlights, 1 strikethrough)
 
 ### Removing annotations — three mechanisms
 
-1. **Click annotated text** → toolbar appears with ↺ (clear) button
-2. **Click an annotation** in the ResponseView → toggles it off directly
+1. **Click annotated text** in the ResponseView → toggles it off directly
+2. **Select text overlapping an annotation** → toolbar appears with ↺ (clear) button
 3. **Click delete** in the AnnotationList → removes by ID
 
 ### Proactive injection flow (zero-click)
@@ -616,7 +624,7 @@ No "Apply" or "Inject" buttons — the flow is completely automatic. The side pa
 
 ## 9. Structured Feedback Format
 
-When the user clicks Apply, annotations are converted to structured text. This text gets injected into claude.ai's text box above whatever the user types next.
+Annotations are continuously converted to structured text and proactively injected into the platform's text box above whatever the user types next.
 
 ### Format
 
@@ -628,7 +636,13 @@ KEEP — I found these points valuable:
 - "Token cost is approximately 2.5-3x, not the naive 4x..."
 
 DROP — Please disregard or reconsider:
-- "For straightforward questions this adds no value..." (not relevant to our discussion)
+- "For straightforward questions this adds no value..."
+
+EXPLORE DEEPER — Need more detail on:
+- "The synthesis prompt design..."
+
+VERIFY — Please double-check:
+- "Cost per turn is approximately $0.02..."
 
 [Your message below]
 ```
@@ -637,7 +651,9 @@ DROP — Please disregard or reconsider:
 
 - **Highlighted text** → listed under "KEEP"
 - **Struck-through text** → listed under "DROP"
-- If only highlights exist, the "DROP" section is omitted (and vice versa)
+- **Dig deeper text** → listed under "EXPLORE DEEPER"
+- **Verify text** → listed under "VERIFY"
+- Sections with no annotations of that type are omitted
 - Text is quoted verbatim from the selection
 - Selections longer than 200 characters are truncated with "..."
 - A separator line signals where the user's own message begins
@@ -648,8 +664,12 @@ DROP — Please disregard or reconsider:
 // lib/formatter.ts
 
 export function formatFeedback(annotations: Annotation[]): string {
+  if (annotations.length === 0) return '';
+
   const highlights = annotations.filter(a => a.type === 'highlight');
   const strikethroughs = annotations.filter(a => a.type === 'strikethrough');
+  const deeper = annotations.filter(a => a.type === 'deeper');
+  const verify = annotations.filter(a => a.type === 'verify');
 
   const parts: string[] = ['[Feedback on your previous response]\n'];
 
@@ -669,6 +689,22 @@ export function formatFeedback(annotations: Annotation[]): string {
     parts.push('');
   }
 
+  if (deeper.length > 0) {
+    parts.push('EXPLORE DEEPER — Need more detail on:');
+    for (const d of deeper) {
+      parts.push(`- "${truncate(d.text, 200)}"`);
+    }
+    parts.push('');
+  }
+
+  if (verify.length > 0) {
+    parts.push('VERIFY — Please double-check:');
+    for (const v of verify) {
+      parts.push(`- "${truncate(v.text, 200)}"`);
+    }
+    parts.push('');
+  }
+
   parts.push('[Your message below]');
   return parts.join('\n');
 }
@@ -678,35 +714,26 @@ export function formatFeedback(annotations: Annotation[]): string {
 
 ## 10. Extensibility
 
-### Adding V1.1 annotation types
+### Annotation type extensibility
 
-The architecture supports new annotation types with minimal changes:
+The architecture supports new annotation types with minimal changes. V1.1 added "dig deeper" and "verify" following this pattern:
 
-**1. Add to the type union:**
+**1. Type union** (`lib/types.ts`):
 ```typescript
-type: 'highlight' | 'strikethrough' | 'deeper' | 'question'
+type AnnotationType = 'highlight' | 'strikethrough' | 'deeper' | 'verify';
 ```
 
-**2. Add a toolbar button:**
-```tsx
-// AnnotationToolbar.tsx — add to the button array
-{ type: 'deeper', icon: '⤵', color: '#3b82f6', label: 'Dig deeper' }
-{ type: 'question', icon: '?', color: '#f59e0b', label: 'Verify this' }
-```
-
-**3. Add visual treatment:**
-```css
-/* annotations.css */
-.annotation-deeper { border-left: 3px solid #3b82f6; background: rgba(59, 130, 246, 0.1); }
-.annotation-question { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.1); }
-```
-
-**4. Add to the formatter:**
+**2. TYPE_CONFIG map** (`ResponseView.tsx`):
 ```typescript
-// New sections in structured feedback
-'EXPLORE DEEPER — I want to go deeper on these points:'
-'VERIFY — I'm not sure about these claims:'
+const TYPE_CONFIG: Record<AnnotationType, { tag: string; cls: string }> = {
+  highlight:     { tag: 'mark', cls: 'annotation-highlight' },
+  strikethrough: { tag: 'del',  cls: 'annotation-strikethrough' },
+  deeper:        { tag: 'mark', cls: 'annotation-deeper' },
+  verify:        { tag: 'mark', cls: 'annotation-verify' },
+};
 ```
+
+**3. Toolbar button + CSS + formatter section** — each new type gets a button in `AnnotationToolbar`, a visual treatment in `annotations.css`, an icon in `AnnotationList`, and a section in the formatter output.
 
 ### Adding new platforms
 

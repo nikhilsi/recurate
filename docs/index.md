@@ -1,6 +1,6 @@
 # Don't just chat, recurate.
 
-**Recurate** gives you annotation tools for AI conversations — highlight what matters, strikethrough what doesn't, and watch the conversation get sharper every turn.
+**Recurate** gives you annotation tools for AI conversations — highlight what matters, strikethrough what doesn't, dig deeper into what's interesting, verify what's uncertain, and watch the conversation get sharper every turn.
 
 ---
 
@@ -16,8 +16,10 @@ When the AI produces a detailed response and you agree with half, think one para
 
 **Highlight** and **strikethrough** parts of an AI response instead.
 
-- **Highlight** = "This matters. Carry this forward."
-- **Strikethrough** = "This is wrong or irrelevant. Drop it."
+- **Highlight** (green) = "This matters. Carry this forward."
+- **Strikethrough** (red) = "This is wrong or irrelevant. Drop it."
+- **Dig deeper** (blue) = "Elaborate on this. I want more detail."
+- **Verify** (amber) = "Fact-check this. I'm not sure it's right."
 
 These gestures communicate in seconds what would take paragraphs to type. The AI gets clear signal about what you valued and what you didn't, and the next response is better for it.
 
@@ -25,7 +27,7 @@ These gestures communicate in seconds what would take paragraphs to type. The AI
 
 ### Recurate Annotator — Chrome Extension
 
-A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight and strikethrough. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai and chat.com.
+A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai and chat.com.
 
 **Status:** Built and working
 

@@ -22,6 +22,14 @@ export const strikethroughs = computed(() =>
   annotations.value.filter(a => a.type === 'strikethrough')
 );
 
+export const deeperAnnotations = computed(() =>
+  annotations.value.filter(a => a.type === 'deeper')
+);
+
+export const verifyAnnotations = computed(() =>
+  annotations.value.filter(a => a.type === 'verify')
+);
+
 export const hasAnnotations = computed(() =>
   annotations.value.length > 0
 );

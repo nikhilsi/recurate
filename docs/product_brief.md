@@ -25,9 +25,9 @@ Most of the time, you don't bother. You just ask your next question and hope the
 
 ## The Idea
 
-**What if you could highlight and strikethrough parts of an AI's response?**
+**What if you could annotate parts of an AI's response?**
 
-Not type about it. Just select text and gesture: *this matters* (highlight) or *drop this* (strikethrough). The AI gets that signal on the next turn and adjusts accordingly.
+Not type about it. Just select text and gesture: *this matters* (highlight), *drop this* (strikethrough), *go deeper here* (dig deeper), or *check this* (verify). The AI gets that signal on the next turn and adjusts accordingly.
 
 That's it. That's the core insight.
 
@@ -51,11 +51,11 @@ This plays out in two phases:
 
 ### Phase 0: Recurate Annotator — Browser + Editor Extensions (ship first, ship fast)
 
-**Chrome Extension:** Works on claude.ai and chat.com. Opens a side panel, mirrors the AI's latest response, and lets you highlight/strikethrough. Annotations auto-inject as structured KEEP/DROP feedback into the platform's text box. No backend, no API keys — install and your conversations immediately get better. Built and working.
+**Chrome Extension:** Works on claude.ai and chat.com. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback into the platform's text box. No backend, no API keys — install and your conversations immediately get better. Built and working.
 
 **VS Code Extension:** The same annotation UX, built for the Claude Code terminal workflow. A sidebar that watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. You paste into Claude Code when ready. Built and working.
 
-Both extensions share the same core: Preact + Preact Signals UI, the same annotation components (ResponseView, AnnotationToolbar, AnnotationList), and the same KEEP/DROP feedback format. What differs is how they capture the AI's response (DOM extraction vs. JSONL file watching) and how they deliver feedback (text box injection vs. clipboard).
+Both extensions share the same core: Preact + Preact Signals UI, the same annotation components (ResponseView, AnnotationToolbar, AnnotationList), and the same feedback format (KEEP/DROP/EXPLORE DEEPER/VERIFY). What differs is how they capture the AI's response (DOM extraction vs. JSONL file watching) and how they deliver feedback (text box injection vs. clipboard).
 
 **This is a standalone product with a real audience.** Anyone who uses LLMs for more than casual questions would benefit.
 
@@ -89,18 +89,18 @@ A few questions I'm noodling on that are very much in your wheelhouse:
 
 2. **Fast path vs. power path balance.** The design lets users either just keep chatting (fast path, no annotation) or pause to annotate before continuing (power path). Is that the right UX, or does the option to annotate create decision fatigue? Should annotation be more ambient/passive?
 
-3. **The annotation vocabulary.** We're starting with highlight and strikethrough as the foundation. But there's a richer palette we're considering — and I'm genuinely unsure which of these are essential from day one vs. later additions:
+3. **The annotation vocabulary.** We started with highlight and strikethrough as the foundation and have since added dig deeper and verify. But there's a richer palette we're considering:
 
-   - **Highlight** — "This matters, carry it forward" (definitely V1)
-   - **Strikethrough** — "This is wrong or irrelevant, drop it" (definitely V1)
-   - **"Dig deeper" marker** — "I want the next turn to explore this specific point further"
-   - **"Question" marker** — "I'm not sure this is right, flag it for verification"
+   - **Highlight** — "This matters, carry it forward" (shipped)
+   - **Strikethrough** — "This is wrong or irrelevant, drop it" (shipped)
+   - **"Dig deeper" marker** — "I want the next turn to explore this specific point further" (shipped)
+   - **"Verify" marker** — "I'm not sure this is right, flag it for verification" (shipped)
    - **"Star" or "Pin"** — "This is a key insight that should persist across many turns, not just the next one"
    - **Cross-model linking** (Roundtable only) — "Claude's point here connects to GPT's point there"
    - **Priority ranking** — If I highlight multiple things, let me rank which matters most
    - **Inline comment** — A lightweight "why" note attached to an annotation — more than a gesture, less than a paragraph
 
-   My instinct says highlight and strikethrough alone might feel too blunt — like having a pen that only writes in two colors. But every gesture we add is a UX decision the user has to make, which adds friction. Where's the sweet spot?
+   Four gestures feels like the right balance — expressive enough to capture nuance, simple enough to not create decision fatigue. Every gesture we add beyond this is a UX decision the user has to make, which adds friction.
 
 4. **Who is the actual user?** I'm designing for myself — someone who has long, strategic, multi-turn conversations with LLMs. Is that a big enough audience, or does this need to work for more casual use cases too?
 

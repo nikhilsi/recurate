@@ -5,16 +5,18 @@ interface Props {
   hasOverlap: boolean;
   onHighlight: () => void;
   onStrikethrough: () => void;
+  onDeeper: () => void;
+  onVerify: () => void;
   onClear: () => void;
   onDismiss: () => void;
 }
 
-export function AnnotationToolbar({ rect, hasOverlap, onHighlight, onStrikethrough, onClear, onDismiss }: Props) {
+export function AnnotationToolbar({ rect, hasOverlap, onHighlight, onStrikethrough, onDeeper, onVerify, onClear, onDismiss }: Props) {
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   // Position: above the selection, centered horizontally
   const toolbarHeight = 40;
-  const toolbarWidth = hasOverlap ? 130 : 90;
+  const toolbarWidth = hasOverlap ? 210 : 170;
   let top = rect.top - toolbarHeight - 8;
   let left = rect.left + rect.width / 2 - toolbarWidth / 2;
 
@@ -66,6 +68,20 @@ export function AnnotationToolbar({ rect, hasOverlap, onHighlight, onStrikethrou
         title="Strikethrough — drop this"
       >
         ✗
+      </button>
+      <button
+        class="toolbar-btn toolbar-btn-deeper"
+        onClick={onDeeper}
+        title="Dig deeper — need more detail"
+      >
+        ⤵
+      </button>
+      <button
+        class="toolbar-btn toolbar-btn-verify"
+        onClick={onVerify}
+        title="Verify — double-check this"
+      >
+        ?
       </button>
       {hasOverlap && (
         <button

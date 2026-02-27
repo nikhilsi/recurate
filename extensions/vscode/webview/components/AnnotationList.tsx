@@ -1,10 +1,15 @@
 import { useSignal } from '@preact/signals';
-import { annotations, highlights, strikethroughs, removeAnnotation, clearAnnotations } from '../state/annotations';
+import { annotations, highlights, strikethroughs, deeperAnnotations, verifyAnnotations, removeAnnotation, clearAnnotations } from '../state/annotations';
+import type { AnnotationType } from '../../shared/types';
 
 function truncate(text: string, length: number): string {
   if (text.length <= length) return text;
   return text.slice(0, length).trimEnd() + '...';
 }
+
+const TYPE_ICON: Record<AnnotationType, string> = {
+  highlight: '✓', strikethrough: '✗', deeper: '⤵', verify: '?',
+};
 
 function scrollToAnnotation(id: string) {
   const el = document.querySelector(`[data-annotation-id="${id}"]`);
@@ -18,10 +23,14 @@ export function AnnotationList() {
 
   const hCount = highlights.value.length;
   const sCount = strikethroughs.value.length;
+  const dCount = deeperAnnotations.value.length;
+  const vCount = verifyAnnotations.value.length;
 
   const summaryParts: string[] = [];
   if (hCount > 0) summaryParts.push(`${hCount} highlight${hCount !== 1 ? 's' : ''}`);
   if (sCount > 0) summaryParts.push(`${sCount} strikethrough${sCount !== 1 ? 's' : ''}`);
+  if (dCount > 0) summaryParts.push(`${dCount} explore${dCount !== 1 ? 's' : ''}`);
+  if (vCount > 0) summaryParts.push(`${vCount} verif${vCount !== 1 ? 'ies' : 'y'}`);
 
   return (
     <div class="annotation-list">
@@ -54,7 +63,7 @@ export function AnnotationList() {
               onClick={() => scrollToAnnotation(ann.id)}
             >
               <span class="annotation-item-icon">
-                {ann.type === 'highlight' ? '✓' : '✗'}
+                {TYPE_ICON[ann.type]}
               </span>
               <span class="annotation-item-text">
                 {truncate(ann.text, 80)}

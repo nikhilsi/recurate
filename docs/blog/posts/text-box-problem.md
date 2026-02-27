@@ -37,12 +37,14 @@ The result? Most people don't bother giving detailed feedback. They just ask the
 
 ## What If You Could Just Highlight?
 
-Imagine this instead: the AI gives you a response, and before you type your next message, you can **highlight** the parts that matter and **strikethrough** the parts that don't.
+Imagine this instead: the AI gives you a response, and before you type your next message, you can **annotate** the parts that matter.
 
-That's it. No typing required. Just select and gesture.
+No typing required. Just select and gesture.
 
-- A highlight says: *"This is the insight. Carry this forward. Go deeper here."*
-- A strikethrough says: *"This is wrong, irrelevant, or unhelpful. Drop it."*
+- A **highlight** says: *"This is the insight. Carry this forward."*
+- A **strikethrough** says: *"This is wrong, irrelevant, or unhelpful. Drop it."*
+- A **dig deeper** marker says: *"Elaborate on this. I want more detail here."*
+- A **verify** marker says: *"I'm not sure this is right. Fact-check it."*
 - Everything else is implicitly acknowledged but not prioritized.
 
 The AI receives these signals and adjusts. The next response is better — not because you wrote a paragraph explaining what you wanted, but because you *curated* the previous response in seconds.
@@ -79,9 +81,9 @@ Maybe it's because annotation feels like a "small" UX improvement compared to a 
 
 We're building **Recurate** — tools that let you curate AI conversations instead of just chatting through them.
 
-We've built a **Chrome extension** that works on claude.ai and ChatGPT. It adds a side panel where you can annotate the AI's response — annotations auto-inject as structured feedback into the platform's text box. No backend, no API keys — just install and your conversations get better.
+We've built a **Chrome extension** that works on claude.ai and ChatGPT. It adds a side panel where you can annotate the AI's response — highlight, strikethrough, dig deeper, verify — and annotations auto-inject as structured feedback into the platform's text box. No backend, no API keys — just install and your conversations get better.
 
-We've also built a **VS Code extension** for the Claude Code terminal workflow. Same annotation UX, but it watches Claude Code's conversation files and auto-copies feedback to your clipboard. If you spend your day in VS Code with Claude Code, this is where annotation meets your actual workflow.
+We've also built a **VS Code extension** for the Claude Code terminal workflow. Same annotation UX with all four gesture types, but it watches Claude Code's conversation files and auto-copies feedback to your clipboard. If you spend your day in VS Code with Claude Code, this is where annotation meets your actual workflow.
 
 Next up is a **multi-model platform** where you can ask questions across multiple AIs simultaneously and curate across all of them, building a shared conversation that's richer than any single model could produce.
 

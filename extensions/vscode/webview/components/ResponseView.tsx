@@ -4,6 +4,13 @@ import { currentResponse, annotations, addAnnotation, removeAnnotation } from '.
 import { AnnotationToolbar } from './AnnotationToolbar';
 import type { Annotation, AnnotationType } from '../../shared/types';
 
+const TYPE_CONFIG: Record<AnnotationType, { tag: string; cls: string }> = {
+  highlight:     { tag: 'mark', cls: 'annotation-highlight' },
+  strikethrough: { tag: 'del',  cls: 'annotation-strikethrough' },
+  deeper:        { tag: 'mark', cls: 'annotation-deeper' },
+  verify:        { tag: 'mark', cls: 'annotation-verify' },
+};
+
 interface SelectionInfo {
   text: string;
   startOffset: number;
@@ -54,8 +61,7 @@ function applyAnnotationsToDOM(container: HTMLElement, annotationList: Annotatio
   const sorted = [...annotationList].sort((a, b) => b.startOffset - a.startOffset);
 
   for (const ann of sorted) {
-    const tagName = ann.type === 'highlight' ? 'mark' : 'del';
-    const cls = ann.type === 'highlight' ? 'annotation-highlight' : 'annotation-strikethrough';
+    const { tag: tagName, cls } = TYPE_CONFIG[ann.type];
 
     // Find and wrap overlapping text nodes (reverse order for safe DOM modification)
     for (let i = textNodes.length - 1; i >= 0; i--) {
@@ -201,6 +207,8 @@ export function ResponseView() {
           hasOverlap={!!selectionInfo.value.overlapsAnnotationId}
           onHighlight={() => handleAnnotate('highlight')}
           onStrikethrough={() => handleAnnotate('strikethrough')}
+          onDeeper={() => handleAnnotate('deeper')}
+          onVerify={() => handleAnnotate('verify')}
           onClear={handleClear}
           onDismiss={handleDismiss}
         />

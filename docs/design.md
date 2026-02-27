@@ -67,7 +67,7 @@ The vision is delivered through two products, built in sequence, sharing a commo
 
 Extensions that add annotation tools to existing AI workflows. Both share the same core UI (Preact + Preact Signals) and annotation components, but differ in how they capture AI output and deliver feedback.
 
-**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users highlight/strikethrough. Structured KEEP/DROP feedback auto-injects into the platform's text box. Works on claude.ai and chat.com. **Built and working.**
+**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users annotate (highlight, strikethrough, dig deeper, verify). Structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback auto-injects into the platform's text box. Works on claude.ai and chat.com. **Built and working.**
 
 **VS Code Extension** — A sidebar for the Claude Code terminal workflow. Watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. User pastes into Claude Code when ready. **Built and working.**
 
@@ -107,7 +107,7 @@ The Recurate Annotator ships as two extensions sharing the same annotation UX: a
 
 ### 3.1 Core Concept (Chrome Extension)
 
-A Chrome extension that opens a **side panel** when the user is on a supported LLM chat site. The side panel displays the most recent AI response and provides annotation tools (highlight and strikethrough). When annotations are complete and the user composes their next message, the extension generates structured feedback text and injects it into the platform's text input box.
+A Chrome extension that opens a **side panel** when the user is on a supported LLM chat site. The side panel displays the most recent AI response and provides annotation tools (highlight, strikethrough, dig deeper, and verify). The extension generates structured feedback text and proactively injects it into the platform's text input box.
 
 ### 3.2 Why Side Panel (Not DOM Injection)
 
@@ -139,8 +139,10 @@ Additional platforms can be added by creating a new platform module (`lib/platfo
 2. User clicks the extension icon or the side panel auto-opens
 3. Side panel displays the most recent AI response
 4. User annotates:
-   - **Highlight** portions they want to emphasize / carry forward / explore further
-   - **Strikethrough** portions they want to discard / disagree with / de-emphasize
+   - **Highlight** (green) — carry forward, this matters
+   - **Strikethrough** (red) — discard, this is wrong or irrelevant
+   - **Dig deeper** (blue) — elaborate on this point
+   - **Verify** (amber) — fact-check this claim
    - Unannotated text is treated as neutral / acknowledged but not prioritized
 5. User composes their next question in the platform's native text box
 6. The extension generates structured annotation text and proactively injects it into the platform's text box, formatted as:
@@ -152,8 +154,13 @@ KEEP — I found these points valuable:
 - "Token cost is approximately 2.5-3x, not the naive 4x..."
 
 DROP — Please disregard or reconsider:
-- "The UI is a solved problem..." (I think the UI design matters more than suggested)
-- "For straightforward questions this adds no value..." (not relevant to our current discussion)
+- "For straightforward questions this adds no value..."
+
+EXPLORE DEEPER — Need more detail on:
+- "The synthesis prompt design..."
+
+VERIFY — Please double-check:
+- "Cost per turn is approximately $0.02..."
 
 [My question]
 Given the architecture we've discussed, what about latency optimization strategies?
@@ -188,7 +195,7 @@ extensions/chrome/
 │   └── chatgpt.content.ts     (content script for chat.com)
 ├── lib/
 │   ├── types.ts               (shared TypeScript types)
-│   ├── formatter.ts           (annotations → KEEP/DROP feedback text)
+│   ├── formatter.ts           (annotations → KEEP/DROP/EXPLORE DEEPER/VERIFY feedback text)
 │   └── platforms/             (per-platform DOM selectors and extraction)
 │       ├── claude.ts
 │       └── chatgpt.ts
@@ -213,7 +220,7 @@ extensions/vscode/
 │   └── state/annotations.ts  (Preact Signals state + response history)
 ├── shared/                    (shared between host and webview)
 │   ├── types.ts               (TypeScript types)
-│   └── formatter.ts           (KEEP/DROP feedback formatter)
+│   └── formatter.ts           (KEEP/DROP/EXPLORE DEEPER/VERIFY feedback formatter)
 └── dist/                      (build output)
 ```
 
@@ -303,11 +310,13 @@ Today, across every LLM chat interface, the only input mechanism is a text box. 
 
 The annotation mechanism provides fast, intuitive, non-verbal feedback:
 
-- **Highlight** = "This matters. Carry this forward. Go deeper here."
-- **Strikethrough** = "This is wrong, irrelevant, or unhelpful. Drop it."
+- **Highlight** (green) = "This matters. Carry this forward."
+- **Strikethrough** (red) = "This is wrong, irrelevant, or unhelpful. Drop it."
+- **Dig deeper** (blue) = "Elaborate on this. I want more detail."
+- **Verify** (amber) = "Fact-check this. I'm not sure it's right."
 - **No annotation** = "This is fine but not noteworthy."
 
-These gestures communicate in seconds what would take paragraphs to type. A highlight on a single sentence says "this is the insight" without requiring the user to articulate why. A strikethrough says "ignore this" without a written rebuttal.
+These gestures communicate in seconds what would take paragraphs to type. A highlight on a single sentence says "this is the insight" without requiring the user to articulate why. A strikethrough says "ignore this" without a written rebuttal. A dig deeper marker says "explore this further" without a paragraph of follow-up questions. A verify marker says "I'm skeptical" without explaining why.
 
 **This creates a fundamentally different and faster communication channel between human and AI.**
 
@@ -352,7 +361,7 @@ In the Roundtable platform specifically, the turn flow incorporates annotation a
 
 1. **Responses arrive → Auto-synthesis runs immediately.** The user is not waiting — they get a synthesized view right away as a starting point. This is the auto-synthesis.
 
-2. **User reviews and (optionally) annotates.** They can highlight/strikethrough across any of the individual model responses or the synthesis itself.
+2. **User reviews and (optionally) annotates.** They can annotate (highlight, strikethrough, dig deeper, verify) across any of the individual model responses or the synthesis itself.
 
 3. **Fork:**
    - (a) User asks their next question without annotating → auto-synthesis becomes the CC for the next turn
@@ -366,25 +375,26 @@ Must be genuinely intelligent. It has no user guidance, so it must infer from th
 **User-refined synthesis (runs after annotation):**
 A much simpler problem. The user has explicitly signaled what matters (highlights) and what doesn't (strikethroughs). The prompt can be straightforward: "Given these highlighted sections (high priority) and these struck-through sections (exclude), produce an updated summary of the conversation so far." The synthesis just needs to be obedient to user signals.
 
-### 5.8 Annotation Gestures — MVP
+### 5.8 Annotation Gestures — Current
 
-For V1 of both products:
-- **Highlight:** Text selection-based. User selects text, a floating toolbar appears with a "highlight" button. Highlighted text is visually marked (e.g., yellow background).
-- **Strikethrough:** Same selection mechanism, "strikethrough" button. Text is visually struck through (e.g., faded with a line through it).
-- **Undo:** Click on any annotation to remove it.
+Four gestures are shipped in both extensions:
+
+- **Highlight** (green, ✓): User selects text, floating toolbar appears, clicks highlight. Text gets a green background and left border. Mapped to KEEP in feedback.
+- **Strikethrough** (red, ✗): Same selection mechanism. Text is visually struck through with reduced opacity. Mapped to DROP in feedback.
+- **Dig deeper** (blue, ⤵): Same selection mechanism. Text gets a blue background and left border. Mapped to EXPLORE DEEPER in feedback.
+- **Verify** (amber, ?): Same selection mechanism. Text gets an amber background and left border. Mapped to VERIFY in feedback.
+- **Undo:** Click on any annotated text to remove it, or use the clear button in the toolbar/annotation list.
 
 **Key UX requirement: Annotation must be faster than typing.** If it takes more effort to annotate than to write a text message explaining the same reaction, users won't use it. The entire value proposition depends on this being a fast, low-friction interaction.
 
-### 5.9 Potential Future Annotation Gestures (V2+)
+### 5.9 Potential Future Annotation Gestures
 
-The highlight/strikethrough model is the MVP. But the concept opens up richer possibilities:
+The four-gesture model covers the core use cases. Richer possibilities remain:
 
-- **"Dig deeper" marker:** Signal that the user wants the next turn to explore this specific point further
-- **"Question" marker:** Flag something as uncertain or needing verification
 - **"Star" or "Pin":** Mark something as a key insight that should persist across many turns (not just the next one)
 - **Cross-model linking (Roundtable only):** "Claude's point here connects to GPT's point there" — explicitly linking insights across models
 - **Priority ranking:** If multiple highlights exist, allowing the user to rank which matters most
-- **Inline comments:** A lightweight "why" note attached to a highlight or strikethrough — more than a gesture, less than a paragraph
+- **Inline comments:** A lightweight "why" note attached to an annotation — more than a gesture, less than a paragraph
 
 These illustrate the design space that opens up once you move beyond text-box-only input.
 
@@ -614,7 +624,7 @@ Annotation
   - id (UUID)
   - turn_id (FK)
   - model_response_id (FK, nullable — null if annotating the synthesis)
-  - annotation_type (enum: highlight, strikethrough)
+  - annotation_type (enum: highlight, strikethrough, deeper, verify)
   - start_offset (int — character offset in the response text)
   - end_offset (int)
   - annotated_text (text — the selected text, for display and synthesis input)
@@ -721,7 +731,7 @@ Two things are novel in this design:
 
 1. **Cross-model Condensed Context:** A rolling, synthesized summary that captures what all models said and feeds it back into all models on subsequent turns. No existing tool does this. The CC is not just a summary — it's a structured memory artifact that improves with each turn.
 
-2. **User annotation of LLM responses:** Non-verbal, gestural feedback (highlight/strikethrough) that shapes what gets carried forward in the conversation. No major LLM interface or multi-LLM tool offers this. This concept is valuable even in single-model conversations (hence the Chrome Extension as a standalone product).
+2. **User annotation of LLM responses:** Non-verbal, gestural feedback (highlight, strikethrough, dig deeper, verify) that shapes what gets carried forward in the conversation. No major LLM interface or multi-LLM tool offers this. This concept is valuable even in single-model conversations (hence the Chrome Extension as a standalone product).
 
 ---
 
@@ -761,7 +771,7 @@ Two things are novel in this design:
 
 ### 11.3 Shared Design Language
 
-All products use the same annotation UX patterns (highlight = green emphasis, strikethrough = red + line through) and the same KEEP/DROP feedback format. The Chrome and VS Code extensions share ~70% of their UI code — the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), the same Signals-based state management, and the same CSS. If a user moves between the browser and VS Code, the annotation experience is identical.
+All products use the same annotation UX patterns (highlight = green, strikethrough = red, dig deeper = blue, verify = amber) and the same KEEP/DROP/EXPLORE DEEPER/VERIFY feedback format. The Chrome and VS Code extensions share ~70% of their UI code — the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), the same Signals-based state management, and the same CSS. If a user moves between the browser and VS Code, the annotation experience is identical.
 
 ---
 
@@ -775,8 +785,8 @@ All products use the same annotation UX patterns (highlight = green emphasis, st
 | 2 | **Synthesis model selection** | Cheap model, frontier model, rotating, or Anthropic Compaction API? See Section 6.4 |
 | 3 | **Auto-synthesis prompt** | The harder prompt — must infer consensus, tensions, insights without user guidance |
 | 4 | **User-refined synthesis prompt** | Easier — follows user annotation signals. But format of annotation input needs definition |
-| 5 | ~~**Annotation UX design**~~ | **Resolved.** Built and working in both extensions. Text selection → floating toolbar (highlight/strikethrough/clear) → DOM overlay with `<mark>`/`<del>` wrappers. Faster than typing. |
-| 6 | **Annotation → synthesis translation** | How do highlights and strikethroughs get represented in the synthesis prompt? Quoted text with labels? Structured JSON? |
+| 5 | ~~**Annotation UX design**~~ | **Resolved.** Built and working in both extensions. Text selection → floating toolbar (✓/✗/⤵/?/↺) → DOM overlay with `<mark>`/`<del>` wrappers. Four gesture types: highlight, strikethrough, dig deeper, verify. |
+| 6 | **Annotation → synthesis translation** | How do annotations get represented in the synthesis prompt? Quoted text with labels? Structured JSON? |
 
 ### 12.2 Important (Resolve during implementation)
 
@@ -792,7 +802,7 @@ All products use the same annotation UX patterns (highlight = green emphasis, st
 | # | Item | Notes |
 |---|------|-------|
 | 11 | **Recovering context from prior conversations** | Importing context from other platforms |
-| 12 | **Richer annotation gestures** | Dig deeper, question, star/pin, cross-model linking, priority ranking |
+| 12 | **Richer annotation gestures** | Star/pin, cross-model linking, priority ranking, inline comments |
 | 13 | **Mobile interface** | Not a V1 concern — serious conversations happen on desktop |
 | 14 | **Sharing conversations** | Collaboration features |
 | 15 | **Analytics** | Model agreement/disagreement patterns over time |
@@ -816,7 +826,7 @@ All products use the same annotation UX patterns (highlight = green emphasis, st
 **Chrome Extension — Built and working.**
 
 - Side panel annotation on claude.ai and chat.com
-- Highlight and strikethrough with floating toolbar
+- Four annotation gestures: highlight, strikethrough, dig deeper, verify
 - Proactive feedback auto-injection into platform text box
 - No backend, no API keys, fully client-side
 - Tech: WXT, Preact, Preact Signals, TypeScript, Vite
@@ -881,7 +891,7 @@ All products use the same annotation UX patterns (highlight = green emphasis, st
 | 10 | **Brand name: Recurate (recurate.ai)** | "Curate" is the base word — exactly what the user does (curating AI responses through annotation). "Re-curate" is the action — every turn, the conversation gets re-curated. Unique, ownable, pronounceable, elevated. Works for both the Chrome extension (Recurate Annotator) and the platform (Recurate Roundtable). Tagline: "Don't just chat, recurate." |
 | 11 | **VS Code extension for Claude Code** | Claude Code users work in the terminal, not the web UI. The JSONL file watcher approach captures assistant text responses without any unstable APIs. Clipboard-based feedback delivery (vs. terminal injection) is the safe V1 — no risk of disrupting an active session. |
 | 12 | **JSONL file watching (not terminal API)** | Claude Code saves conversations to `~/.claude/projects/<encoded-path>/<session-id>.jsonl`. Watching these files is reliable and stable. The VS Code terminal API (`onDidWriteTerminalData`) is proposed/unstable and wouldn't give structured message data. Hooks capture tool events, not text responses. |
-| 13 | **Shared UI components across extensions** | Both extensions use the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), same Signals state, same CSS, same KEEP/DROP formatter. Only the messaging layer and data source differ. This ensures consistent UX and reduces maintenance. |
+| 13 | **Shared UI components across extensions** | Both extensions use the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), same Signals state, same CSS, same KEEP/DROP/EXPLORE DEEPER/VERIFY formatter. Only the messaging layer and data source differ. This ensures consistent UX and reduces maintenance. |
 | 14 | **Auto-copy to clipboard** | VS Code extension copies formatted feedback to clipboard on every annotation change. No explicit "copy" action needed — the clipboard always has the latest feedback. User pastes into Claude Code when ready. Reduces friction to near-zero. |
 | 15 | **Response history (last 5)** | VS Code extension keeps the last 5 assistant responses with back/forward navigation. Unlike the Chrome extension (which gets a new response on every AI turn), the VS Code sidebar may be opened after several responses have passed. History lets users annotate any recent response. |
 | 16 | **WEBVIEW_READY handshake** | VS Code destroys webviews when the sidebar is hidden. The WEBVIEW_READY pattern (webview signals when mounted, extension re-sends state) ensures the sidebar always restores correctly, even after tab switching. |
