@@ -142,16 +142,16 @@ Additional platforms can be added by creating a new platform module (`lib/platfo
    - **Highlight** portions they want to emphasize / carry forward / explore further
    - **Strikethrough** portions they want to discard / disagree with / de-emphasize
    - Unannotated text is treated as neutral / acknowledged but not prioritized
-5. User composes their next question in the side panel (or in the platform's native text box)
-6. The extension generates structured annotation text and injects it into the platform's text box, formatted as:
+5. User composes their next question in the platform's native text box
+6. The extension generates structured annotation text and proactively injects it into the platform's text box, formatted as:
 
 ```
 [Feedback on your previous response]
-EMPHASIZED — I found these points particularly valuable:
+KEEP — I found these points valuable:
 - "The stateless API approach eliminates complexity of managing separate threads..."
 - "Token cost is approximately 2.5-3x, not the naive 4x..."
 
-DISAGREE/DISCARD — Please disregard or reconsider these points:
+DROP — Please disregard or reconsider:
 - "The UI is a solved problem..." (I think the UI design matters more than suggested)
 - "For straightforward questions this adds no value..." (not relevant to our current discussion)
 

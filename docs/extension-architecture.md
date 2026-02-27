@@ -208,7 +208,6 @@ type Theme = 'light' | 'dark';
 
 // Message types for chrome.runtime messaging
 type ExtensionMessage =
-  | { type: 'RESPONSE_STREAMING'; html: string; messageId: string }
   | { type: 'RESPONSE_READY'; html: string; text: string; messageId: string }
   | { type: 'INJECT_FEEDBACK'; feedback: string }
   | { type: 'PENDING_FEEDBACK'; feedback: string | null }
