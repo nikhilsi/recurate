@@ -97,13 +97,15 @@
 - STORE_LISTING.md has all field values for reference
 - Build output: Chrome 105 KB
 
-### Marketplace Prep (VS Code — Ready for Publishing)
-- VS Code: README rewritten for marketplace (problem-first), package.json polished (categories, keywords, activation), .vscodeignore (VSIX 258 KB → 40 KB)
-- Build output: VS Code VSIX 40 KB
+### VS Code Marketplace (Submitted, Verifying)
+- Publisher account created: `recurate`
+- .vsix uploaded (41 KB), automated verification in progress
+- README serves as marketplace page (problem-first, gesture list, how it works)
+- package.json metadata: categories, keywords, repository, homepage, activation
 
 ### Not Yet Built
-- VS Code Marketplace publisher account + submission
 - Blog posts scheduled and shared on LinkedIn
+- Update recurate.ai with install links
 - Settings/config page (deferred to V1.2)
 - Platform (Roundtable) — design phase only
 

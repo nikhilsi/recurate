@@ -10,23 +10,21 @@
 
 ---
 
-## Next Up: Publish VS Code Extension
-
-### VS Code Extension
-- [ ] Publisher account on VS Code Marketplace (publisher name: `"recurate"`)
-- [ ] Screenshots showing annotation flow
-- [ ] Publish to VS Code Marketplace
+## Next Up: Go Live + Blog Posts
 
 ### Chrome Extension — Submitted, Awaiting Review
-- [x] Screenshots showing all 4 annotation gestures
-- [x] Chrome Web Store developer account ($5 fee)
-- [x] Privacy practices (permissions justifications, single purpose, data certification)
-- [x] Submitted for review (typically 1-3 business days)
+- [x] Submitted for review (Feb 27, 2026) — typically 1-3 business days
 - [ ] Receive approval and go live
 
+### VS Code Extension — Submitted, Verifying
+- [x] Publisher account created (publisher: `recurate`)
+- [x] .vsix packaged and uploaded (41 KB)
+- [ ] Verification completes and goes live
+
 ### Post-Publish
-- [ ] Update recurate.ai with install links and screenshots
-- [ ] Blog posts: schedule and share on LinkedIn
+- [ ] Update recurate.ai with install links
+- [ ] Schedule and share blog posts on LinkedIn
+- [ ] Second blog post: finalize and publish "20+ Tools, Zero Curation"
 
 ---
 

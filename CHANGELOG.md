@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - STORE_LISTING.md expanded with privacy practices, permission justifications, and submission steps
 - Mermaid diagram support enabled in mkdocs.yml
 - Second blog post drafted: "I Found 20+ Multi-Model AI Tools. None of Them Let You Curate." (not yet published)
+- **VS Code Marketplace submission** — publisher account (`recurate`), .vsix uploaded and verifying
 
 ### Changed
 - Manifest description shortened to 116 chars (Chrome Web Store 132-char limit)
