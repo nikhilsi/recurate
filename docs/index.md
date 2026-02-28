@@ -29,13 +29,13 @@ These gestures communicate in seconds what would take paragraphs to type. The AI
 
 A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai and chat.com.
 
-**Status:** Built and working
+**Status:** Submitted to Chrome Web Store, awaiting review
 
 ### Recurate Annotator — VS Code Extension
 
 The same annotation UX, built for the Claude Code terminal workflow. A VS Code sidebar that watches Claude Code's conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to your clipboard. You paste it into Claude Code when you're ready.
 
-**Status:** Built and working
+[Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode){ .md-button .md-button--primary }
 
 ### Recurate Roundtable — Multi-LLM Platform
 
