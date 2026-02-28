@@ -7,3 +7,5 @@ dist/
 .DS_Store
 .output/
 .wxt/
+*.zip
+*.vsix
