@@ -1,12 +1,12 @@
 # Current State
 
 ---
-**Last Updated**: February 21, 2026
+**Last Updated**: February 27, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Extension Testing & Multi-Platform | **Status**: Chrome extension working on claude.ai + ChatGPT, VS Code extension working, preparing for packaging & shipping
+**Phase**: Package & Ship | **Status**: Chrome extension submitted to Chrome Web Store (awaiting review), VS Code extension ready to publish
 
 ---
 
@@ -88,17 +88,23 @@
 - Site: SVG logo in header, 32px PNG favicon, 1200x630 social card PNG
 - Generation scripts: `scripts/generate-icons.mjs`, `scripts/generate-social-card.mjs` (sharp)
 
-### Marketplace Prep (Ready for Publishing)
+### Chrome Web Store (Submitted)
+- Developer account created, $5 fee paid
+- Store listing complete: short description, detailed description, category (Tools), language (English)
+- Screenshots: 2x 1280x800 PNG showing all 4 annotation gestures on claude.ai
+- Privacy practices: single purpose, permission justifications (activeTab, sidePanel, host, remote code), data certification
+- Submitted for review (Feb 27, 2026) — typically 1-3 business days
+- STORE_LISTING.md has all field values for reference
+- Build output: Chrome 105 KB
+
+### Marketplace Prep (VS Code — Ready for Publishing)
 - VS Code: README rewritten for marketplace (problem-first), package.json polished (categories, keywords, activation), .vscodeignore (VSIX 258 KB → 40 KB)
-- Chrome: store listing drafted (STORE_LISTING.md — short + detailed descriptions), manifest description rewritten for discoverability
-- Chrome: code polished — empty state mentions ChatGPT, platform-agnostic status label, dead code removed
-- Build output: Chrome 100 KB, VS Code VSIX 40 KB
+- Build output: VS Code VSIX 40 KB
 
 ### Not Yet Built
-- Chrome Web Store account + submission
 - VS Code Marketplace publisher account + submission
-- Screenshots and demo video
-- Settings/config page (deferred to V1.1)
+- Blog posts scheduled and shared on LinkedIn
+- Settings/config page (deferred to V1.2)
 - Platform (Roundtable) — design phase only
 
 ---

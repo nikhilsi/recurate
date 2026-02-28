@@ -10,21 +10,23 @@
 
 ---
 
-## Next Up: Publish Both Extensions
+## Next Up: Publish VS Code Extension
 
 ### VS Code Extension
 - [ ] Publisher account on VS Code Marketplace (publisher name: `"recurate"`)
 - [ ] Screenshots showing annotation flow
 - [ ] Publish to VS Code Marketplace
 
-### Chrome Extension
-- [ ] Screenshots showing before/after annotation quality
-- [ ] Chrome Web Store developer account
-- [ ] Review and submit to Chrome Web Store
+### Chrome Extension — Submitted, Awaiting Review
+- [x] Screenshots showing all 4 annotation gestures
+- [x] Chrome Web Store developer account ($5 fee)
+- [x] Privacy practices (permissions justifications, single purpose, data certification)
+- [x] Submitted for review (typically 1-3 business days)
+- [ ] Receive approval and go live
 
 ### Post-Publish
 - [ ] Update recurate.ai with install links and screenshots
-- [ ] Test on multiple claude.ai and ChatGPT conversations
+- [ ] Blog posts: schedule and share on LinkedIn
 
 ---
 

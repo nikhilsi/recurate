@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.9.0] - 2026-02-27
+
+### Added
+- **Chrome Web Store submission** — developer account, store listing, screenshots, privacy practices, submitted for review
+- Updated screenshots (1280x800) showing all 4 annotation gestures
+- STORE_LISTING.md expanded with privacy practices, permission justifications, and submission steps
+- Mermaid diagram support enabled in mkdocs.yml
+- Second blog post drafted: "I Found 20+ Multi-Model AI Tools. None of Them Let You Curate." (not yet published)
+
+### Changed
+- Manifest description shortened to 116 chars (Chrome Web Store 132-char limit)
+- .gitignore updated: added *.zip and *.vsix
+
+---
+
 ## [0.8.0] - 2026-02-27
 
 ### Added
