@@ -29,7 +29,7 @@ These gestures communicate in seconds what would take paragraphs to type. The AI
 
 A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai and chat.com.
 
-**Status:** Submitted to Chrome Web Store, awaiting review
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm){ .md-button .md-button--primary }
 
 ### Recurate Annotator — VS Code Extension
 

@@ -4,15 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [0.9.0] - 2026-02-27
+## [0.9.0] - 2026-03-02
 
 ### Added
-- **Chrome Web Store submission** — developer account, store listing, screenshots, privacy practices, submitted for review
-- Updated screenshots (1280x800) showing all 4 annotation gestures
-- STORE_LISTING.md expanded with privacy practices, permission justifications, and submission steps
+- **Chrome Web Store** — published: [Install link](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm)
+- **VS Code Marketplace** — published: [Install link](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
+- Developer accounts created for both stores
+- Chrome store listing, screenshots (1280x800), privacy practices, permission justifications
+- STORE_LISTING.md expanded with all submission fields and steps
 - Mermaid diagram support enabled in mkdocs.yml
 - Second blog post drafted: "I Found 20+ Multi-Model AI Tools. None of Them Let You Curate." (not yet published)
-- **VS Code Marketplace submission** — publisher account (`recurate`), .vsix uploaded and verifying
+- Install links added to recurate.ai, README.md
 
 ### Changed
 - Manifest description shortened to 116 chars (Chrome Web Store 132-char limit)

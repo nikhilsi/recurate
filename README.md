@@ -42,7 +42,7 @@ A lightweight Chrome extension that adds annotation tools to AI chat interfaces.
 - Annotations auto-inject into the text box — zero-click feedback
 - Works with light and dark themes
 
-**Status:** Working end-to-end on claude.ai and ChatGPT
+**Status:** Published — [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm)
 
 ### Recurate Annotator — VS Code Extension
 
@@ -53,7 +53,7 @@ Annotate **Claude Code** responses directly in VS Code. Same annotation UX, buil
 - Annotate → feedback auto-copied to clipboard → paste into Claude Code
 - Last 5 responses available with back/forward navigation
 
-**Status:** Working end-to-end, installed via .vsix
+**Status:** Published — [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
 
 ### Recurate Roundtable — Multi-LLM Platform (Future)
 

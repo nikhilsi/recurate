@@ -1,12 +1,12 @@
 # Current State
 
 ---
-**Last Updated**: February 27, 2026
+**Last Updated**: March 2, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Package & Ship | **Status**: Chrome extension submitted to Chrome Web Store (awaiting review), VS Code extension ready to publish
+**Phase**: Published & Promoting | **Status**: Both extensions live — Chrome Web Store + VS Code Marketplace
 
 ---
 
@@ -88,24 +88,22 @@
 - Site: SVG logo in header, 32px PNG favicon, 1200x630 social card PNG
 - Generation scripts: `scripts/generate-icons.mjs`, `scripts/generate-social-card.mjs` (sharp)
 
-### Chrome Web Store (Submitted)
-- Developer account created, $5 fee paid
-- Store listing complete: short description, detailed description, category (Tools), language (English)
+### Chrome Web Store (Published)
+- [Install link](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm)
+- Store listing: short description, detailed description, category (Tools), language (English)
 - Screenshots: 2x 1280x800 PNG showing all 4 annotation gestures on claude.ai
-- Privacy practices: single purpose, permission justifications (activeTab, sidePanel, host, remote code), data certification
-- Submitted for review (Feb 27, 2026) — typically 1-3 business days
+- Privacy practices: single purpose, permission justifications, data certification
 - STORE_LISTING.md has all field values for reference
 - Build output: Chrome 105 KB
 
-### VS Code Marketplace (Submitted, Verifying)
-- Publisher account created: `recurate`
-- .vsix uploaded (41 KB), automated verification in progress
+### VS Code Marketplace (Published)
+- [Install link](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
+- Publisher: `recurate`
 - README serves as marketplace page (problem-first, gesture list, how it works)
-- package.json metadata: categories, keywords, repository, homepage, activation
+- Build output: VSIX 41 KB
 
 ### Not Yet Built
-- Blog posts scheduled and shared on LinkedIn
-- Update recurate.ai with install links
+- Blog posts shared on LinkedIn (post 1 scheduled for Mar 4, post 2 for Mar 7)
 - Settings/config page (deferred to V1.2)
 - Platform (Roundtable) — design phase only
 

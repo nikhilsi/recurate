@@ -1,30 +1,32 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: February 27, 2026
+**Last Updated**: March 2, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
 
-**Phase**: Package & Ship
+**Phase**: Published & Promoting
 
 ---
 
-## Next Up: Go Live + Blog Posts
+## Both Extensions Live
 
-### Chrome Extension — Submitted, Awaiting Review
-- [x] Submitted for review (Feb 27, 2026) — typically 1-3 business days
-- [ ] Receive approval and go live
+- **Chrome**: [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm)
+- **VS Code**: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
+- **recurate.ai**: install links added for both extensions
 
-### VS Code Extension — Submitted, Verifying
-- [x] Publisher account created (publisher: `recurate`)
-- [x] .vsix packaged and uploaded (41 KB)
-- [ ] Verification completes and goes live
+## Next Up: Blog Posts + Promotion
 
-### Post-Publish
-- [ ] Update recurate.ai with install links
-- [ ] Schedule and share blog posts on LinkedIn
-- [ ] Second blog post: finalize and publish "20+ Tools, Zero Curation"
+### Blog Post 1 — "The Text Box Problem"
+- [x] Published on recurate.ai
+- [ ] LinkedIn post — scheduled for Tuesday Mar 4
+
+### Blog Post 2 — "20+ Tools, Zero Curation"
+- [x] Draft written (docs/blog/posts/twenty-tools-zero-curation.md)
+- [ ] Finalize: update date to Mar 6, add install links, verify emoji rendering
+- [ ] Publish to recurate.ai — Mar 6
+- [ ] LinkedIn post — Mar 7
 
 ---
 

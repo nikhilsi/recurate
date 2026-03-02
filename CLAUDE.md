@@ -166,8 +166,6 @@ recurate/
 ## Current Limitations
 
 - Chrome extension supports claude.ai and chat.com only — grok.com and gemini.google.com planned
-- Not yet published to Chrome Web Store or VS Code Marketplace
-- No logo or visual identity
 - CC schema not yet defined (critical open item for Roundtable — see docs/design.md Section 6.3)
 - Synthesis model not yet selected (critical open item for Roundtable — see docs/design.md Section 6.4)
 - Roundtable platform not yet built
