@@ -2,7 +2,7 @@
   "name": "recurate-annotator-vscode",
   "displayName": "Recurate Annotator",
   "description": "Don't just chat, recurate. Annotation tools for Claude Code conversations.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "recurate",
   "icon": "icon.png",
   "license": "MIT",
