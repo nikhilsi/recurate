@@ -37,6 +37,35 @@ function getTextOffset(container: Node, targetNode: Node, targetOffset: number):
 }
 
 /**
+ * Build a set of character offsets where element boundaries occur.
+ * These are positions between adjacent text nodes that belong to different
+ * parent elements (e.g., the boundary between a <p> and the next <p>,
+ * or between a <strong> and adjacent text). Word-level selection snapping
+ * should stop at these boundaries even when there's no whitespace character.
+ */
+function getElementBoundaryOffsets(container: Node): Set<number> {
+  const boundaries = new Set<number>();
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let offset = 0;
+  let prevNode: Text | null = null;
+  let node: Text | null;
+
+  while ((node = walker.nextNode() as Text | null)) {
+    if (prevNode) {
+      // If the previous text node and this text node have different parent elements,
+      // or if there's a block-level element between them, mark the boundary
+      if (prevNode.parentElement !== node.parentElement) {
+        boundaries.add(offset);
+      }
+    }
+    prevNode = node;
+    offset += node.length;
+  }
+
+  return boundaries;
+}
+
+/**
  * Apply annotation overlays directly to the DOM.
  * Walks text nodes and wraps annotated ranges with <mark>/<del> elements,
  * preserving the original HTML structure (headings, lists, code blocks, etc.).
@@ -147,12 +176,17 @@ export function ResponseView() {
       let startOffset = getTextOffset(containerRef.current, range.startContainer, range.startOffset);
       let endOffset = getTextOffset(containerRef.current, range.endContainer, range.endOffset);
 
-      // Snap selection to word boundaries so partial words aren't captured
+      // Snap selection to word boundaries so partial words aren't captured.
+      // Treat whitespace AND element boundaries as word boundaries.
+      // Build a set of offsets where element boundaries occur (text nodes meet),
+      // so snapping stops at element edges even when there's no whitespace.
       const fullText = containerRef.current.textContent || '';
-      while (startOffset > 0 && !/\s/.test(fullText[startOffset - 1])) {
+      const elementBoundaries = getElementBoundaryOffsets(containerRef.current);
+
+      while (startOffset > 0 && !/\s/.test(fullText[startOffset - 1]) && !elementBoundaries.has(startOffset)) {
         startOffset--;
       }
-      while (endOffset < fullText.length && !/\s/.test(fullText[endOffset])) {
+      while (endOffset < fullText.length && !/\s/.test(fullText[endOffset]) && !elementBoundaries.has(endOffset)) {
         endOffset++;
       }
 

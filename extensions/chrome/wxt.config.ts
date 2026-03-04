@@ -8,8 +8,8 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Recurate Annotator',
-    description: "Annotate AI responses on Claude and ChatGPT. Highlight, strikethrough, dig deeper, verify — feedback auto-injects.",
-    version: '0.1.0',
+    description: "Annotate AI responses on Claude, ChatGPT, and Copilot. Highlight, strikethrough, dig deeper, verify — feedback auto-injects.",
+    version: '0.2.0',
     permissions: ['sidePanel', 'activeTab'],
     icons: {
       16: 'icons/icon-16.png',
