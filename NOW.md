@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 2, 2026
+**Last Updated**: March 4, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -10,17 +10,30 @@
 
 ---
 
-## Both Extensions Live
+## Both Extensions Live — 4 Platforms
 
 - **Chrome**: [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm)
 - **VS Code**: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
 - **recurate.ai**: install links added for both extensions
+- **Supported platforms**: claude.ai, ChatGPT (chat.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft/chat)
 
-## Next Up: Blog Posts + Promotion
+## Recently Completed: Copilot Support (v0.2.0)
 
-### Blog Post 1 — "The Text Box Problem"
-- [x] Published on recurate.ai
-- [ ] LinkedIn post — scheduled for Tuesday Mar 4
+- [x] Consumer Copilot — textarea injection, stop button streaming detection
+- [x] Enterprise Copilot — Lexical editor injection via synthetic ClipboardEvent paste
+- [x] Word-level selection snapping fix (element boundary detection)
+- [x] All 4 platforms regression tested and working
+
+## Next Up
+
+### Republish Chrome Extension (v0.2.0)
+- [ ] Update Chrome Web Store with Copilot support
+- [ ] Update screenshots to show Copilot
+
+### Blog Post — Copilot Support Announcement
+- [ ] Write short post announcing Copilot support (consumer + enterprise) — what was tricky (Lexical editor), 4 platforms now supported
+- [ ] Publish to recurate.ai
+- [ ] LinkedIn post
 
 ### Blog Post 2 — "20+ Tools, Zero Curation"
 - [x] Draft written (docs/blog/posts/twenty-tools-zero-curation.md)

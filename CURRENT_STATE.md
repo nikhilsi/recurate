@@ -1,12 +1,12 @@
 # Current State
 
 ---
-**Last Updated**: March 2, 2026
+**Last Updated**: March 4, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Published & Promoting | **Status**: Both extensions live — Chrome Web Store + VS Code Marketplace
+**Phase**: Published & Promoting | **Status**: Both extensions live — Chrome Web Store + VS Code Marketplace | **4 platforms**: claude.ai, ChatGPT, Copilot (consumer + enterprise)
 
 ---
 
@@ -28,17 +28,18 @@
 - Logo (SVG), favicon (32px PNG), social card (1200x630 PNG)
 - OG meta tags with social card for link previews
 
-### Chrome Extension (Working on claude.ai)
+### Chrome Extension (Working — 4 platforms)
 - WXT + Preact + Preact Signals + TypeScript
-- Builds clean (74 KB total output)
-- **Tested and working end-to-end on claude.ai:**
-  - Response detection via MutationObserver on `data-is-streaming`
+- Version 0.2.0 — builds clean (143 KB total output: 4 content scripts + shared code)
+- **Supported platforms:** claude.ai, ChatGPT (chat.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft/chat)
+- **Tested and working end-to-end on all 4 platforms:**
+  - Response detection via MutationObserver (platform-specific: `data-is-streaming`, stop button presence)
   - Response extraction and rendering in side panel (preserves HTML formatting)
   - Annotation UX: text selection → floating toolbar → highlight (green ✓) / strikethrough (red ✗) / dig deeper (blue ⤵) / verify (amber ?)
   - DOM overlay annotations — `<mark>`/`<del>` wrappers applied via TreeWalker, preserves all formatting
-  - Word-level selection snapping — partial word selections expand to full word boundaries
-  - Auto-inject feedback into text box — annotations appear in claude.ai's input as user annotates, zero-click flow
-  - Light/dark theme — side panel matches claude.ai's theme via CSS variables + content script detection
+  - Word-level selection snapping — partial word selections expand to full word boundaries, respects element boundaries
+  - Auto-inject feedback into text box — annotations appear in platform's input as user annotates, zero-click flow
+  - Light/dark theme — side panel matches platform's theme via CSS variables + content script detection
   - Background service worker — message relay between content script and side panel
   - State management via Preact Signals
   - Structured feedback formatter (KEEP/DROP/EXPLORE DEEPER/VERIFY format)
@@ -55,16 +56,26 @@
 - Project structure: `extensions/chrome/`, `extensions/vscode/`
 - VS Code extension: JSONL file watching, clipboard auto-copy, response history (last 5)
 
-### Chrome Extension (Working on ChatGPT)
+### Chrome Extension — ChatGPT (chat.com)
 - `lib/platforms/chatgpt.ts` — DOM selectors, response extraction, ProseMirror injection
 - `entrypoints/chatgpt.content.ts` — content script for chat.com / chatgpt.com
-- **Tested and working end-to-end on chat.com:**
-  - Response detection via MutationObserver + stop button presence/absence
-  - Response extraction from `article` elements with `.markdown.prose` content
-  - Annotation and feedback injection working (same proactive zero-click flow)
-  - ChatGPT also uses ProseMirror (div#prompt-textarea[contenteditable]) — handles both textarea and contenteditable
-  - Theme detection, SPA navigation handling
-- Build output: 93 KB total (both content scripts + shared code)
+- Response detection via MutationObserver + stop button presence/absence
+- ChatGPT uses ProseMirror (div#prompt-textarea[contenteditable]) — handles both textarea and contenteditable
+
+### Chrome Extension — Copilot Consumer (copilot.microsoft.com)
+- `lib/platforms/copilot.ts` — DOM selectors, response extraction, textarea-based injection (native setter to bypass React)
+- `entrypoints/copilot.content.ts` — content script for copilot.microsoft.com
+- Streaming detection via stop button presence/absence
+- Editor: standard `<textarea#userInput>` — injection via native value setter
+- Post-streaming debounce: 1200ms (longer than other platforms — DOM settles slower)
+
+### Chrome Extension — Copilot Enterprise (m365.cloud.microsoft/chat)
+- `lib/platforms/copilot-enterprise.ts` — DOM selectors, response extraction, Lexical editor injection via synthetic ClipboardEvent paste
+- `entrypoints/copilot-enterprise.content.ts` — content script for m365.cloud.microsoft/chat
+- Streaming detection via stop button only (`aria-busy` attribute is unreliable — false positives)
+- Editor: Lexical editor (`data-lexical-editor="true"`) — **Lexical maintains its own state tree and reverts all direct DOM manipulation**. Injection uses synthetic `ClipboardEvent` paste with `DataTransfer` + 10ms selection sync delay
+- `injecting` flag suppresses MutationObserver during paste to prevent false streaming detection
+- `pendingFeedback` cleared on streaming start to prevent stale re-injection
 
 ### VS Code Extension (Working)
 - Located at `extensions/vscode/`
@@ -94,7 +105,8 @@
 - Screenshots: 2x 1280x800 PNG showing all 4 annotation gestures on claude.ai
 - Privacy practices: single purpose, permission justifications, data certification
 - STORE_LISTING.md has all field values for reference
-- Build output: Chrome 105 KB
+- Build output: Chrome 143 KB (4 content scripts + shared code)
+- Manifest description: "Annotate AI responses on Claude, ChatGPT, and Copilot."
 
 ### VS Code Marketplace (Published)
 - [Install link](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
@@ -102,7 +114,13 @@
 - README serves as marketplace page (problem-first, gesture list, how it works)
 - Build output: VSIX 41 KB
 
+### Diagnostic Scripts
+- `scripts/inspect-platform.js` — DOM inspector utility for adding new platform support
+- `scripts/inspect-editor.js` — editor element diagnostic for contenteditable injection debugging
+- `scripts/inspect-lexical.js` — Lexical editor diagnostic (framework detection, injection method testing)
+
 ### Not Yet Built
+- Chrome Web Store update with Copilot support (v0.2.0 needs republishing)
 - Blog posts shared on LinkedIn (post 1 scheduled for Mar 4, post 2 for Mar 7)
 - Settings/config page (deferred to V1.2)
 - Platform (Roundtable) — design phase only
@@ -123,6 +141,12 @@
 
 ### Resolved (ChatGPT)
 - ~~chat.com DOM structure~~ → `article` elements, `div.ProseMirror#prompt-textarea` (contenteditable), stop button for streaming
+
+### Resolved (Copilot)
+- ~~Consumer Copilot DOM structure~~ → response containers via `div.cib-message-group`, `<textarea#userInput>`, stop button streaming
+- ~~Enterprise Copilot DOM structure~~ → `div.fai-CopilotMessage`, Lexical editor (`data-lexical-editor`), stop button only (aria-busy unreliable)
+- ~~Lexical editor injection~~ → synthetic ClipboardEvent paste with DataTransfer (Lexical reverts all direct DOM manipulation)
+- ~~Element boundary word snapping~~ → `getElementBoundaryOffsets()` detects parent element changes between text nodes
 
 ### Resolved (VS Code Extension)
 - ~~VS Code extension architecture~~ → JSONL file watching + Webview sidebar + clipboard feedback
@@ -157,8 +181,12 @@
 | **Extension config** | `extensions/chrome/wxt.config.ts` |
 | **Content script (claude.ai)** | `extensions/chrome/entrypoints/claude.content.ts` |
 | **Content script (ChatGPT)** | `extensions/chrome/entrypoints/chatgpt.content.ts` |
+| **Content script (Copilot)** | `extensions/chrome/entrypoints/copilot.content.ts` |
+| **Content script (Copilot Enterprise)** | `extensions/chrome/entrypoints/copilot-enterprise.content.ts` |
 | **Platform selectors (claude.ai)** | `extensions/chrome/lib/platforms/claude.ts` |
 | **Platform selectors (ChatGPT)** | `extensions/chrome/lib/platforms/chatgpt.ts` |
+| **Platform selectors (Copilot)** | `extensions/chrome/lib/platforms/copilot.ts` |
+| **Platform selectors (Copilot Enterprise)** | `extensions/chrome/lib/platforms/copilot-enterprise.ts` |
 | **Annotation state** | `extensions/chrome/entrypoints/sidepanel/state/annotations.ts` |
 | **VS Code extension entry** | `extensions/vscode/src/extension.ts` |
 | **JSONL watcher** | `extensions/vscode/src/jsonlWatcher.ts` |

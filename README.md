@@ -35,7 +35,7 @@ This isn't just a feature. It's a fundamentally different way to communicate wit
 
 ### Recurate Annotator — Chrome Extension
 
-A lightweight Chrome extension that adds annotation tools to AI chat interfaces. Works on **claude.ai** and **ChatGPT (chat.com)**. No backend, no API keys — just install and your conversations immediately get better.
+A lightweight Chrome extension that adds annotation tools to AI chat interfaces. Works on **claude.ai**, **ChatGPT (chat.com)**, and **Microsoft Copilot** (consumer + enterprise). No backend, no API keys — just install and your conversations immediately get better.
 
 - Side panel mirrors the AI's latest response
 - Select text → floating toolbar → highlight, strikethrough, dig deeper, or verify
@@ -112,7 +112,7 @@ Turn N: Every turn is sharper than the last
 ```
 recurate/
 ├── extensions/
-│   ├── chrome/          # Chrome extension (claude.ai + ChatGPT)
+│   ├── chrome/          # Chrome extension (claude.ai + ChatGPT + Copilot)
 │   └── vscode/          # VS Code extension (Claude Code)
 ├── docs/                # MkDocs site (recurate.ai)
 └── platform/            # Roundtable (future)

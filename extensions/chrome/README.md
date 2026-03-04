@@ -1,6 +1,6 @@
 # Recurate Annotator — Chrome Extension
 
-Annotate AI responses with highlight, strikethrough, dig deeper, and verify gestures. Works on **claude.ai** and **ChatGPT (chat.com)**.
+Annotate AI responses with highlight, strikethrough, dig deeper, and verify gestures. Works on **claude.ai**, **ChatGPT (chat.com)**, and **Microsoft Copilot** (consumer + enterprise).
 
 ## What It Does
 
@@ -38,7 +38,7 @@ Production build output: `.output/chrome-mv3/`
 ```
 ┌──────────────────────────────────────────────────┐
 │  Content Script (one per platform)               │
-│  claude.content.ts / chatgpt.content.ts          │
+│  claude / chatgpt / copilot / copilot-enterprise │
 │                                                  │
 │  - Detects AI response completion                │
 │  - Extracts response HTML                        │
@@ -90,6 +90,8 @@ Adding a new platform means creating a new platform module and content script fo
 | `wxt.config.ts` | WXT build config (Vite + Preact) |
 | `entrypoints/claude.content.ts` | Content script for claude.ai |
 | `entrypoints/chatgpt.content.ts` | Content script for chat.com |
+| `entrypoints/copilot.content.ts` | Content script for copilot.microsoft.com |
+| `entrypoints/copilot-enterprise.content.ts` | Content script for m365.cloud.microsoft/chat |
 | `entrypoints/background.ts` | Background service worker (message relay) |
 | `entrypoints/sidepanel/App.tsx` | Root UI component |
 | `entrypoints/sidepanel/components/ResponseView.tsx` | Renders response with DOM overlay annotations |
@@ -98,6 +100,8 @@ Adding a new platform means creating a new platform module and content script fo
 | `entrypoints/sidepanel/state/annotations.ts` | Annotation state (Preact Signals) |
 | `lib/platforms/claude.ts` | claude.ai DOM selectors and extraction |
 | `lib/platforms/chatgpt.ts` | ChatGPT DOM selectors and extraction |
+| `lib/platforms/copilot.ts` | Copilot consumer DOM selectors, textarea injection |
+| `lib/platforms/copilot-enterprise.ts` | Copilot enterprise DOM selectors, Lexical editor injection |
 | `lib/formatter.ts` | Formats annotations into KEEP/DROP/EXPLORE DEEPER/VERIFY feedback text |
 | `lib/types.ts` | Shared TypeScript types |
 
@@ -130,3 +134,16 @@ Adding a new platform means creating a new platform module and content script fo
 - Editor: ProseMirror `div#prompt-textarea[contenteditable]`
 - Theme: `<html>` class contains `dark` → dark mode
 - Response containers: `article[data-testid^="conversation-turn-"]`
+
+### Copilot Consumer (copilot.microsoft.com)
+- Streaming detection: stop button presence/absence
+- Editor: `<textarea#userInput>` — injection via native value setter (bypasses React)
+- Theme: `data-theme` attribute on `<html>`
+- Post-streaming debounce: 1200ms (DOM settles slower than other platforms)
+
+### Copilot Enterprise (m365.cloud.microsoft/chat)
+- Streaming detection: stop button only — `aria-busy` attribute is unreliable (false positives)
+- Editor: Lexical editor (`data-lexical-editor="true"`) — direct DOM manipulation gets reverted
+- Injection: synthetic `ClipboardEvent` paste with `DataTransfer` + 10ms selection sync delay
+- Response containers: `div.fai-CopilotMessage` with `[data-testid="markdown-reply"]` content
+- `injecting` flag suppresses MutationObserver during paste to prevent false streaming detection

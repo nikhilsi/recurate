@@ -51,7 +51,7 @@ This plays out in two phases:
 
 ### Phase 0: Recurate Annotator — Browser + Editor Extensions (ship first, ship fast)
 
-**Chrome Extension:** Works on claude.ai and chat.com. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback into the platform's text box. No backend, no API keys — install and your conversations immediately get better. Built and working.
+**Chrome Extension:** Works on claude.ai, ChatGPT (chat.com), and Microsoft Copilot (consumer + enterprise). Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback into the platform's text box. No backend, no API keys — install and your conversations immediately get better. Built and working.
 
 **VS Code Extension:** The same annotation UX, built for the Claude Code terminal workflow. A sidebar that watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. You paste into Claude Code when ready. Built and working.
 

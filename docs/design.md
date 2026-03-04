@@ -67,12 +67,12 @@ The vision is delivered through two products, built in sequence, sharing a commo
 
 Extensions that add annotation tools to existing AI workflows. Both share the same core UI (Preact + Preact Signals) and annotation components, but differ in how they capture AI output and deliver feedback.
 
-**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users annotate (highlight, strikethrough, dig deeper, verify). Structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback auto-injects into the platform's text box. Works on claude.ai and chat.com. **Built and working.**
+**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users annotate (highlight, strikethrough, dig deeper, verify). Structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback auto-injects into the platform's text box. Works on claude.ai, ChatGPT (chat.com), and Microsoft Copilot (consumer + enterprise). **Built and working.**
 
 **VS Code Extension** — A sidebar for the Claude Code terminal workflow. Watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. User pastes into Claude Code when ready. **Built and working.**
 
 - **Solves:** Problem 1.1 (text-box-only input)
-- **Chrome works on:** claude.ai, chat.com (web-based LLM chat)
+- **Chrome works on:** claude.ai, chat.com, copilot.microsoft.com, m365.cloud.microsoft/chat (web-based LLM chat)
 - **VS Code works on:** Claude Code in VS Code terminal
 - **Requires:** No backend, no API keys, no new interface to learn
 - **Target user:** Anyone who uses LLMs for substantive conversations on desktop
@@ -125,6 +125,8 @@ Two approaches were considered:
 
 - claude.ai (Anthropic Claude)
 - chat.com (OpenAI ChatGPT)
+- copilot.microsoft.com (Microsoft Copilot — consumer)
+- m365.cloud.microsoft/chat (Microsoft Copilot — enterprise)
 
 **Planned:**
 
@@ -192,13 +194,17 @@ extensions/chrome/
 │   │   ├── components/        (ResponseView, AnnotationToolbar, AnnotationList, StatusBar)
 │   │   └── state/annotations.ts (Preact Signals state)
 │   ├── claude.content.ts      (content script for claude.ai)
-│   └── chatgpt.content.ts     (content script for chat.com)
+│   ├── chatgpt.content.ts     (content script for chat.com)
+│   ├── copilot.content.ts     (content script for copilot.microsoft.com)
+│   └── copilot-enterprise.content.ts (content script for m365.cloud.microsoft/chat)
 ├── lib/
 │   ├── types.ts               (shared TypeScript types)
 │   ├── formatter.ts           (annotations → KEEP/DROP/EXPLORE DEEPER/VERIFY feedback text)
 │   └── platforms/             (per-platform DOM selectors and extraction)
 │       ├── claude.ts
-│       └── chatgpt.ts
+│       ├── chatgpt.ts
+│       ├── copilot.ts
+│       └── copilot-enterprise.ts
 └── public/icons/              (extension icons)
 ```
 
@@ -792,7 +798,7 @@ All products use the same annotation UX patterns (highlight = green, strikethrou
 
 | # | Item | Notes |
 |---|------|-------|
-| 7 | ~~**Platform DOM selectors**~~ (Extension) | **Resolved for claude.ai and ChatGPT.** See [Extension Architecture](extension-architecture.md) Sections 7 and 8 for selector details. Grok and Gemini selectors still TBD. |
+| 7 | ~~**Platform DOM selectors**~~ (Extension) | **Resolved for claude.ai, ChatGPT, Copilot consumer, and Copilot enterprise.** See [Extension Architecture](extension-architecture.md) Sections 7-10 for selector details. Grok and Gemini selectors still TBD. |
 | 8 | **Error handling for API failures** | What happens if one model's API is down? Skip it? Show error? Retry? |
 | 9 | **Streaming responses** | Do we stream individual model responses as they arrive, or wait for all? Streaming is better UX but adds complexity |
 | 10 | **Model configuration UI** | How does the user select which models to include? API key management? |
@@ -825,7 +831,7 @@ All products use the same annotation UX patterns (highlight = green, strikethrou
 
 **Chrome Extension — Built and working.**
 
-- Side panel annotation on claude.ai and chat.com
+- Side panel annotation on claude.ai, chat.com, and Microsoft Copilot (consumer + enterprise)
 - Four annotation gestures: highlight, strikethrough, dig deeper, verify
 - Proactive feedback auto-injection into platform text box
 - No backend, no API keys, fully client-side

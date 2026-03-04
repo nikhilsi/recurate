@@ -1,8 +1,8 @@
 # Recurate Annotator — Chrome Extension Architecture
 
 **Status:** Built and working
-**Date:** February 21, 2026
-**Target:** V1 — claude.ai + ChatGPT (chat.com)
+**Date:** March 4, 2026
+**Target:** V1 — claude.ai, ChatGPT (chat.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft/chat)
 
 > **See also:** [VS Code Extension Architecture](vscode-extension-architecture.md) for the Claude Code terminal workflow variant.
 
@@ -18,10 +18,12 @@
 6. [Messaging Architecture](#messaging-architecture)
 7. [Platform Integration — claude.ai](#platform-integration-claudeai)
 8. [Platform Integration — ChatGPT](#platform-integration-chatgpt)
-9. [Annotation UX](#annotation-ux)
-10. [Structured Feedback Format](#structured-feedback-format)
-11. [Extensibility](#extensibility)
-12. [Known Risks & Mitigations](#known-risks--mitigations)
+9. [Platform Integration — Copilot Consumer](#platform-integration-copilot-consumer)
+10. [Platform Integration — Copilot Enterprise](#platform-integration-copilot-enterprise)
+11. [Annotation UX](#annotation-ux)
+12. [Structured Feedback Format](#structured-feedback-format)
+13. [Extensibility](#extensibility)
+14. [Known Risks & Mitigations](#known-risks--mitigations)
 
 ---
 
@@ -29,7 +31,7 @@
 
 The Recurate Annotator is a Chrome extension that adds a side panel to AI chat interfaces. The side panel displays the AI's latest response and provides annotation tools — highlight (keep/carry forward), strikethrough (drop/discard), dig deeper (elaborate), and verify (fact-check). The extension generates structured feedback text and injects it into the platform's native text box alongside the user's next question.
 
-**V1 scope:** claude.ai and ChatGPT (chat.com). Additional platforms (grok.com, gemini.google.com) follow the same architecture with platform-specific selectors.
+**V1 scope:** claude.ai, ChatGPT (chat.com), Microsoft Copilot consumer (copilot.microsoft.com), and Microsoft Copilot enterprise (m365.cloud.microsoft/chat). Additional platforms (grok.com, gemini.google.com) follow the same architecture with platform-specific selectors.
 
 **Core loop:**
 
@@ -99,17 +101,29 @@ extensions/chrome/
 │   │                                  #   - Response HTML extraction
 │   │                                  #   - Proactive feedback injection into ProseMirror
 │   │
-│   └── chatgpt.content.ts            # Content script for chat.com / chatgpt.com
-│                                      #   - MutationObserver + stop button detection
-│                                      #   - Response HTML extraction from article elements
-│                                      #   - Proactive feedback injection into ProseMirror
+│   ├── chatgpt.content.ts            # Content script for chat.com / chatgpt.com
+│   │                                  #   - MutationObserver + stop button detection
+│   │                                  #   - Response HTML extraction from article elements
+│   │                                  #   - Proactive feedback injection into ProseMirror
+│   │
+│   ├── copilot.content.ts            # Content script for copilot.microsoft.com
+│   │                                  #   - Stop button streaming detection
+│   │                                  #   - 1200ms post-streaming debounce
+│   │                                  #   - Textarea injection via native setter
+│   │
+│   └── copilot-enterprise.content.ts # Content script for m365.cloud.microsoft/chat
+│                                      #   - Stop button streaming detection (aria-busy unreliable)
+│                                      #   - Lexical editor injection via ClipboardEvent paste
+│                                      #   - Injection flag suppresses observer during paste
 │
 ├── lib/
 │   ├── types.ts                       # Shared TypeScript types (Annotation, Message, etc.)
 │   ├── formatter.ts                   # Annotations → structured feedback text
 │   └── platforms/
 │       ├── claude.ts                  # claude.ai DOM selectors and extraction/injection logic
-│       └── chatgpt.ts                # ChatGPT DOM selectors and extraction/injection logic
+│       ├── chatgpt.ts                # ChatGPT DOM selectors and extraction/injection logic
+│       ├── copilot.ts                # Copilot consumer DOM selectors, textarea injection
+│       └── copilot-enterprise.ts     # Copilot enterprise DOM selectors, Lexical editor injection
 │
 └── public/
     └── icons/                         # Extension icons (16, 32, 48, 128px)
@@ -156,9 +170,9 @@ App.tsx
 ### Data flow
 
 ```
-Platform DOM (claude.ai / ChatGPT)
+Platform DOM (claude.ai / ChatGPT / Copilot / Copilot Enterprise)
     ↓ (MutationObserver detects response completion)
-Content Script (claude.content.ts / chatgpt.content.ts)
+Content Script (claude / chatgpt / copilot / copilot-enterprise .content.ts)
     ↓ (browser.runtime.sendMessage)
 Background (background.ts)
     ↓ (relay)
@@ -550,7 +564,110 @@ export function setEditorContent(text: string): boolean {
 
 ---
 
-## 9. Annotation UX
+## 9. Platform Integration — Copilot Consumer
+
+Copilot consumer (copilot.microsoft.com) uses a standard textarea for input and a stop button for streaming detection.
+
+### Key differences from other platforms
+
+| Aspect | Copilot Consumer |
+|--------|-----------------|
+| **Input editor** | `<textarea#userInput>` |
+| **Response containers** | `div.cib-message-group` with response content elements |
+| **Streaming detection** | Stop button appears/disappears |
+| **Theme** | `data-theme` attribute on `<html>` |
+| **Post-streaming debounce** | 1200ms (longer — DOM settles slowly) |
+
+### Text injection
+
+Copilot consumer uses a standard `<textarea>` — injection via native value setter (same pattern as ChatGPT textarea path):
+
+```typescript
+export function setEditorContent(text: string): boolean {
+  const editor = getEditor() as HTMLTextAreaElement | null;
+  if (!editor) return false;
+  const nativeSetter = Object.getOwnPropertyDescriptor(
+    HTMLTextAreaElement.prototype, 'value'
+  )?.set;
+  if (nativeSetter) nativeSetter.call(editor, text);
+  else editor.value = text;
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}
+```
+
+---
+
+## 10. Platform Integration — Copilot Enterprise
+
+Enterprise Copilot (m365.cloud.microsoft/chat) has a completely different DOM structure from consumer Copilot. It uses **Lexical** (Meta's text editor framework) which requires a unique injection approach.
+
+### Key differences
+
+| Aspect | Copilot Enterprise |
+|--------|-------------------|
+| **Input editor** | Lexical editor (`data-lexical-editor="true"`, `#m365-chat-editor-target-element`) |
+| **Response containers** | `div.fai-CopilotMessage` |
+| **Streaming detection** | Stop button only — `aria-busy` attribute is unreliable (persists after response) |
+| **Theme** | System preference (no theme attribute) |
+
+### Lexical editor injection
+
+Enterprise Copilot uses Lexical, Meta's text editor framework. Lexical maintains its own internal state tree and **reverts all direct DOM manipulation** — `innerHTML`, `textContent`, `execCommand`, synthetic InputEvents all get overwritten.
+
+The only reliable injection method is **synthetic ClipboardEvent paste** with `DataTransfer`:
+
+```typescript
+export function setEditorContent(text: string): boolean {
+  const editor = getEditor();
+  if (!editor) return false;
+
+  editor.focus();
+
+  // Select all existing content in the DOM
+  const sel = document.getSelection();
+  if (sel) {
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  // Lexical manages its own internal selection state separately from the DOM.
+  // Fire selectionchange so Lexical syncs its internal selection to match our
+  // "select all" above, then paste after a tick so Lexical has time to process.
+  document.dispatchEvent(new Event('selectionchange'));
+
+  setTimeout(() => {
+    const dt = new DataTransfer();
+    dt.setData('text/plain', text);
+    editor.dispatchEvent(new ClipboardEvent('paste', {
+      clipboardData: dt,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }, 10);
+
+  return true;
+}
+```
+
+**Key details:**
+- The `selectionchange` event dispatch + 10ms delay before paste is critical — without it, Lexical's internal selection doesn't match the DOM selection, and paste appends instead of replacing.
+- The content script uses an `injecting` flag to suppress its MutationObserver during paste. Without this, our own DOM changes trigger false streaming detection.
+- `pendingFeedback` is cleared when streaming starts to prevent stale feedback re-injection after the user sends a message.
+
+### Diagnostic scripts
+
+Three diagnostic scripts in `scripts/` were created to debug platform integration:
+
+- **`inspect-platform.js`** — General DOM inspector for adding new platform support
+- **`inspect-editor.js`** — Editor element diagnostic for contenteditable injection debugging
+- **`inspect-lexical.js`** — Lexical editor diagnostic (tests `__lexicalEditor` API and ClipboardEvent paste)
+
+---
+
+## 11. Annotation UX
 
 ### Floating toolbar
 
@@ -622,7 +739,7 @@ No "Apply" or "Inject" buttons — the flow is completely automatic. The side pa
 
 ---
 
-## 9. Structured Feedback Format
+## 12. Structured Feedback Format
 
 Annotations are continuously converted to structured text and proactively injected into the platform's text box above whatever the user types next.
 
@@ -712,7 +829,7 @@ export function formatFeedback(annotations: Annotation[]): string {
 
 ---
 
-## 10. Extensibility
+## 13. Extensibility
 
 ### Annotation type extensibility
 
@@ -746,7 +863,7 @@ The side panel, state management, and formatter are platform-agnostic — they r
 
 ---
 
-## 11. Known Risks & Mitigations
+## 14. Known Risks & Mitigations
 
 ### Selector fragility
 
@@ -796,4 +913,4 @@ The side panel, state management, and formatter are platform-agnostic — they r
 
 ---
 
-*This document captures the Chrome extension architecture as of February 21, 2026. The extension is built and working with claude.ai and ChatGPT support and proactive injection flow. For the VS Code extension variant, see [VS Code Extension Architecture](vscode-extension-architecture.md).*
+*This document captures the Chrome extension architecture as of March 4, 2026. The extension is built and working with claude.ai, ChatGPT, Copilot consumer, and Copilot enterprise support and proactive injection flow. For the VS Code extension variant, see [VS Code Extension Architecture](vscode-extension-architecture.md).*

@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.0] - 2026-03-04
+
+### Added
+- **Microsoft Copilot support** — both consumer (copilot.microsoft.com) and enterprise (m365.cloud.microsoft/chat)
+- `lib/platforms/copilot.ts` — consumer Copilot DOM selectors, textarea-based injection (native setter to bypass React)
+- `lib/platforms/copilot-enterprise.ts` — enterprise Copilot DOM selectors, Lexical editor injection via synthetic ClipboardEvent paste
+- `entrypoints/copilot.content.ts` — content script for copilot.microsoft.com
+- `entrypoints/copilot-enterprise.content.ts` — content script for m365.cloud.microsoft/chat
+- `scripts/inspect-platform.js` — DOM inspector utility for adding new platform support
+- `scripts/inspect-editor.js` — editor element diagnostic for contenteditable injection debugging
+- `scripts/inspect-lexical.js` — Lexical editor diagnostic (framework detection, injection method testing)
+
+### Fixed
+- **Word-level selection snapping** — annotations no longer grab extra words at element boundaries (e.g., Copilot's HTML concatenates text across `<strong>`/`<em>` elements without whitespace). Added `getElementBoundaryOffsets()` that detects parent element changes between adjacent text nodes. Applied to both Chrome and VS Code extensions.
+- **Enterprise Copilot status bar** — `isStreaming()` now uses only stop button presence (removed unreliable `aria-busy` fallback that caused false positives). Added `injecting` flag to suppress observer during editor paste. Clears pending feedback when streaming starts to prevent stale re-injection.
+- **Consumer Copilot response truncation** — increased post-streaming debounce from 500ms to 1200ms to let response DOM fully settle
+
+### Changed
+- Extension version bumped to 0.2.0 (manifest + package.json)
+- Manifest description updated: "Annotate AI responses on Claude, ChatGPT, and Copilot."
+- Build output: 143 KB total (4 content scripts + shared code)
+
+### Technical Notes
+- Enterprise Copilot uses a **Lexical editor** (Meta's text editor framework, `data-lexical-editor="true"`). Lexical maintains its own state tree and reverts all direct DOM manipulation. The only reliable injection method is synthetic `ClipboardEvent` paste with `DataTransfer`. Selection must be set via DOM API + `selectionchange` event dispatch with 10ms delay before paste so Lexical syncs its internal selection state.
+- Consumer Copilot uses a standard `<textarea#userInput>` — injection via native value setter (same pattern as ChatGPT textarea path).
+- Enterprise Copilot's DOM is noisy — `aria-busy` attribute on `CopilotMessage` elements persists/reappears after responses complete. Stop button (`button[aria-label="Stop generating"]`) is the only reliable streaming signal.
+
+---
+
 ## [0.9.0] - 2026-03-02
 
 ### Added
