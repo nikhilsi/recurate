@@ -21,7 +21,7 @@
 
 ### Blog Post 2 — "20+ Tools, Zero Curation"
 - [x] Draft written (docs/blog/posts/twenty-tools-zero-curation.md)
-- [ ] Finalize and publish to recurate.ai
+- [x] Finalized and published to recurate.ai (slug: multi-model-ai-tools-no-curation)
 - [ ] LinkedIn post
 
 ### Chrome Extension Updates
