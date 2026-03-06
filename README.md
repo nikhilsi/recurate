@@ -55,12 +55,6 @@ Annotate **Claude Code** responses directly in VS Code. Same annotation UX, buil
 
 **Status:** Published — [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
 
-### Recurate Roundtable — Multi-LLM Platform (Future)
-
-A web application that sends your question to multiple AI models simultaneously, synthesizes their perspectives into a shared context, and lets you curate across all of them.
-
-**Status:** Design phase — see [Design & Architecture](https://recurate.ai/design/)
-
 ## How It Works
 
 ```
@@ -91,7 +85,7 @@ Turn N: Every turn is sharper than the last
 
 ## Documentation
 
-- **[Design & Architecture](https://recurate.ai/design/)** — Complete design and architecture document
+- **[Design & Architecture](https://recurate.ai/design/)** — Design document and extension architecture
 - **[Chrome Extension Architecture](https://recurate.ai/extension-architecture/)** — Implementation details for the Chrome extension
 - **[VS Code Extension Architecture](https://recurate.ai/vscode-extension-architecture/)** — Implementation details for the VS Code extension
 - **[Product Brief](https://recurate.ai/product_brief/)** — Non-technical product brief — the "why" and "what"
@@ -103,9 +97,6 @@ Turn N: Every turn is sharper than the last
 |-----------|------------|
 | Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
 | VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
-| Roundtable Frontend | React, TypeScript |
-| Roundtable Backend | Python, FastAPI |
-| LLM APIs | Anthropic, OpenAI, xAI, Google |
 
 ## Project Structure
 
@@ -115,7 +106,7 @@ recurate/
 │   ├── chrome/          # Chrome extension (claude.ai + ChatGPT + Copilot)
 │   └── vscode/          # VS Code extension (Claude Code)
 ├── docs/                # MkDocs site (recurate.ai)
-└── platform/            # Roundtable (future)
+└── scripts/             # Icon and social card generation
 ```
 
 ## Contributing

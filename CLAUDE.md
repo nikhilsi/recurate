@@ -1,7 +1,7 @@
 # Claude Code Development Guide
 
 ---
-**Last Updated**: February 21, 2026
+**Last Updated**: March 6, 2026
 **Purpose**: Rules and workflow for working with this codebase
 ---
 
@@ -17,8 +17,10 @@
 6. **`git log --oneline -10`** — Recent commits
 
 **Detailed reference** (read when relevant to your task):
-- **docs/design.md** — Complete design & architecture document (Chrome extension + Roundtable platform)
-- **docs/product_brief.md** — Non-technical product brief — the "why" and "what"
+- **docs/design.md** — Design & architecture document
+- **docs/extension-architecture.md** — Chrome extension architecture
+- **docs/vscode-extension-architecture.md** — VS Code extension architecture
+- **docs/product_brief.md** — Non-technical product brief
 
 ---
 
@@ -26,7 +28,7 @@
 
 ### Non-Negotiables
 1. **Unauthorized commits** — NEVER commit without explicit approval
-2. **Over-engineering** — KISS principle always. Ship the extension first, keep it simple.
+2. **Over-engineering** — KISS principle always. Keep it simple.
 3. **Not reading requirements** — Full attention to specs, read the docs thoroughly
 4. **Guessing** — Say "I don't know" if unsure
 5. **Not thinking critically** — Question things that don't make sense
@@ -47,16 +49,18 @@
 ## Development Standards
 
 ### Code Quality
-- **TypeScript/JavaScript** (Chrome extension): Strong typing, clear naming, minimal dependencies
-- **Python** (Roundtable backend): Type hints, proper error handling, clear variable names
-- **React** (Roundtable frontend): Functional components, hooks, TypeScript
+- **TypeScript** (all extension code): Strong typing, clear naming, minimal dependencies
 - **No notebooks in git** — Convert to scripts before committing
 
 ### Git Workflow
 - **Atomic commits** — One logical change per commit
 - **Clear messages** — Descriptive, explain the why
-- **NO attribution** — Never include "Generated with Claude"
+- **NO attribution** — Never include "Generated with Claude" or Co-Authored-By lines
 - **Working state** — Every commit leaves code functional
+
+### Documentation Discipline
+- **After each change**: Update CURRENT_STATE.md, NOW.md, CHANGELOG.md as needed
+- **Do not defer docs** — Each commit is a complete, coherent snapshot
 
 ---
 
@@ -68,24 +72,14 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 **Highlight + strikethrough** on the AI's response communicates in seconds what would take paragraphs to type. The AI gets clear signal about what you valued and what you didn't.
 
-### Two Products
+### Extensions
 
-**Phase 0: Recurate Annotator (Extensions)**
+*Chrome Extension* — Side panel annotation for web-based AI chat. Highlight/strikethrough/dig deeper/verify → structured feedback auto-injects into text box. Works on claude.ai, ChatGPT (chat.com), and Microsoft Copilot (consumer + enterprise). Built and working. Published on Chrome Web Store.
 
-*Chrome Extension* — Side panel annotation for web-based AI chat. Highlight/strikethrough/dig deeper/verify → structured feedback auto-injects into text box. Works on claude.ai and chat.com. Built and working.
-
-*VS Code Extension* — Sidebar annotation for Claude Code terminal workflow. Watches JSONL files, renders markdown, auto-copies feedback to clipboard. Built and working.
+*VS Code Extension* — Sidebar annotation for Claude Code terminal workflow. Watches JSONL files, renders markdown, auto-copies feedback to clipboard. Built and working. Published on VS Code Marketplace and Open VSX.
 
 - No backend, no API keys, fully client-side
 - Shared Preact + Signals UI across both extensions
-
-**Phase 1: Recurate Roundtable (Web Platform)**
-- Send one question to multiple LLMs simultaneously
-- Condensed Context (CC) synthesizes all responses into shared memory
-- Annotation mechanism built natively (curate across models)
-- Stateless architecture — each LLM call gets CC + new question, no per-model state
-- React frontend + Python/FastAPI backend
-- **Ships after the extensions validate the annotation UX.**
 
 ### Tech Stack
 
@@ -93,10 +87,6 @@ The core insight: every AI chat interface gives you a text box as the only way t
 |-----------|------------|
 | Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
 | VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
-| Roundtable Frontend | React, TypeScript |
-| Roundtable Backend | Python, FastAPI |
-| LLM APIs | Anthropic, OpenAI, xAI, Google |
-| Database | SQLite (personal) → PostgreSQL (scaled) |
 
 ---
 
@@ -115,7 +105,7 @@ recurate/
 │   ├── index.md                 (Site landing page)
 │   ├── CNAME                    (Custom domain: recurate.ai)
 │   ├── product_brief.md         (Non-technical product brief)
-│   ├── design.md                (Complete design & architecture)
+│   ├── design.md                (Design & architecture)
 │   ├── extension-architecture.md (Chrome extension architecture)
 │   ├── vscode-extension-architecture.md (VS Code extension architecture)
 │   ├── overrides/
@@ -128,12 +118,14 @@ recurate/
 │           └── text-box-problem.md  (Blog article)
 │
 ├── extensions/
-│   ├── chrome/                  (Chrome extension — claude.ai + ChatGPT)
+│   ├── chrome/                  (Chrome extension — 4 platforms)
 │   │   ├── wxt.config.ts        (WXT + Vite + Preact configuration)
 │   │   ├── entrypoints/
 │   │   │   ├── background.ts    (Service worker)
 │   │   │   ├── claude.content.ts (Content script for claude.ai)
 │   │   │   ├── chatgpt.content.ts (Content script for chat.com)
+│   │   │   ├── copilot.content.ts (Content script for copilot.microsoft.com)
+│   │   │   ├── copilot-enterprise.content.ts (Content script for m365.cloud.microsoft)
 │   │   │   └── sidepanel/       (Side panel UI — Preact components)
 │   │   └── lib/                 (Shared types, formatter, platform selectors)
 │   │
@@ -142,30 +134,45 @@ recurate/
 │       ├── webview/             (Sidebar UI — Preact, same components as Chrome)
 │       └── shared/              (Types, formatter shared between host + webview)
 │
-└── platform/                    (Phase 1 — Roundtable web app, not yet built)
-    ├── frontend/                (React + TypeScript)
-    └── backend/                 (Python + FastAPI)
+└── scripts/                     (Icon generation, social card generation)
 ```
-
-**Note:** The `platform/` directory doesn't exist yet.
 
 ---
 
 ## Key Concepts
 
 - **Annotation** — Highlight (carry forward), strikethrough (drop it), dig deeper (elaborate), and verify (fact-check) gestures on AI responses. The core UX innovation.
-- **Condensed Context (CC)** — Rolling synthesized summary of a multi-model conversation. Sole persistent state for the Roundtable. Re-generated every turn.
 - **Fast path** — User just asks their next question without annotating. Zero friction.
 - **Power path** — User annotates before proceeding. The AI's next response is better because it got explicit signal.
-- **Auto-synthesis** — CC generated automatically from model responses (no user input).
-- **User-refined synthesis** — CC re-generated after user annotates (easier prompt, user has given explicit signals).
 - **Side Panel** — Chrome's built-in Side Panel API. Chosen over DOM injection for platform-agnostic robustness.
 
 ---
 
-## Current Limitations
+## Key Files
 
-- Chrome extension supports claude.ai and chat.com only — grok.com and gemini.google.com planned
-- CC schema not yet defined (critical open item for Roundtable — see docs/design.md Section 6.3)
-- Synthesis model not yet selected (critical open item for Roundtable — see docs/design.md Section 6.4)
-- Roundtable platform not yet built
+| Purpose | File |
+|---------|------|
+| **Design & architecture** | `docs/design.md` |
+| **Extension architecture** | `docs/extension-architecture.md` |
+| **VS Code architecture** | `docs/vscode-extension-architecture.md` |
+| **Product brief** | `docs/product_brief.md` |
+| **Blog article** | `docs/blog/posts/text-box-problem.md` |
+| **Dev rules** | `CLAUDE.md` |
+| **Site config** | `mkdocs.yml` |
+| **Extension config** | `extensions/chrome/wxt.config.ts` |
+| **Content script (claude.ai)** | `extensions/chrome/entrypoints/claude.content.ts` |
+| **Content script (ChatGPT)** | `extensions/chrome/entrypoints/chatgpt.content.ts` |
+| **Content script (Copilot)** | `extensions/chrome/entrypoints/copilot.content.ts` |
+| **Content script (Copilot Enterprise)** | `extensions/chrome/entrypoints/copilot-enterprise.content.ts` |
+| **Platform selectors (claude.ai)** | `extensions/chrome/lib/platforms/claude.ts` |
+| **Platform selectors (ChatGPT)** | `extensions/chrome/lib/platforms/chatgpt.ts` |
+| **Platform selectors (Copilot)** | `extensions/chrome/lib/platforms/copilot.ts` |
+| **Platform selectors (Copilot Enterprise)** | `extensions/chrome/lib/platforms/copilot-enterprise.ts` |
+| **Annotation state** | `extensions/chrome/entrypoints/sidepanel/state/annotations.ts` |
+| **VS Code extension entry** | `extensions/vscode/src/extension.ts` |
+| **JSONL watcher** | `extensions/vscode/src/jsonlWatcher.ts` |
+| **VS Code webview provider** | `extensions/vscode/src/webviewProvider.ts` |
+| **VS Code webview app** | `extensions/vscode/webview/App.tsx` |
+| **Master icon SVG** | `docs/assets/images/recurate-icon.svg` |
+| **Icon generation** | `scripts/generate-icons.mjs` |
+| **Social card generation** | `scripts/generate-social-card.mjs` |
