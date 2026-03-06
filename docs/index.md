@@ -36,12 +36,7 @@ A Chrome extension that adds annotation tools to AI chat interfaces. Opens a sid
 The same annotation UX, built for the Claude Code terminal workflow. A VS Code sidebar that watches Claude Code's conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to your clipboard. You paste it into Claude Code when you're ready.
 
 [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode){ .md-button .md-button--primary }
-
-### Recurate Roundtable — Multi-LLM Platform
-
-Send your question to multiple AI models simultaneously. A synthesized shared context captures the best of each response. Annotate across all models — curate a conversation richer than any single model could produce alone.
-
-**Status:** Design phase
+[Install from Open VSX](https://open-vsx.org/extension/recurate/recurate-annotator-vscode){ .md-button } (for Antigravity, VSCodium, Theia)
 
 ---
 

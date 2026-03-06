@@ -53,7 +53,7 @@ Annotate **Claude Code** responses directly in VS Code. Same annotation UX, buil
 - Annotate → feedback auto-copied to clipboard → paste into Claude Code
 - Last 5 responses available with back/forward navigation
 
-**Status:** Published — [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode)
+**Status:** Published — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode) | [Open VSX](https://open-vsx.org/extension/recurate/recurate-annotator-vscode) (Antigravity, VSCodium, Theia)
 
 ## How It Works
 
