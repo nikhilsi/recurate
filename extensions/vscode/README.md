@@ -51,4 +51,4 @@ Recurate reads Claude Code's local JSONL conversation files. No data leaves your
 
 ---
 
-[recurate.ai](https://recurate.ai) | [GitHub](https://github.com/nikhilsi/recurate)
+[recurate.ai](https://recurate.ai) | [GitHub](https://github.com/nikhilsi/recurate) | [Open VSX](https://open-vsx.org/extension/recurate/recurate-annotator-vscode)

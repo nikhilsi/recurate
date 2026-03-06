@@ -8,11 +8,11 @@ Copy-paste these into the Chrome Web Store developer dashboard.
 
 ### Short Description (132 chars max)
 
-Annotate AI responses on Claude and ChatGPT — highlight, strikethrough, dig deeper, verify. Feedback auto-injects. No typing needed.
+Annotate AI responses on Claude, ChatGPT, and Copilot — highlight, strikethrough, dig deeper, verify. Feedback auto-injects.
 
 ### Manifest Description (132 chars max)
 
-Annotate AI responses on Claude and ChatGPT. Highlight, strikethrough, dig deeper, verify — feedback auto-injects.
+Annotate AI responses on Claude, ChatGPT, and Copilot. Highlight, strikethrough, dig deeper, verify — feedback auto-injects.
 
 ### Detailed Description
 
@@ -50,6 +50,8 @@ SUPPORTED PLATFORMS
 
 - claude.ai (Anthropic's Claude)
 - chat.com / chatgpt.com (OpenAI's ChatGPT)
+- copilot.microsoft.com (Microsoft Copilot)
+- m365.cloud.microsoft/chat (Microsoft Copilot Enterprise)
 
 PRIVACY
 
@@ -83,11 +85,11 @@ Annotate AI chat responses with highlight, strikethrough, dig deeper, and verify
 
 ### Permission Justifications
 
-**activeTab**: Reads the AI's latest response text from the active tab (claude.ai or chat.com) and injects structured annotation feedback into the page's text input field. No data is sent externally.
+**activeTab**: Reads the AI's latest response text from the active tab (claude.ai, chat.com, copilot.microsoft.com, or m365.cloud.microsoft/chat) and injects structured annotation feedback into the page's text input field. No data is sent externally.
 
 **sidePanel**: Displays the annotation UI in Chrome's side panel where users can highlight, strikethrough, dig deeper, or verify portions of the AI's response.
 
-**Host permissions**: Content scripts run on claude.ai and chat.com to extract AI response text and inject annotation feedback into the chat input. No other sites are accessed.
+**Host permissions**: Content scripts run on claude.ai, chat.com, copilot.microsoft.com, and m365.cloud.microsoft/chat to extract AI response text and inject annotation feedback into the chat input. No other sites are accessed.
 
 **Remote code**: This extension does not use remote code. All JavaScript is bundled locally in the extension package.
 
@@ -103,7 +105,7 @@ Check the compliance checkbox. The extension collects no user data, transmits no
 # Build production ZIP
 cd extensions/chrome
 npm run build
-cd .output/chrome-mv3 && zip -r ../../recurate-chrome-v0.1.0.zip .
+cd .output/chrome-mv3 && zip -r ../../recurate-annotator-0.2.0.zip .
 
-# Upload recurate-chrome-v0.1.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-annotator-0.2.0.zip to Chrome Web Store Developer Dashboard
 ```
