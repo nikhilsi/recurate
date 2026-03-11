@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 6, 2026
+**Last Updated**: March 11, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -18,13 +18,13 @@
 - docs/product_brief.md — non-technical product brief
 - docs/extension-architecture.md — Chrome extension technical architecture
 - docs/vscode-extension-architecture.md — VS Code extension technical architecture
-- Blog article — docs/blog/posts/text-box-problem.md
+- Blog articles — docs/blog/posts/text-box-problem.md, docs/blog/posts/twenty-tools-zero-curation.md
 - CLAUDE.md — development rules and workflow
 - Tracking docs — CHANGELOG.md, CURRENT_STATE.md, NOW.md
 
 ### Website (Live)
 - recurate.ai — MkDocs Material site, deployed via GitHub Pages
-- Blog with first article live
+- Blog with two articles live
 - Logo (SVG), favicon (32px PNG), social card (1200x630 PNG)
 - OG meta tags with social card for link previews
 
@@ -42,11 +42,12 @@
   - Light/dark theme support
   - Structured feedback formatter (KEEP/DROP/EXPLORE DEEPER/VERIFY)
 
-### VS Code Extension (Working)
+### VS Code Extension (Working — v0.2.1)
 - Located at `extensions/vscode/`
 - Extension host (Node.js): JSONL watcher, webview provider, clipboard copy
 - Webview sidebar (Preact + Signals): same annotation UI as Chrome extension
 - JSONL file watching, auto-copy to clipboard, response history (last 5)
+- Windows path encoding fix (v0.2.1) — works on Google Antigravity, VSCodium, Theia
 - Build: extension host 81 KB (esbuild), webview 28.5 KB JS + 6 KB CSS
 
 ### Chrome Web Store (Published)

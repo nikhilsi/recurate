@@ -27,7 +27,7 @@
 ### GitHub Issues
 
 - [x] **#1** — VS Code extension "Not connected" on Windows. Fixed `encodePath`, published v0.2.1.
-- [ ] **#2** — Feature request: requirement planning/prompt refinement in IDE. Discussion open.
+- [ ] **#2** — Feature request: requirement planning/prompt refinement in IDE. Responded, awaiting Amit's reply.
 
 ### Chrome Extension Updates
 - [ ] Add grok.com platform support

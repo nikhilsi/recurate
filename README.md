@@ -90,6 +90,7 @@ Turn N: Every turn is sharper than the last
 - **[VS Code Extension Architecture](https://recurate.ai/vscode-extension-architecture/)** — Implementation details for the VS Code extension
 - **[Product Brief](https://recurate.ai/product_brief/)** — Non-technical product brief — the "why" and "what"
 - **[Blog: The Text Box Problem](https://recurate.ai/blog/text-box-problem)** — Why the text box is AI's biggest UX blind spot
+- **[Blog: 20+ Multi-Model AI Tools](https://recurate.ai/blog/multi-model-ai-tools-no-curation)** — The competitive landscape and the curation gap
 
 ## Tech Stack
 

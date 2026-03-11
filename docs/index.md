@@ -40,5 +40,6 @@ The same annotation UX, built for the Claude Code terminal workflow. A VS Code s
 
 ---
 
-[Read the Blog Post](blog/text-box-problem){ .md-button }
+[Blog: The Text Box Problem](blog/text-box-problem){ .md-button }
+[Blog: 20+ Tools, Zero Curation](blog/multi-model-ai-tools-no-curation){ .md-button }
 [View on GitHub](https://github.com/nikhilsi/recurate){ .md-button .md-button--primary }
