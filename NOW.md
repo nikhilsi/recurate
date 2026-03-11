@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 6, 2026
+**Last Updated**: March 11, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -22,12 +22,17 @@
 ### Blog Post 2 — "20+ Tools, Zero Curation"
 - [x] Draft written (docs/blog/posts/twenty-tools-zero-curation.md)
 - [x] Finalized and published to recurate.ai (slug: multi-model-ai-tools-no-curation)
-- [ ] LinkedIn post
+- [x] LinkedIn post
+
+### GitHub Issues
+
+- [x] **#1** — VS Code extension "Not connected" on Windows. Fixed `encodePath`, published v0.2.1.
+- [ ] **#2** — Feature request: requirement planning/prompt refinement in IDE. Discussion open.
 
 ### Chrome Extension Updates
-- [ ] Update Chrome Web Store screenshots to show Copilot
 - [ ] Add grok.com platform support
 - [ ] Add gemini.google.com platform support
+- [ ] Update Chrome Web Store screenshots (after grok + gemini)
 
 ---
 
@@ -48,7 +53,7 @@ cd extensions/chrome && npm run build   # Production build
 # VS Code extension
 cd extensions/vscode && npm run compile   # Build
 npx @vscode/vsce package                 # Package .vsix
-code --install-extension recurate-annotator-vscode-0.2.0.vsix  # Install
+code --install-extension recurate-annotator-vscode-0.2.1.vsix  # Install
 ```
 
 ---

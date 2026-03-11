@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.1] - 2026-03-11
+
+### Fixed
+- **VS Code extension: Windows path encoding** — `encodeProjectPath` only replaced `/` with `-`, missing `:` and `\` on Windows paths. Extension showed "Not connected" on Google Antigravity, VSCodium, and other Windows-based editors. Fixed to match Claude Code's encoding: replaces `:`, `\`, and `/`. (GitHub issue #1)
+
+### Changed
+- VS Code extension version bumped to 0.2.1 (published to VS Code Marketplace + Open VSX)
+
+---
+
 ## [1.0.0] - 2026-03-04
 
 ### Added

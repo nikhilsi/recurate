@@ -26,10 +26,11 @@ export interface ParsedResponse {
 
 /**
  * Encode a filesystem path to Claude's project directory name.
- * /Users/foo/myproject → -Users-foo-myproject
+ * macOS/Linux: /Users/foo/myproject → -Users-foo-myproject
+ * Windows:     D:\repos\myproject   → D--repos-myproject
  */
 function encodeProjectPath(fsPath: string): string {
-  return fsPath.replace(/\//g, '-');
+  return fsPath.replace(/:/g, '-').replace(/[\\\/]/g, '-');
 }
 
 /**
