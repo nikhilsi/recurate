@@ -8,10 +8,11 @@
 
 ## Next Up
 
-### Recurate Composer — Publish
+### Recurate Composer — Chrome Web Store
 - [x] Extension built and tested on 8 platforms
 - [x] Store listing drafted, icon created, screenshots taken
-- [ ] Publish to Chrome Web Store
+- [x] Submitted to Chrome Web Store (Mar 15, pending review)
+- [ ] Update docs once approved and public
 
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)

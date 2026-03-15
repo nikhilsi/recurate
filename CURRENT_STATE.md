@@ -81,7 +81,7 @@
 
 ## Not Yet Built
 
-- Recurate Composer — Chrome Web Store publication (store listing, screenshots ready)
+- Recurate Composer — Chrome Web Store pending review (submitted Mar 15)
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)
 

@@ -37,13 +37,21 @@ When publishing a new version, adding a platform, or making a significant change
 - [ ] Publish to VS Code Marketplace (`npx @vscode/vsce publish`)
 - [ ] Publish to Open VSX (`npx ovsx publish <vsix> -p <token>`)
 
-## Chrome Extension Version Bump
+## Chrome Extension (Annotator) Version Bump
 
 - [ ] **extensions/chrome/wxt.config.ts** — Version in manifest
 - [ ] **extensions/chrome/package.json** — Version number
 - [ ] **CURRENT_STATE.md** — Version reference, build size if changed
 - [ ] **extensions/chrome/STORE_LISTING.md** — Zip filename
 - [ ] Upload new zip to Chrome Web Store Developer Dashboard
+
+## Composer Version Bump
+
+- [ ] **extensions/markdown-toolbar/manifest.json** — Version number
+- [ ] **CURRENT_STATE.md** — Version reference
+- [ ] **extensions/markdown-toolbar/STORE_LISTING.md** — Zip filename
+- [ ] Rebuild zip: `cd extensions/markdown-toolbar && zip -r recurate-composer-<version>.zip manifest.json content.js icon-*.png`
+- [ ] Upload zip to Chrome Web Store Developer Dashboard
 
 ## Site Changes (recurate.ai)
 
