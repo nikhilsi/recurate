@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Recurate Composer",
+  "description": "AI responds in rich text. You're stuck with plain text. Markdown formatting toolbar for Claude, ChatGPT, Grok, Gemini, and Copilot.",
+  "version": "0.1.0",
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://claude.ai/*",
+        "*://www.google.com/*",
+        "*://chatgpt.com/*",
+        "*://chat.openai.com/*",
+        "*://gemini.google.com/*",
+        "*://copilot.microsoft.com/*",
+        "*://m365.cloud.microsoft/*",
+        "*://grok.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338CA"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background (same as Recurate Annotator) -->
+  <rect x="0" y="0" width="128" height="128" rx="28" ry="28" fill="url(#bg)"/>
+
+  <!-- Pen/quill — angled writing instrument -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Pen body (angled from bottom-left to upper-right) -->
+    <line x1="32" y1="96" x2="78" y2="50"/>
+    <!-- Pen tip -->
+    <line x1="78" y1="50" x2="84" y2="44"/>
+    <!-- Small nib detail -->
+    <line x1="84" y1="44" x2="88" y2="40"/>
+  </g>
+
+  <!-- Pen tip dot -->
+  <circle cx="88" cy="40" r="3" fill="#FFFFFF"/>
+
+  <!-- Formatting marks: B (bold marker, right side) -->
+  <text x="56" y="42" font-family="system-ui, sans-serif" font-weight="800" font-size="22" fill="#34D399" letter-spacing="-1">B</text>
+
+  <!-- Formatting marks: # (heading marker, right side below B) -->
+  <text x="80" y="74" font-family="system-ui, sans-serif" font-weight="700" font-size="18" fill="#F87171">#</text>
+
+  <!-- Small horizontal lines suggesting text/formatting (bottom right) -->
+  <g stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.6">
+    <line x1="42" y1="78" x2="68" y2="78"/>
+    <line x1="42" y1="86" x2="58" y2="86"/>
+  </g>
+</svg>

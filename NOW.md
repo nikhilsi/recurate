@@ -1,21 +1,24 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 11, 2026
+**Last Updated**: March 15, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
 
 ## Next Up
 
-### Chrome Extension — New Platforms
+### Recurate Composer — Publish
+- [x] Extension built and tested on 8 platforms
+- [x] Store listing drafted, icon created, screenshots taken
+- [ ] Publish to Chrome Web Store
 
+### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)
 - [ ] Add gemini.google.com platform support (DOM inspection needed)
 - [ ] Update Chrome Web Store screenshots (after grok + gemini)
 
 ### GitHub Issues
-
 - [ ] **#2** — Feature request: requirement planning/prompt refinement in IDE. Responded, awaiting Amit's reply.
 
 ---

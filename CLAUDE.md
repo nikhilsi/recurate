@@ -78,15 +78,19 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 *VS Code Extension* — Sidebar annotation for Claude Code terminal workflow. Watches JSONL files, renders markdown, auto-copies feedback to clipboard. Built and working. Published on VS Code Marketplace and Open VSX.
 
+*Markdown Toolbar (Recurate Composer)* — Floating markdown formatting toolbar for AI chat input boxes. The input-side complement to the output-side Annotator. Bold, italic, strikethrough, headings, code, lists, blockquotes, links. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google Search. Vanilla JS, no build step.
+
 - No backend, no API keys, fully client-side
-- Shared Preact + Signals UI across both extensions
+- Annotator extensions share Preact + Signals UI
+- Composer is standalone vanilla JS (no framework, no build)
 
 ### Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
-| VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
+| Chrome Extension (Annotator) | WXT, Preact, Preact Signals, TypeScript |
+| VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
+| Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
 
 ---
 
@@ -129,10 +133,16 @@ recurate/
 │   │   │   └── sidepanel/       (Side panel UI — Preact components)
 │   │   └── lib/                 (Shared types, formatter, platform selectors)
 │   │
-│   └── vscode/                  (VS Code extension — Claude Code)
-│       ├── src/                 (Extension host: watcher, provider, clipboard)
-│       ├── webview/             (Sidebar UI — Preact, same components as Chrome)
-│       └── shared/              (Types, formatter shared between host + webview)
+│   ├── vscode/                  (VS Code extension — Claude Code)
+│   │   ├── src/                 (Extension host: watcher, provider, clipboard)
+│   │   ├── webview/             (Sidebar UI — Preact, same components as Chrome)
+│   │   └── shared/              (Types, formatter shared between host + webview)
+│   │
+│   └── markdown-toolbar/        (Recurate Composer — 8 platforms)
+│       ├── manifest.json        (Chrome Manifest V3)
+│       ├── content.js           (All logic — platform detection, formatting, toolbar UI)
+│       ├── icon.svg             (Master icon SVG)
+│       └── STORE_LISTING.md     (Chrome Web Store listing text)
 │
 └── scripts/                     (Icon generation, social card generation)
 ```
@@ -156,10 +166,12 @@ recurate/
 | **Extension architecture** | `docs/extension-architecture.md` |
 | **VS Code architecture** | `docs/vscode-extension-architecture.md` |
 | **Product brief** | `docs/product_brief.md` |
-| **Blog article** | `docs/blog/posts/text-box-problem.md` |
+| **Blog post 1** | `docs/blog/posts/text-box-problem.md` |
+| **Blog post 2** | `docs/blog/posts/twenty-tools-zero-curation.md` |
 | **Dev rules** | `CLAUDE.md` |
+| **Update checklist** | `UPDATE_CHECKLIST.md` |
 | **Site config** | `mkdocs.yml` |
-| **Extension config** | `extensions/chrome/wxt.config.ts` |
+| **Annotator config** | `extensions/chrome/wxt.config.ts` |
 | **Content script (claude.ai)** | `extensions/chrome/entrypoints/claude.content.ts` |
 | **Content script (ChatGPT)** | `extensions/chrome/entrypoints/chatgpt.content.ts` |
 | **Content script (Copilot)** | `extensions/chrome/entrypoints/copilot.content.ts` |
@@ -176,3 +188,7 @@ recurate/
 | **Master icon SVG** | `docs/assets/images/recurate-icon.svg` |
 | **Icon generation** | `scripts/generate-icons.mjs` |
 | **Social card generation** | `scripts/generate-social-card.mjs` |
+| **Composer content script** | `extensions/markdown-toolbar/content.js` |
+| **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
+| **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
+| **Composer icon** | `extensions/markdown-toolbar/icon.svg` |

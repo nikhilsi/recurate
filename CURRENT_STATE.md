@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 11, 2026
+**Last Updated**: March 15, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -59,8 +59,21 @@
 ### Open VSX Registry (Published)
 - [Install link](https://open-vsx.org/extension/recurate/recurate-annotator-vscode)
 
+### Recurate Composer — Markdown Toolbar (Working — 8 platforms)
+- Vanilla JS Chrome extension, no build step
+- Version 0.1.0
+- Floating markdown formatting toolbar docked above AI chat input boxes
+- **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google Search (google.com), Google AI Mode
+- **Formatting:** Bold, italic, strikethrough, H1-H3, inline code, code blocks, bullet lists, numbered lists (auto-increment), blockquotes, links, horizontal rules
+- Keyboard shortcuts: Cmd/Ctrl+B (bold), Cmd/Ctrl+I (italic), Cmd/Ctrl+E (code), Cmd/Ctrl+K (link)
+- Docked above editor, draggable to detach, double-click to re-dock
+- Collapsible toolbar, dark mode support via prefers-color-scheme
+- Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
+- Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
+
 ### Icons & Visual Identity (Complete)
-- Master SVG icon, Chrome extension icons (16-128px), VS Code marketplace icon
+- Master SVG icon (Annotator), Composer icon SVG
+- Chrome extension icons (16-128px), VS Code marketplace icon
 - Site logo, favicon, social card
 - Generation scripts in `scripts/`
 
@@ -68,7 +81,8 @@
 
 ## Not Yet Built
 
-- Additional browser platforms — grok.com, gemini.google.com
+- Recurate Composer — Chrome Web Store publication (store listing, screenshots ready)
+- Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)
 
 ---
@@ -82,10 +96,13 @@
 | **Product brief** | `docs/product_brief.md` |
 | **Dev rules** | `CLAUDE.md` |
 | **Site config** | `mkdocs.yml` |
-| **Extension config** | `extensions/chrome/wxt.config.ts` |
+| **Annotator config** | `extensions/chrome/wxt.config.ts` |
 | **Content scripts** | `extensions/chrome/entrypoints/*.content.ts` |
 | **Platform selectors** | `extensions/chrome/lib/platforms/*.ts` |
 | **VS Code extension** | `extensions/vscode/src/extension.ts` |
+| **Composer content script** | `extensions/markdown-toolbar/content.js` |
+| **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
+| **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
 
 ---
 

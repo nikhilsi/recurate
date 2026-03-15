@@ -38,6 +38,12 @@ The same annotation UX, built for the Claude Code terminal workflow. A VS Code s
 [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode){ .md-button .md-button--primary }
 [Install from Open VSX](https://open-vsx.org/extension/recurate/recurate-annotator-vscode){ .md-button } (for Antigravity, VSCodium, Theia)
 
+### Recurate Composer — Markdown Toolbar
+
+AI responds in rich text. You're stuck with plain text. Recurate Composer adds a floating markdown toolbar to every AI chat input box — bold, italic, headings, code, lists, links, and more. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google Search.
+
+*Coming soon to Chrome Web Store*
+
 ---
 
 [Blog: The Text Box Problem](blog/text-box-problem){ .md-button }

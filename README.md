@@ -55,6 +55,16 @@ Annotate **Claude Code** responses directly in VS Code. Same annotation UX, buil
 
 **Status:** Published — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode) | [Open VSX](https://open-vsx.org/extension/recurate/recurate-annotator-vscode) (Antigravity, VSCodium, Theia)
 
+### Recurate Composer — Markdown Toolbar
+
+AI responds in rich text. You're stuck with plain text. Recurate Composer levels the playing field — a floating markdown toolbar for every AI chat input box.
+
+- Bold, italic, strikethrough, headings, code, lists, blockquotes, links
+- Docks above the text box, follows as it expands
+- Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google Search**
+
+**Status:** Built and tested — Chrome Web Store publication pending
+
 ## How It Works
 
 ```
@@ -96,16 +106,18 @@ Turn N: Every turn is sharper than the last
 
 | Component | Technology |
 |-----------|------------|
-| Chrome Extension | WXT, Preact, Preact Signals, TypeScript |
-| VS Code Extension | VS Code Webview API, Preact, esbuild, Vite |
+| Chrome Extension (Annotator) | WXT, Preact, Preact Signals, TypeScript |
+| VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
+| Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
 
 ## Project Structure
 
 ```
 recurate/
 ├── extensions/
-│   ├── chrome/          # Chrome extension (claude.ai + ChatGPT + Copilot)
-│   └── vscode/          # VS Code extension (Claude Code)
+│   ├── chrome/              # Recurate Annotator (claude.ai + ChatGPT + Copilot)
+│   ├── vscode/              # Recurate Annotator (Claude Code)
+│   └── markdown-toolbar/    # Recurate Composer (8 platforms)
 ├── docs/                # MkDocs site (recurate.ai)
 └── scripts/             # Icon and social card generation
 ```

@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.1.0] - 2026-03-15
+
+### Added
+- **Recurate Composer** — new Chrome extension: floating markdown formatting toolbar for AI chat input boxes. The input-side complement to the output-side Annotator.
+- **8 platforms supported:** claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), Google Search, Google AI Mode
+- **Formatting options:** Bold, italic, strikethrough, H1-H3, inline code, code blocks, bullet lists, numbered lists (auto-increment), blockquotes, links, horizontal rules
+- **Keyboard shortcuts:** Cmd/Ctrl+B (bold), Cmd/Ctrl+I (italic), Cmd/Ctrl+E (code), Cmd/Ctrl+K (link)
+- **Smart positioning:** toolbar docks above editor container, follows as text box expands, repositions on scroll. Draggable to detach, double-click to re-dock. Collapsible.
+- **Platform-specific editor handling:** ProseMirror paste via ClipboardEvent + selectionchange sync (Claude, ChatGPT, Grok), textarea via native value setter (Google, Copilot consumer), Lexical via ClipboardEvent (Copilot enterprise), contenteditable (Gemini)
+- **Dark mode** via `prefers-color-scheme` media query
+- **Brand identity:** indigo gradient icon with pen + formatting marks (B in green, # in red), same palette as Annotator
+- Chrome Web Store listing drafted (`extensions/markdown-toolbar/STORE_LISTING.md`)
+- Store screenshots: claude input, claude response, 2 platform collages (6 platforms across 2 images)
+- `extensions/markdown-toolbar/` — vanilla JS, no build step, Chrome Manifest V3
+
+### Technical Notes
+- Line-prefix operations (headings, lists, blockquotes) on ProseMirror require `selectionchange` event dispatch + 15ms delay before paste, so ProseMirror syncs its internal selection state with the DOM selection.
+- Gemini's contenteditable `sel.modify('move', 'backward', 'character')` crosses line boundaries — cursor repositioning skipped on Gemini for wrap operations.
+- Numbered list auto-increments by inspecting the previous sibling block's text content for `^\d+\.\s` pattern.
+
+---
+
 ## [1.0.1] - 2026-03-11
 
 ### Fixed
