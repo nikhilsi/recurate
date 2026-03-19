@@ -80,9 +80,11 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 *Markdown Toolbar (Recurate Composer)* — Floating markdown formatting toolbar for AI chat input boxes. The input-side complement to the output-side Annotator. Bold, italic, strikethrough, headings, code, lists, blockquotes, links. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google Search. Vanilla JS, no build step.
 
+*Conversation Copier (Recurate Copier)* — Copy or download full AI conversations (both user messages and AI responses). Copies as clean markdown to clipboard, or downloads as styled HTML. Injects into Claude's action bar; floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google AI Mode. Vanilla JS, no build step.
+
 - No backend, no API keys, fully client-side
 - Annotator extensions share Preact + Signals UI
-- Composer is standalone vanilla JS (no framework, no build)
+- Composer and Copier are standalone vanilla JS (no framework, no build)
 
 ### Tech Stack
 
@@ -91,6 +93,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 | Chrome Extension (Annotator) | WXT, Preact, Preact Signals, TypeScript |
 | VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
 | Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
+| Chrome Extension (Copier) | Vanilla JS, Chrome Manifest V3 |
 
 ---
 
@@ -138,11 +141,16 @@ recurate/
 │   │   ├── webview/             (Sidebar UI — Preact, same components as Chrome)
 │   │   └── shared/              (Types, formatter shared between host + webview)
 │   │
-│   └── markdown-toolbar/        (Recurate Composer — 8 platforms)
+│   ├── markdown-toolbar/        (Recurate Composer — 8 platforms)
+│   │   ├── manifest.json        (Chrome Manifest V3)
+│   │   ├── content.js           (All logic — platform detection, formatting, toolbar UI)
+│   │   ├── icon.svg             (Master icon SVG)
+│   │   └── STORE_LISTING.md     (Chrome Web Store listing text)
+│   │
+│   └── conversation-copier/     (Recurate Copier — 7 platforms)
 │       ├── manifest.json        (Chrome Manifest V3)
-│       ├── content.js           (All logic — platform detection, formatting, toolbar UI)
-│       ├── icon.svg             (Master icon SVG)
-│       └── STORE_LISTING.md     (Chrome Web Store listing text)
+│       ├── content.js           (All logic — conversation extraction, export)
+│       └── icon.svg             (Master icon SVG)
 │
 └── scripts/                     (Icon generation, social card generation)
 ```
@@ -192,3 +200,6 @@ recurate/
 | **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
 | **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
 | **Composer icon** | `extensions/markdown-toolbar/icon.svg` |
+| **Copier content script** | `extensions/conversation-copier/content.js` |
+| **Copier manifest** | `extensions/conversation-copier/manifest.json` |
+| **Copier icon** | `extensions/conversation-copier/icon.svg` |

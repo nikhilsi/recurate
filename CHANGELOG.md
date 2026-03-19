@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.0] - 2026-03-19
+
+### Added
+- **Recurate Copier** — new Chrome extension: copy or download full AI conversations (both user messages and AI responses). Third extension in the Recurate family.
+- **7 platforms supported:** claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), Google AI Mode
+- **Two export formats:** Click copies full conversation as clean markdown to clipboard. Download button exports as styled self-contained HTML file.
+- **Platform-native button injection on Claude:** Copier buttons appear inline in Claude's action bar (next to copy/thumbs/retry). Floating buttons on other platforms.
+- **Smart filename:** HTML downloads include conversation title from the platform (e.g., `recurate-daily-ops-and-campaign-hq-v9-2026-03-19.html`)
+- **Styled HTML export:** Indigo-branded, responsive layout, user messages in bordered boxes, AI responses with full formatting (headings, lists, code blocks, blockquotes). Print-ready.
+- **Keyboard shortcuts:** Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
+- Brand identity: indigo gradient icon with clipboard + green export arrow, same palette as Annotator and Composer
+
+### Technical Notes
+- Claude button injection matches exact DOM structure (`div[role="group"][aria-label="Message actions"]`) with matching CSS classes for native look.
+- Google AI Mode DOM is heavily obfuscated — content extraction clones DOM, strips buttons/icons/UI chrome via selector removal + text pattern matching + SVG removal.
+- Conversation title extracted per-platform: Claude uses `[data-testid="chat-title-button"] .truncate`, Google uses URL query parameter `q`.
+- Blob download in content scripts requires `documentElement.appendChild` (not `body`) with delayed cleanup.
+
+---
+
 ## [1.1.0] - 2026-03-15
 
 ### Added

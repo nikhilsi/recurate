@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338CA"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background (same as Recurate family) -->
+  <rect x="0" y="0" width="128" height="128" rx="28" ry="28" fill="url(#bg)"/>
+
+  <!-- Clipboard body -->
+  <rect x="34" y="36" width="52" height="62" rx="6" ry="6"
+    fill="none" stroke="#FFFFFF" stroke-width="5"/>
+
+  <!-- Clipboard clip at top -->
+  <rect x="48" y="28" width="24" height="14" rx="4" ry="4"
+    fill="none" stroke="#FFFFFF" stroke-width="5"/>
+
+  <!-- Text lines on clipboard -->
+  <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" opacity="0.7">
+    <line x1="46" y1="56" x2="74" y2="56"/>
+    <line x1="46" y1="66" x2="68" y2="66"/>
+    <line x1="46" y1="76" x2="72" y2="76"/>
+    <line x1="46" y1="86" x2="62" y2="86"/>
+  </g>
+
+  <!-- Small arrow (copy/export) coming off bottom-right -->
+  <g fill="none" stroke="#34D399" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="80,78 96,78 96,62"/>
+    <polyline points="88,70 96,62 104,70"/>
+  </g>
+</svg>

@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 15, 2026
+**Last Updated**: March 19, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -71,6 +71,18 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
+### Recurate Copier — Conversation Export (Working — 7 platforms)
+- Vanilla JS Chrome extension, no build step
+- Version 0.1.0
+- Copy full AI conversations (user messages + AI responses) as markdown or download as styled HTML
+- **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
+- Claude: buttons injected into native action bar. Other platforms: floating buttons.
+- Smart filename with conversation title from platform
+- Styled HTML: indigo-branded, responsive, print-ready
+- Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
+- Google AI Mode: DOM content cleaned (strips buttons, icons, UI chrome)
+- Icon: indigo gradient with clipboard + green export arrow
+
 ### Icons & Visual Identity (Complete)
 - Master SVG icon (Annotator), Composer icon SVG
 - Chrome extension icons (16-128px), VS Code marketplace icon
@@ -81,7 +93,8 @@
 
 ## Not Yet Built
 
-- Recurate Composer — Chrome Web Store pending review (submitted Mar 15)
+- Recurate Composer — Chrome Web Store approved (published Mar 15)
+- Recurate Copier — Chrome Web Store publication pending (built, tested on Claude + Google AI Mode)
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)
 

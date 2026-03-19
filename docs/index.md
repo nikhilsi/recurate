@@ -42,6 +42,12 @@ The same annotation UX, built for the Claude Code terminal workflow. A VS Code s
 
 AI responds in rich text. You're stuck with plain text. Recurate Composer adds a floating markdown toolbar to every AI chat input box — bold, italic, headings, code, lists, links, and more. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google Search.
 
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg){ .md-button .md-button--primary }
+
+### Recurate Copier — Conversation Export
+
+Copy or download your full AI conversation — both your messages and the AI's responses. Clean markdown to clipboard, or styled HTML file. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
+
 *Coming soon to Chrome Web Store*
 
 ---

@@ -63,6 +63,16 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer levels
 - Docks above the text box, follows as it expands
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google Search**
 
+**Status:** Published — [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg)
+
+### Recurate Copier — Conversation Export
+
+Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown, or download as a styled HTML file you can open anywhere.
+
+- Full conversation export (not just the last response)
+- Smart filenames with conversation title
+- Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
+
 **Status:** Built and tested — Chrome Web Store publication pending
 
 ## How It Works
@@ -109,6 +119,7 @@ Turn N: Every turn is sharper than the last
 | Chrome Extension (Annotator) | WXT, Preact, Preact Signals, TypeScript |
 | VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
 | Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
+| Chrome Extension (Copier) | Vanilla JS, Chrome Manifest V3 |
 
 ## Project Structure
 
@@ -117,7 +128,8 @@ recurate/
 ├── extensions/
 │   ├── chrome/              # Recurate Annotator (claude.ai + ChatGPT + Copilot)
 │   ├── vscode/              # Recurate Annotator (Claude Code)
-│   └── markdown-toolbar/    # Recurate Composer (8 platforms)
+│   ├── markdown-toolbar/    # Recurate Composer (8 platforms)
+│   └── conversation-copier/ # Recurate Copier (7 platforms)
 ├── docs/                # MkDocs site (recurate.ai)
 └── scripts/             # Icon and social card generation
 ```

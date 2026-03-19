@@ -39,25 +39,11 @@ The toolbar stays docked above the text box as you type. Drag it to reposition i
 
 Keyboard shortcuts: Ctrl/Cmd+B (bold), Ctrl/Cmd+I (italic), Ctrl/Cmd+E (code), Ctrl/Cmd+K (link).
 
-SUPPORTED PLATFORMS
-
-- claude.ai (Anthropic's Claude)
-- chatgpt.com (OpenAI's ChatGPT)
-- grok.com (xAI's Grok)
-- gemini.google.com (Google's Gemini)
-- copilot.microsoft.com (Microsoft Copilot)
-- m365.cloud.microsoft/chat (Microsoft Copilot Enterprise)
-- google.com (Google Search / AI Mode)
+Works with all major AI chat platforms — the toolbar appears automatically when you visit a supported site.
 
 FORMATTING OPTIONS
 
-- Bold, Italic, Strikethrough
-- Headings (H1, H2, H3)
-- Inline code and code blocks
-- Bullet lists and numbered lists (auto-incrementing)
-- Blockquotes
-- Links
-- Horizontal rules
+Bold, italic, strikethrough, headings (H1-H3), inline code, code blocks, bullet lists, numbered lists (auto-incrementing), blockquotes, links, and horizontal rules.
 
 PRIVACY
 

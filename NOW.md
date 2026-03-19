@@ -1,18 +1,22 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 15, 2026
+**Last Updated**: March 19, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
 
 ## Next Up
 
-### Recurate Composer — Chrome Web Store
+### Recurate Composer — Published
 - [x] Extension built and tested on 8 platforms
-- [x] Store listing drafted, icon created, screenshots taken
-- [x] Submitted to Chrome Web Store (Mar 15, pending review)
-- [ ] Update docs once approved and public
+- [x] Published on Chrome Web Store (Mar 15)
+
+### Recurate Copier
+- [x] Extension built, tested on Claude + Google AI Mode
+- [ ] Test remaining platforms (ChatGPT, Grok, Gemini, Copilot)
+- [ ] Store listing, screenshots
+- [ ] Publish to Chrome Web Store
 
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)
