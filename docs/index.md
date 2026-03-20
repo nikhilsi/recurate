@@ -1,6 +1,6 @@
 # Don't just chat, recurate.
 
-**Recurate** gives you annotation tools for AI conversations — highlight what matters, strikethrough what doesn't, dig deeper into what's interesting, verify what's uncertain, and watch the conversation get sharper every turn.
+**Recurate** is a suite of tools for AI conversations. Annotate the output, compose the input, and capture the conversation — all from your browser.
 
 ---
 
@@ -29,6 +29,8 @@ These gestures communicate in seconds what would take paragraphs to type. The AI
 
 A Chrome extension that adds annotation tools to AI chat interfaces. Opens a side panel, mirrors the AI's latest response, and lets you highlight, strikethrough, dig deeper, and verify. Annotations auto-inject as structured feedback into the platform's text box. Works on claude.ai, ChatGPT, and Microsoft Copilot.
 
+![Recurate Annotator — annotations on Claude with side panel](assets/images/annotator-hero.png)
+
 [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm){ .md-button .md-button--primary }
 
 ### Recurate Annotator — VS Code Extension
@@ -42,11 +44,15 @@ The same annotation UX, built for the Claude Code terminal workflow. A VS Code s
 
 AI responds in rich text. You're stuck with plain text. Recurate Composer adds a floating markdown toolbar to every AI chat input box — bold, italic, headings, code, lists, links, and more. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google Search.
 
+![Recurate Composer — markdown toolbar on Claude, ChatGPT, and Grok](assets/images/composer-hero.png)
+
 [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg){ .md-button .md-button--primary }
 
 ### Recurate Copier — Conversation Export
 
-Copy or download your full AI conversation — both your messages and the AI's responses. Clean markdown to clipboard, or styled HTML file. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
+Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown to clipboard, or download as a styled HTML file with formatted responses, smart filenames, and a print-ready layout. Buttons appear in the platform's own action bar on Claude and Grok, or as floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
+
+![Recurate Copier — ChatGPT conversation exported as styled HTML](assets/images/copier-hero.png)
 
 *Coming soon to Chrome Web Store*
 
