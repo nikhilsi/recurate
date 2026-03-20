@@ -22,6 +22,9 @@
 - **docs/vscode-extension-architecture.md** — VS Code extension architecture
 - **docs/product_brief.md** — Non-technical product brief
 
+
+- Before beginning implementation, check with your project lead for any cross-session context or coordination notes that may affect this work.
+
 ---
 
 ## Critical Rules
