@@ -62,6 +62,15 @@
         }
         return null;
       }
+      case 'grok': {
+        // Grok: page title is usually the conversation name
+        const docTitle = document.title?.trim();
+        if (docTitle && docTitle.length > 2 && docTitle !== 'Grok') {
+          const cleaned = docTitle.replace(/\s*[-–—]\s*Grok\s*$/i, '').trim();
+          if (cleaned && cleaned.length > 2) return cleaned;
+        }
+        return null;
+      }
       case 'gemini': {
         // Gemini: title is in the page title (format: "conversation name - Google Gemini")
         const docTitle = document.title?.trim();
@@ -128,8 +137,10 @@
       }
       attrsToRemove.forEach(a => el.removeAttribute(a));
 
-      // Strip all class attributes — the export has its own CSS
+      // Strip class, style, dir — the export has its own CSS
       el.removeAttribute('class');
+      el.removeAttribute('style');
+      el.removeAttribute('dir');
     });
 
     // Remove screen-reader-only and hidden elements
@@ -207,54 +218,50 @@
       }
 
       case 'chatgpt': {
-        // ChatGPT: all turns in article[data-testid^="conversation-turn-"]
-        // AI turns have .markdown.prose content; user turns don't
-        const articles = document.querySelectorAll('article[data-testid^="conversation-turn-"]');
-        articles.forEach(article => {
-          const markdownContent = article.querySelector('.markdown.prose') ||
-                                  article.querySelector('.prose') ||
-                                  article.querySelector('[class*="markdown"]');
-          if (markdownContent) {
-            messages.push({ role: 'assistant', text: markdownContent.textContent?.trim() || '', html: markdownContent.innerHTML });
+        // ChatGPT: turns in [data-testid^="conversation-turn-"] (section or article)
+        // AI turns have [data-message-author-role="assistant"] with .markdown content
+        // User turns have [data-message-author-role="user"]
+        const turns = document.querySelectorAll('[data-testid^="conversation-turn-"]');
+        turns.forEach(turn => {
+          const assistantEl = turn.querySelector('[data-message-author-role="assistant"]');
+          if (assistantEl) {
+            const markdownContent = assistantEl.querySelector('[class*="markdown"]') ||
+                                    assistantEl.querySelector('.prose') || assistantEl;
+            const clone = markdownContent.cloneNode(true);
+            sanitizeHTML(clone);
+            messages.push({ role: 'assistant', text: markdownContent.textContent?.trim() || '', html: clone.innerHTML });
           } else {
-            // User message — get the text content
-            const userText = article.querySelector('[data-message-author-role="user"]') || article;
-            messages.push({ role: 'user', text: userText.textContent?.trim() || '', html: userText.innerHTML });
+            const userEl = turn.querySelector('[data-message-author-role="user"]');
+            if (userEl) {
+              const text = userEl.textContent?.trim() || '';
+              if (text) messages.push({ role: 'user', text, html: escapeHtml(text) });
+            }
           }
         });
         break;
       }
 
       case 'grok': {
-        // Grok: messages in the conversation area
-        // Try common patterns — message containers with role indicators
-        const turns = document.querySelectorAll('[class*="message"], [class*="turn"], [data-testid*="message"]');
-        if (turns.length === 0) {
-          // Fallback: look for the main conversation container and walk direct children
-          const container = document.querySelector('main') || document.querySelector('[role="main"]');
-          if (container) {
-            const blocks = container.querySelectorAll('[class*="response"], [class*="query"]');
-            blocks.forEach(block => {
-              const isUser = block.className.includes('query') || block.className.includes('user');
-              messages.push({
-                role: isUser ? 'user' : 'assistant',
-                text: block.textContent?.trim() || '',
-                html: block.innerHTML,
-              });
-            });
+        // Grok: message groups have id="response-..."
+        // items-end = user (right-aligned), items-start = AI (left-aligned)
+        // AI content in div.message-bubble > div.response-content-markdown
+        const groups = document.querySelectorAll('div[id^="response-"]');
+        groups.forEach(group => {
+          const isUser = group.className.includes('items-end');
+          if (isUser) {
+            // User message text
+            const text = group.textContent?.trim() || '';
+            if (text) messages.push({ role: 'user', text, html: escapeHtml(text) });
+          } else {
+            // AI response — find the markdown content
+            const content = group.querySelector('.response-content-markdown') ||
+                            group.querySelector('.message-bubble') || group;
+            const clone = content.cloneNode(true);
+            sanitizeHTML(clone);
+            const text = content.textContent?.trim() || '';
+            if (text) messages.push({ role: 'assistant', text, html: clone.innerHTML });
           }
-        } else {
-          turns.forEach(turn => {
-            const isUser = turn.getAttribute('data-message-author-role') === 'user' ||
-                           turn.className.includes('user') ||
-                           turn.className.includes('human');
-            messages.push({
-              role: isUser ? 'user' : 'assistant',
-              text: turn.textContent?.trim() || '',
-              html: turn.innerHTML,
-            });
-          });
-        }
+        });
         break;
       }
 
@@ -586,11 +593,17 @@ ${body}
         return bars.length > 0 ? bars[bars.length - 1] : null;
       }
       case 'chatgpt': {
-        // ChatGPT: look for the action buttons area in the last assistant turn
-        const articles = document.querySelectorAll('article[data-testid^="conversation-turn-"]');
-        for (let i = articles.length - 1; i >= 0; i--) {
-          const bar = articles[i].querySelector('[class*="flex"][class*="items-center"]');
-          if (bar) return bar;
+        // ChatGPT: action bar has aria-label="Response actions"
+        const bars = document.querySelectorAll('[aria-label="Response actions"]');
+        return bars.length > 0 ? bars[bars.length - 1] : null;
+      }
+      case 'grok': {
+        // Grok: div.action-buttons contains Regenerate, Copy, Like, Dislike etc.
+        const bars = document.querySelectorAll('div.action-buttons');
+        if (bars.length > 0) {
+          const last = bars[bars.length - 1];
+          // Find the flex container with the buttons inside
+          return last.querySelector('div.flex') || last;
         }
         return null;
       }
