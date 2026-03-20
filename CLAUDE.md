@@ -83,7 +83,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 *Markdown Toolbar (Recurate Composer)* — Floating markdown formatting toolbar for AI chat input boxes. The input-side complement to the output-side Annotator. Bold, italic, strikethrough, headings, code, lists, blockquotes, links. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google Search. Vanilla JS, no build step.
 
-*Conversation Copier (Recurate Copier)* — Copy or download full AI conversations (both user messages and AI responses). Copies as clean markdown to clipboard, or downloads as styled HTML. Injects into Claude's action bar; floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google AI Mode. Vanilla JS, no build step.
+*Conversation Copier (Recurate Copier)* — Copy or download full AI conversations (both user messages and AI responses). Copies as clean markdown to clipboard, or downloads as styled HTML with full sanitization (strips platform DOM cruft). Injects into native action bars on Claude and Grok; floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google AI Mode. Vanilla JS, no build step.
 
 - No backend, no API keys, fully client-side
 - Annotator extensions share Preact + Signals UI

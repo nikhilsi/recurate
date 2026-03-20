@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 19, 2026
+**Last Updated**: March 20, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -76,11 +76,12 @@
 - Version 0.1.0
 - Copy full AI conversations (user messages + AI responses) as markdown or download as styled HTML
 - **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
-- Claude: buttons injected into native action bar. Other platforms: floating buttons.
-- Smart filename with conversation title from platform
+- **Tested on 6 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode (Copilot not yet tested)
+- Claude: buttons injected into native action bar. Grok: buttons injected into action bar. Other platforms: floating buttons.
+- HTML sanitization: strips class/style/dir attributes, Google's js* and data-* attributes, empty wrappers, buttons, icons, UI chrome, HTML comments
+- Smart filename with conversation title from platform (per-platform title extraction including Grok page title)
 - Styled HTML: indigo-branded, responsive, print-ready
 - Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
-- Google AI Mode: DOM content cleaned (strips buttons, icons, UI chrome)
 - Icon: indigo gradient with clipboard + green export arrow
 
 ### Icons & Visual Identity (Complete)
@@ -93,8 +94,7 @@
 
 ## Not Yet Built
 
-- Recurate Composer — Chrome Web Store approved (published Mar 15)
-- Recurate Copier — Chrome Web Store publication pending (built, tested on Claude + Google AI Mode)
+- Recurate Copier — Chrome Web Store publication pending (built, tested on 6 of 7 platforms — Copilot not yet tested)
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)
 
@@ -116,6 +116,8 @@
 | **Composer content script** | `extensions/markdown-toolbar/content.js` |
 | **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
 | **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
+| **Copier content script** | `extensions/conversation-copier/content.js` |
+| **Copier manifest** | `extensions/conversation-copier/manifest.json` |
 
 ---
 

@@ -70,10 +70,12 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer levels
 Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown, or download as a styled HTML file you can open anywhere.
 
 - Full conversation export (not just the last response)
-- Smart filenames with conversation title
+- Smart filenames with platform name and conversation title
+- HTML sanitization strips platform DOM cruft for clean, portable exports
+- Native action bar injection on **Claude** and **Grok**; floating buttons on other platforms
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** Built and tested — Chrome Web Store publication pending
+**Status:** Built and tested on 6 of 7 platforms — Chrome Web Store publication pending
 
 ## How It Works
 

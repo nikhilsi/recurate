@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.1] - 2026-03-20
+
+### Fixed
+- **ChatGPT conversation extraction** — ChatGPT changed `<article>` to `<section>` elements for conversation turns. Updated selector from `article[data-testid^="conversation-turn-"]` to element-agnostic `[data-testid^="conversation-turn-"]`. Now uses `data-message-author-role` attribute for reliable user/assistant role detection.
+- **ChatGPT action bar injection** — replaced fragile class-based selector with `aria-label="Response actions"` for finding the button row.
+
+### Added
+- **HTML sanitization for exports** — `sanitizeHTML()` now strips `class`, `style`, and `dir` attributes from all elements, Google's `js*` and `data-*` attributes, empty wrapper divs/spans, buttons, icons, SVGs, UI chrome text, favicon images, and HTML comments. Produces clean, portable HTML exports across all platforms.
+- **Grok action bar injection** — Copier buttons now inject into Grok's native `div.action-buttons` bar (same pattern as Claude), instead of floating.
+- **Grok conversation title extraction** — extracts title from `document.title`, stripping the "— Grok" suffix.
+- **Platform name in filenames** — HTML download filenames now include the platform name (e.g., `recurate-chatgpt-topic-2026-03-20.html`).
+
+### Tested
+- 6 of 7 platforms verified: Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer
+
+---
+
 ## [1.2.0] - 2026-03-19
 
 ### Added

@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 19, 2026 (Ops-HQ)
+**Last Updated**: March 20, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -14,8 +14,11 @@
 
 ### Recurate Copier
 - [x] Extension built, tested on Claude + Google AI Mode
-- [ ] **#4** — Google AI Mode HTML export carries DOM cruft (jscontroller, data-sfc-*, HTML comments, empty wrappers). Needs sanitization pass. Found by Ops-HQ analyzing a real export.
-- [ ] Test remaining platforms (ChatGPT, Grok, Gemini, Copilot)
+- [x] **#4** — HTML sanitization: strips class/style/dir, Google js*/data-* attributes, empty wrappers, buttons, icons, HTML comments
+- [x] Fix ChatGPT selectors (article→section, use data-message-author-role)
+- [x] Add Grok action bar injection and conversation title extraction
+- [x] Tested on 6 platforms: Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer
+- [ ] Test Copilot enterprise
 - [ ] Store listing, screenshots
 - [ ] Publish to Chrome Web Store
 
@@ -26,7 +29,7 @@
 
 ### GitHub Issues
 - [ ] **#2** — Feature request: requirement planning/prompt refinement in IDE. Responded, awaiting Amit's reply.
-- [ ] **#4** — Copier: Google AI Mode HTML export carries excessive DOM cruft. Filed by Ops-HQ after analyzing real export. See issue for full details.
+- [x] **#4** — Copier: HTML sanitization implemented (Google DOM cruft, class/style/dir stripping, empty wrapper removal)
 
 ---
 
