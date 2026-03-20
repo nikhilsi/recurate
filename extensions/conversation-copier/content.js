@@ -62,6 +62,22 @@
         }
         return null;
       }
+      case 'gemini': {
+        // Gemini: title is in the page title (format: "conversation name - Google Gemini")
+        const docTitle = document.title?.trim();
+        if (docTitle) {
+          const cleaned = docTitle.replace(/\s*[-–—]\s*Google Gemini\s*$/i, '').trim();
+          if (cleaned && cleaned.length > 2 && cleaned !== 'Google Gemini') return cleaned;
+        }
+        // Fallback: look for active conversation in sidebar
+        const activeChat = document.querySelector('[class*="selected"] [class*="title"]') ||
+                           document.querySelector('[aria-selected="true"]');
+        if (activeChat) {
+          const text = activeChat.textContent?.trim();
+          if (text && text.length > 2 && text.length < 200) return text;
+        }
+        return null;
+      }
       case 'google': {
         // Google AI Mode: use the search query from the page
         const q = new URLSearchParams(window.location.search).get('q');
@@ -75,6 +91,86 @@
         return null;
       }
     }
+  }
+
+  // --- HTML sanitization ---
+
+  function sanitizeHTML(clone) {
+    // Remove Google's internal attributes from all elements
+    const junkAttrs = [
+      'jscontroller', 'jsaction', 'jsuid', 'jsmodel', 'jsname', 'jsshadow',
+      'jsdata', 'jstcache', 'jsslot',
+      'data-sfc-root', 'data-sfc-cb', 'data-sfc-cp',
+      'data-wiz-uids', 'data-wiz-attrbind',
+      'data-hveid', 'data-ved',
+      'data-animation-skip', 'data-animation-nesting',
+      'data-processed', 'data-container-id', 'data-scope-id',
+      'data-subtree', 'data-xid', 'data-zzy',
+      'data-keys', 'data-value', 'data-hpmde',
+      'data-crb-el',
+    ];
+    const attrPrefixes = ['data-sfc-', 'data-wiz-', 'data-animation-'];
+
+    clone.querySelectorAll('*').forEach(el => {
+      // Remove known junk attributes
+      junkAttrs.forEach(attr => el.removeAttribute(attr));
+
+      // Remove attributes matching prefixes and all data-* attributes
+      const attrsToRemove = [];
+      for (const attr of el.attributes) {
+        if (attrPrefixes.some(p => attr.name.startsWith(p)) ||
+            attr.name.startsWith('js') ||
+            attr.name.startsWith('data-') ||
+            attr.name === 'tabindex' ||
+            attr.name === 'jsuid') {
+          attrsToRemove.push(attr.name);
+        }
+      }
+      attrsToRemove.forEach(a => el.removeAttribute(a));
+
+      // Strip all class attributes — the export has its own CSS
+      el.removeAttribute('class');
+    });
+
+    // Remove screen-reader-only and hidden elements
+    clone.querySelectorAll('.sr-only, [aria-hidden="true"]').forEach(el => el.remove());
+
+    // Remove HTML comments (especially Google's <!--TgQPHd|[...]-->)
+    const commentWalker = document.createTreeWalker(clone, NodeFilter.SHOW_COMMENT);
+    const comments = [];
+    while (commentWalker.nextNode()) comments.push(commentWalker.currentNode);
+    comments.forEach(c => c.remove());
+
+    // Remove empty wrapper divs (no text content, no images)
+    let changed = true;
+    while (changed) {
+      changed = false;
+      clone.querySelectorAll('div, span').forEach(el => {
+        if (!el.textContent?.trim() && !el.querySelector('img, svg, video, iframe')) {
+          el.remove();
+          changed = true;
+        }
+      });
+    }
+
+    // Remove favicon images and citation badges
+    clone.querySelectorAll('img[src*="gstatic.com/favicon"], img[src*="encrypted-tbn"], .notranslate').forEach(el => el.remove());
+
+    // Remove buttons, icons, and UI chrome
+    clone.querySelectorAll('button, [role="button"], svg, [aria-label*="Copy"], [aria-label*="Share"], [aria-label*="response"], [aria-label*="perspective"]').forEach(el => el.remove());
+
+    // Remove UI text patterns
+    const textWalker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+    const junkPatterns = /^(Search Labs|Copy|Creating a public link|Good response|Bad response|Would you like to see this from a different perspective\?)\.{0,3}$/;
+    const junkNodes = [];
+    while (textWalker.nextNode()) {
+      if (junkPatterns.test(textWalker.currentNode.textContent.trim())) {
+        junkNodes.push(textWalker.currentNode.parentElement || textWalker.currentNode);
+      }
+    }
+    junkNodes.forEach(n => n.remove());
+
+    return clone;
   }
 
   // --- Conversation extraction ---
@@ -95,12 +191,16 @@
         );
         allElements.forEach(el => {
           if (el.matches('[data-testid="user-message"]')) {
-            messages.push({ role: 'user', text: el.textContent?.trim() || '', html: el.innerHTML });
+            const clone = el.cloneNode(true);
+            sanitizeHTML(clone);
+            messages.push({ role: 'user', text: el.textContent?.trim() || '', html: clone.innerHTML });
           } else {
             const content = el.querySelector('.font-claude-message') ||
                             el.querySelector('[data-testid*="message"]') ||
                             el.querySelector('.prose') || el;
-            messages.push({ role: 'assistant', text: content.textContent?.trim() || '', html: content.innerHTML });
+            const clone = content.cloneNode(true);
+            sanitizeHTML(clone);
+            messages.push({ role: 'assistant', text: content.textContent?.trim() || '', html: clone.innerHTML });
           }
         });
         break;
@@ -170,10 +270,12 @@
             const isUser = role === 'user' || role === '1' ||
                            turn.className.includes('user') ||
                            turn.className.includes('query');
+            const clone = turn.cloneNode(true);
+            sanitizeHTML(clone);
             messages.push({
               role: isUser ? 'user' : 'assistant',
               text: turn.textContent?.trim() || '',
-              html: turn.innerHTML,
+              html: clone.innerHTML,
             });
           });
         } else {
@@ -183,10 +285,12 @@
           );
           allBlocks.forEach(block => {
             const isUser = block.tagName === 'USER-QUERY' || block.className.includes('query');
+            const clone = block.cloneNode(true);
+            sanitizeHTML(clone);
             messages.push({
               role: isUser ? 'user' : 'assistant',
               text: block.textContent?.trim() || '',
-              html: block.innerHTML,
+              html: clone.innerHTML,
             });
           });
         }
@@ -208,26 +312,15 @@
           const aiEl = turn.querySelector('[data-subtree="aimc"]') ||
                        turn.querySelector('[data-subtree="aimfl"]');
           if (aiEl) {
-            // Get the main content area but exclude action buttons and UI chrome
+            // Get the main content area
             const content = aiEl.querySelector('[data-container-id="main-col"]') ||
                             aiEl.querySelector('[dir="ltr"]') || aiEl;
-            // Clone and strip out buttons, action bars, and non-content elements
+            // Clone, sanitize, and strip all Google DOM cruft
             const clone = content.cloneNode(true);
-            clone.querySelectorAll('button, [role="button"], [aria-label*="response"], [aria-label*="Copy"], [aria-label*="Share"], [aria-label*="perspective"], [class*="Labs"]').forEach(el => el.remove());
-            // Remove hidden elements and elements with display:none
+            // Remove hidden elements first
             clone.querySelectorAll('[style*="display:none"], [style*="display: none"]').forEach(el => el.remove());
-            // Remove remaining UI text nodes (Search Labs, Copy, Good/Bad response, etc.)
-            const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
-            const junkPatterns = /^(Search Labs|Copy|Creating a public link|Good response|Bad response|Would you like to see this from a different perspective\?|Legal Counsel|Procurement Specialist|IT Management Consultant)\.{0,3}$/;
-            const junkNodes = [];
-            while (walker.nextNode()) {
-              if (junkPatterns.test(walker.currentNode.textContent.trim())) {
-                junkNodes.push(walker.currentNode.parentElement || walker.currentNode);
-              }
-            }
-            junkNodes.forEach(n => n.remove());
-            // Remove stray SVGs and icon elements (beaker, checkmarks, etc.)
-            clone.querySelectorAll('svg, img[src*="icon"], [class*="icon"]').forEach(el => el.remove());
+            // Run full sanitization
+            sanitizeHTML(clone);
             const text = clone.textContent?.trim() || '';
             if (text.length > 5) {
               messages.push({ role: 'assistant', text, html: clone.innerHTML });
@@ -431,10 +524,10 @@ ${body}
     }
     const html = toHTML(messages);
     const title = getConversationTitle();
-    const platform = getPlatformDisplayName().toLowerCase();
+    const platform = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
     const date = new Date().toISOString().slice(0, 10);
-    const slug = title ? slugify(title) : platform;
-    const filename = `recurate-${slug}-${date}.html`;
+    const slug = title ? slugify(title) : 'conversation';
+    const filename = `recurate-${platform}-${slug}-${date}.html`;
 
     try {
       const blob = new Blob([html], { type: 'text/html' });
@@ -499,6 +592,22 @@ ${body}
           const bar = articles[i].querySelector('[class*="flex"][class*="items-center"]');
           if (bar) return bar;
         }
+        return null;
+      }
+      case 'gemini': {
+        // Gemini: <message-actions> custom element with class "footer"
+        const bars = document.querySelectorAll('message-actions');
+        if (bars.length > 0) {
+          // Find the buttons-container inside the last message-actions
+          const last = bars[bars.length - 1];
+          return last.querySelector('.buttons-container-v2') ||
+                 last.querySelector('.actions-container-v2') || last;
+        }
+        return null;
+      }
+      case 'google': {
+        // Google AI Mode: position above the input box (top-right), complementing Composer (top-left)
+        // Return null to trigger custom positioning in injectButtons()
         return null;
       }
       default:
@@ -572,6 +681,44 @@ ${body}
     }
   }
 
+  function getInputContainer() {
+    const platform = getPlatform();
+    switch (platform) {
+      case 'google': {
+        // Google AI Mode: find the textarea/input area
+        const textarea = document.querySelector('textarea') ||
+                         document.querySelector('[contenteditable="true"]');
+        if (textarea) {
+          return textarea.closest('form') ||
+                 textarea.closest('[role="combobox"]')?.parentElement ||
+                 textarea.parentElement?.parentElement?.parentElement;
+        }
+        return null;
+      }
+      default:
+        return null;
+    }
+  }
+
+  function positionAboveInput(cluster) {
+    const container = getInputContainer();
+    if (!container) {
+      // Fallback to fixed bottom-right
+      Object.assign(cluster.style, {
+        position: 'fixed', bottom: '20px', right: '20px',
+        top: 'auto', left: 'auto', transform: 'none',
+      });
+      return;
+    }
+    const rect = container.getBoundingClientRect();
+    Object.assign(cluster.style, {
+      position: 'fixed',
+      top: `${rect.top - cluster.offsetHeight - 6}px`,
+      left: `${rect.right - cluster.offsetWidth}px`,
+      bottom: 'auto', right: 'auto', transform: 'none',
+    });
+  }
+
   function showFloatingButtons() {
     if (document.getElementById('rc-copier-floating')) return;
 
@@ -597,7 +744,6 @@ ${body}
     cluster.appendChild(dlBtn);
 
     Object.assign(cluster.style, {
-      position: 'fixed', bottom: '20px', right: '20px',
       zIndex: '2147483647', display: 'flex', gap: '4px',
       background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
@@ -626,6 +772,20 @@ ${body}
       document.head.appendChild(style);
     }
     document.body.appendChild(cluster);
+
+    // Position above input box on Google, fixed bottom-right elsewhere
+    if (getPlatform() === 'google') {
+      requestAnimationFrame(() => positionAboveInput(cluster));
+      // Re-position on scroll
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(() => positionAboveInput(cluster));
+      }, true);
+      setInterval(() => positionAboveInput(cluster), 1500);
+    } else {
+      Object.assign(cluster.style, {
+        position: 'fixed', bottom: '20px', right: '20px',
+      });
+    }
   }
 
   function buildUI() {
