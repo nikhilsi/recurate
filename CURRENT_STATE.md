@@ -87,22 +87,19 @@
 ### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai only)
 - WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)
 - Version 0.1.0
-- Connect multiple Claude.ai chat tabs with one-click context sharing
-- **Tab auto-discovery:** reads chat name from DOM, UUID from URL, registers with background
-- **Share buttons:** injected into Claude's message action bars (AI and user messages)
+- Connect exactly 2 Claude.ai chat tabs with one-click context sharing
+- **Tab auto-discovery:** reads chat name from DOM, UUID from URL, registers with background. 2-tab limit enforced.
+- **Share button:** injected into last message action bar. One click shares to the other tab (no dropdown).
+- **Command palette:** `\rc` (share), `\rcp` (pop out), `\rcc` (clear). Typed in input, intercepted before Claude sees it.
 - **Full exchange context:** share includes both the user prompt and AI response
-- **Text selection + multi-message:** share a portion or a range of messages
-- **Tab picker:** dropdown with individual tabs + "All tabs" broadcast
-- **Auto-send:** one click shares and sends (shift+click to inject without sending)
-- **Shared space sidebar:** view all shared exchanges, send any entry to any tab
-- **Chat-requested share:** detects "share with X:" patterns in AI messages, one-click approve
+- **Text selection:** if text is selected, shares only the selection
+- **Auto-send:** shared content injected and sent automatically
+- **Shared space sidebar:** toggle anchored next to input box, panel in right margin. Header shows "Recurate Connect" + connected tab name.
 - **Edit/pin/delete entries:** curate shared space before sending
-- **Search/filter:** across all shared messages
+- **Search/filter:** across all shared messages (appears with 4+ entries)
 - **Drag-to-inject:** drag sidebar entries into editor
-- **Resizable sidebar:** drag left edge to resize
-- **Pop-out window:** open shared space in separate browser window for multi-monitor workflows
-- **Tab badge:** connection count indicator
-- Build output: 124KB (content script + background + shared space page + icons)
+- **Pop-out window:** open shared space in separate browser window for multi-monitor. All inline sidebars collapse when pop-out opens, restore when closed.
+- Build output: 120KB (content script + background + shared space page + icons)
 - Icon: indigo gradient with two arrows in opposite directions (white right, green left)
 
 ### Icons & Visual Identity (Complete)

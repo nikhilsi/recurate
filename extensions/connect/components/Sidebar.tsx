@@ -246,22 +246,14 @@ function EntryCard({ entry, otherTabs, onSendEntry }: EntryCardProps) {
         <div style={responseStyle}>{truncate(entry.response, 120)}</div>
       )}
 
-      {!isEditing && (
+      {!isEditing && otherTabs.length > 0 && (
         <div style={actionsStyle}>
-          {otherTabs.length > 1 && (
-            <button style={sendBtnStyle} onClick={() => onSendEntry(entry.id, 'all')}>
-              Send to all
-            </button>
-          )}
-          {otherTabs.map(tab => (
-            <button
-              key={tab.tabId}
-              style={sendBtnStyle}
-              onClick={() => onSendEntry(entry.id, [tab.tabId])}
-            >
-              Send to {truncate(tab.chatName || 'Untitled', 20)}
-            </button>
-          ))}
+          <button
+            style={sendBtnStyle}
+            onClick={() => onSendEntry(entry.id, [otherTabs[0].tabId])}
+          >
+            Send to {truncate(otherTabs[0].chatName || 'Untitled', 20)}
+          </button>
         </div>
       )}
 

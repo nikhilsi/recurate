@@ -18,15 +18,16 @@
 - [x] Fix ChatGPT selectors (article→section, use data-message-author-role)
 - [x] Add Grok action bar injection and conversation title extraction
 - [x] Tested on 6 platforms: Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer
-- [ ] Test Copilot enterprise
-- [ ] Store listing, screenshots
-- [ ] Publish to Chrome Web Store
+- [x] Test Copilot enterprise
+- [x] Store listing, screenshots
+- [x] Submitted to Chrome Web Store (Mar 20)
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
-- [x] Extension built: tab registry, share buttons, shared space sidebar, chat-requested share, edit/pin/delete, search, drag-to-inject, resize, pop-out window
-- [ ] Test on Claude.ai with 2+ tabs
-- [ ] Fix issues found during testing
+- [x] Extension built: tab registry (2-tab limit), share button, command palette (\rc, \rcp, \rcc), shared space sidebar, edit/pin/delete, search, drag-to-inject, pop-out window with state sync
+- [x] Testing: tab discovery, share button, auto-send, sidebar positioning, pop-out window
+- [x] Simplified: removed pattern detection, tab picker dropdown, multi-message range, tab badge. Added command palette.
+- [ ] Continue testing remaining features (edit, pin, delete, search, drag, commands)
 - [ ] Store listing, screenshots
 - [ ] Publish to Chrome Web Store
 

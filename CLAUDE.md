@@ -162,9 +162,10 @@ recurate/
 │       ├── wxt.config.ts        (WXT + Vite + Preact configuration)
 │       ├── entrypoints/
 │       │   ├── background.ts    (Service worker: tab registry, shared space, routing)
-│       │   └── claude.content.tsx (Content script: share buttons, sidebar, inject)
-│       ├── components/          (Preact: ShareButton, TabPicker, Sidebar, TabBadge)
-│       └── lib/                 (Selectors, exchange extraction, injection, types)
+│       │   ├── claude.content.tsx (Content script: share button, commands, sidebar)
+│       │   └── shared-space/    (Pop-out window)
+│       ├── components/          (Preact: Sidebar, SharedSpaceWindow)
+│       └── lib/                 (Selectors, injection, shared space, types)
 │
 └── scripts/                     (Icon generation, social card generation)
 ```

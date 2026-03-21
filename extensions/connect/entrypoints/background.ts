@@ -121,6 +121,10 @@ export default defineBackground(() => {
 
     switch (message.type) {
       case 'REGISTER_TAB': {
+        // 2-tab limit: if already at capacity and this is a new tab, reject
+        if (!tabs.has(senderTabId) && tabs.size >= 2) {
+          return false;
+        }
         tabs.set(senderTabId, {
           tabId: senderTabId,
           chatName: message.chatName,

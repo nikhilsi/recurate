@@ -5,7 +5,6 @@ import { SELECTORS } from '../lib/selectors';
 import { getSelectedText } from '../lib/exchange';
 import { injectEntry, appendToEditor } from '../lib/inject';
 import type { TabInfo, SharedEntry, BgMessage, CsMessage } from '../lib/types';
-import { TabPicker } from '../components/TabPicker';
 import { Sidebar } from '../components/Sidebar';
 
 export default defineContentScript({
@@ -39,7 +38,6 @@ export default defineContentScript({
     }
 
     function register() {
-      // Debounce: cancel any pending registration
       if (registrationTimer !== null) {
         clearTimeout(registrationTimer);
       }
@@ -59,10 +57,9 @@ export default defineContentScript({
       }, 300);
     }
 
-    // Register on load
     setTimeout(register, 1000);
 
-    // Re-register on SPA navigation (URL change without page reload)
+    // Re-register on SPA navigation
     let lastUrl = window.location.href;
     const urlObserver = new MutationObserver(() => {
       if (window.location.href !== lastUrl) {
@@ -95,7 +92,6 @@ export default defineContentScript({
     chrome.runtime.onMessage.addListener((message: CsMessage) => {
       switch (message.type) {
         case 'TABS_UPDATED':
-          // Background tells us our tabId explicitly
           currentTabId = message.yourTabId;
           otherTabs.value = message.tabs.filter(t => t.tabId !== currentTabId);
           break;
@@ -114,88 +110,62 @@ export default defineContentScript({
       }
     });
 
-    // --- Share Button Injection ---
+    // --- Extract last exchange ---
 
-    const SHARE_SVG = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>';
-
-    let activePickerContainer: HTMLElement | null = null;
-
-    function closePicker() {
-      if (activePickerContainer) {
-        activePickerContainer.remove();
-        activePickerContainer = null;
+    function extractLastExchange(): { prompt: string; response: string } | null {
+      const selectedText = getSelectedText();
+      if (selectedText) {
+        return { prompt: '', response: selectedText };
       }
-    }
 
-    function showPicker(anchorEl: HTMLElement) {
-      closePicker();
+      const allMessages = document.querySelectorAll(
+        `${SELECTORS.userMessage}, ${SELECTORS.aiMessage}`
+      );
+      let prompt = '';
+      let response = '';
 
-      const container = document.createElement('div');
-      container.className = 'rc-connect-picker';
-      document.body.appendChild(container);
-      activePickerContainer = container;
-
-      const handleSelect = (targetTabIds: number[] | 'all') => {
-        const selectedText = getSelectedText();
-
-        // Extract the last exchange — same pattern as Copier/Annotator
-        // Last AI response + its preceding user prompt
-        const allMessages = document.querySelectorAll(
-          `${SELECTORS.userMessage}, ${SELECTORS.aiMessage}`
-        );
-        let prompt = '';
-        let response = '';
-
-        if (selectedText) {
-          response = selectedText;
-        } else if (allMessages.length > 0) {
-          // Walk backward to find last AI response and its preceding user prompt
-          for (let i = allMessages.length - 1; i >= 0; i--) {
-            const el = allMessages[i] as HTMLElement;
-            if (!response && !el.matches(SELECTORS.userMessage)) {
-              // AI message
-              const content = el.querySelector('.font-claude-message') ||
-                              el.querySelector('.prose') || el;
-              response = content.textContent?.trim() || '';
-            } else if (response && el.matches(SELECTORS.userMessage)) {
-              // User message preceding the AI response
-              prompt = el.textContent?.trim() || '';
-              break;
-            }
+      if (allMessages.length > 0) {
+        for (let i = allMessages.length - 1; i >= 0; i--) {
+          const el = allMessages[i] as HTMLElement;
+          if (!response && !el.matches(SELECTORS.userMessage)) {
+            const content = el.querySelector('.font-claude-message') ||
+                            el.querySelector('.prose') || el;
+            response = content.textContent?.trim() || '';
+          } else if (response && el.matches(SELECTORS.userMessage)) {
+            prompt = el.textContent?.trim() || '';
+            break;
           }
         }
+      }
 
-        if (!response) {
-          closePicker();
-          return;
-        }
+      if (!response) return null;
+      return { prompt, response };
+    }
 
-        const entry = {
+    // --- Share to the other tab ---
+
+    function shareToOtherTab() {
+      if (otherTabs.value.length === 0) return;
+
+      const exchange = extractLastExchange();
+      if (!exchange) return;
+
+      const msg: BgMessage = {
+        type: 'SHARE',
+        entry: {
           from: currentChatName.value,
           fromUuid: currentChatUuid.value,
-          prompt,
-          response,
-        };
-
-        const msg: BgMessage = {
-          type: 'SHARE',
-          entry,
-          targetTabIds,
-        };
-        chrome.runtime.sendMessage(msg);
-        closePicker();
+          prompt: exchange.prompt,
+          response: exchange.response,
+        },
+        targetTabIds: [otherTabs.value[0].tabId],
       };
-
-      render(
-        <TabPicker
-          tabs={otherTabs.value}
-          onSelect={handleSelect}
-          onClose={closePicker}
-          anchorEl={anchorEl}
-        />,
-        container
-      );
+      chrome.runtime.sendMessage(msg);
     }
+
+    // --- Share Button (no picker — direct share to the one other tab) ---
+
+    const SHARE_SVG = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>';
 
     function createShareButton(): HTMLElement {
       const wrapper = document.createElement('div');
@@ -206,7 +176,9 @@ export default defineContentScript({
       btn.className = 'inline-flex items-center justify-center relative isolate shrink-0 can-focus select-none border-transparent transition font-base duration-300 h-8 w-8 rounded-md group/btn _fill_56vq7_9 _ghost_56vq7_96';
       btn.type = 'button';
       btn.setAttribute('aria-label', 'Share to another chat');
-      btn.title = 'Share to another chat';
+      btn.title = otherTabs.value.length > 0
+        ? `Share to ${otherTabs.value[0].chatName}`
+        : 'Share to another chat';
 
       const iconDiv = document.createElement('div');
       iconDiv.className = 'text-text-500 group-hover/btn:text-text-100';
@@ -219,8 +191,7 @@ export default defineContentScript({
       btn.addEventListener('mousedown', e => e.preventDefault());
       btn.addEventListener('click', e => {
         e.stopPropagation();
-        // No message element needed — we extract the last exchange on click
-        showPicker(btn);
+        shareToOtherTab();
       });
 
       return wrapper;
@@ -229,7 +200,8 @@ export default defineContentScript({
     function injectShareButtons() {
       document.querySelectorAll('.rc-connect-injected').forEach(el => el.remove());
 
-      // Same pattern as Copier: find the last action bar, append our button
+      if (otherTabs.value.length === 0) return;
+
       const bars = document.querySelectorAll(SELECTORS.actionBar);
       if (bars.length === 0) return;
 
@@ -245,110 +217,56 @@ export default defineContentScript({
       lastBar.appendChild(shareBtn);
     }
 
-    // --- Chat-Requested Share Detection ---
+    // --- Command Palette (\rc, \rcp, \rcc) ---
 
-    const SHARE_PATTERNS = [
-      /share (?:this )?with\s+(.+?):/i,
-      /send (?:this )?to\s+(.+?):/i,
-      /please share (?:this )?with\s+(.+)/i,
-      /forward (?:this )?to\s+(.+?):/i,
-    ];
-
-    function findMatchingTab(name: string): TabInfo | null {
-      const normalized = name.toLowerCase().trim().replace(/['"]/g, '');
-      return otherTabs.value.find(t =>
-        t.chatName.toLowerCase().includes(normalized) ||
-        normalized.includes(t.chatName.toLowerCase())
-      ) || null;
+    function getEditorText(): string {
+      const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
+      return editor?.textContent?.trim() || '';
     }
 
-    function scanForShareRequests() {
-      const aiMessages = document.querySelectorAll(
-        `${SELECTORS.aiMessage}:not([data-rc-share-scanned])`
-      );
-
-      aiMessages.forEach(msgEl => {
-        msgEl.setAttribute('data-rc-share-scanned', 'true');
-
-        const content =
-          msgEl.querySelector(SELECTORS.aiMessageContent) ||
-          msgEl.querySelector(SELECTORS.aiMessageContentFallback) ||
-          msgEl;
-        const text = content.textContent || '';
-
-        for (const pattern of SHARE_PATTERNS) {
-          const match = text.match(pattern);
-          if (!match) continue;
-
-          const targetName = match[1].trim();
-          const targetTab = findMatchingTab(targetName);
-          if (!targetTab) continue;
-
-          injectRequestedShareButton(msgEl as HTMLElement, targetTab);
-          break;
-        }
-      });
+    function clearEditor() {
+      const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
+      if (!editor) return;
+      editor.innerHTML = '<p><br></p>';
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    function injectRequestedShareButton(msgEl: HTMLElement, targetTab: TabInfo) {
-      if (msgEl.querySelector('.rc-connect-requested-share')) return;
+    function handleCommand(text: string): boolean {
+      const cmd = text.trim().toLowerCase();
 
-      const bar = document.createElement('div');
-      bar.className = 'rc-connect-requested-share rc-connect-injected';
-      bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 12px;margin:8px 0;background:rgba(67,56,202,0.06);border:1px solid rgba(67,56,202,0.15);border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;';
-
-      const label = document.createElement('span');
-      label.style.cssText = 'color:#4338CA;flex:1;';
-      label.textContent = `Claude wants to share with ${targetTab.chatName}`;
-
-      const btn = document.createElement('button');
-      btn.style.cssText = 'border:1px solid #4338CA;background:#4338CA;color:#fff;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;';
-      btn.textContent = `Share to ${targetTab.chatName}`;
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Extract text from this specific message
-        const content = msgEl.querySelector('.font-claude-message') ||
-                        msgEl.querySelector('.prose') || msgEl;
-        const response = content.textContent?.trim() || '';
-        const msg: BgMessage = {
-          type: 'SHARE',
-          entry: {
-            from: currentChatName.value,
-            fromUuid: currentChatUuid.value,
-            prompt: '',
-            response,
-          },
-          targetTabIds: [targetTab.tabId],
-        };
-        chrome.runtime.sendMessage(msg);
-        bar.style.background = 'rgba(52,211,153,0.08)';
-        bar.style.borderColor = 'rgba(52,211,153,0.3)';
-        btn.textContent = 'Shared';
-        btn.disabled = true;
-        btn.style.background = '#34D399';
-        btn.style.borderColor = '#34D399';
-      });
-
-      const dismiss = document.createElement('button');
-      dismiss.style.cssText = 'border:none;background:transparent;color:#999;font-size:14px;cursor:pointer;padding:2px 4px;';
-      dismiss.textContent = '\u00d7';
-      dismiss.title = 'Dismiss';
-      dismiss.addEventListener('click', (e) => {
-        e.stopPropagation();
-        bar.remove();
-      });
-
-      bar.appendChild(label);
-      bar.appendChild(btn);
-      bar.appendChild(dismiss);
-
-      const actionBar = msgEl.querySelector(SELECTORS.actionBar);
-      if (actionBar) {
-        actionBar.parentElement?.insertBefore(bar, actionBar);
-      } else {
-        msgEl.appendChild(bar);
+      if (cmd === '\\rc') {
+        shareToOtherTab();
+        clearEditor();
+        return true;
       }
+
+      if (cmd === '\\rcp') {
+        chrome.runtime.sendMessage({ type: 'POP_OUT_SHARED_SPACE' } as BgMessage);
+        clearEditor();
+        return true;
+      }
+
+      if (cmd === '\\rcc') {
+        chrome.runtime.sendMessage({ type: 'CLEAR_SHARED_SPACE' } as BgMessage);
+        clearEditor();
+        return true;
+      }
+
+      return false;
     }
+
+    // Intercept Enter key to check for commands
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        const text = getEditorText();
+        if (text.startsWith('\\rc')) {
+          if (handleCommand(text)) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+      }
+    }, true); // capture phase to intercept before Claude
 
     // --- Drag-to-inject receiver ---
 
@@ -358,7 +276,6 @@ export default defineContentScript({
 
       editor.addEventListener('dragover', (e) => {
         const de = e as DragEvent;
-        // Only accept our extension's drag data
         if (de.dataTransfer?.types.includes('application/rc-connect-entry')) {
           e.preventDefault();
           de.dataTransfer.dropEffect = 'copy';
@@ -383,13 +300,11 @@ export default defineContentScript({
       });
     }
 
-    // --- Sidebar Mount (anchored next to input box) ---
+    // --- Sidebar Mount ---
 
     function findInputContainer(): HTMLElement | null {
-      // Find Claude's input area — the form or container around the ProseMirror editor
       const editor = document.querySelector(SELECTORS.editor);
       if (!editor) return null;
-      // Walk up to find the outer container (the rounded box around the input)
       return editor.closest('form') ||
              editor.closest('[class*="composer"]') ||
              editor.parentElement?.parentElement?.parentElement as HTMLElement || null;
@@ -404,7 +319,6 @@ export default defineContentScript({
       }
 
       const renderUI = () => {
-        // Find the input container to anchor the toggle position
         const inputContainer = findInputContainer();
         const inputRect = inputContainer?.getBoundingClientRect() || null;
 
@@ -431,41 +345,22 @@ export default defineContentScript({
 
       renderUI();
 
-      // Subscribe to signal changes
       unsubscribes.push(otherTabs.subscribe(() => renderUI()));
       unsubscribes.push(sharedEntries.subscribe(() => renderUI()));
       unsubscribes.push(currentChatName.subscribe(() => renderUI()));
       unsubscribes.push(popoutIsOpen.subscribe(() => renderUI()));
 
-      // Re-render on scroll/resize so the toggle stays anchored to the input box
       const reposition = () => renderUI();
       window.addEventListener('resize', reposition);
-      // Periodic reposition to handle dynamic layout changes
       intervals.push(window.setInterval(reposition, 2000));
     }
 
     // --- Init ---
 
-    document.addEventListener('click', (e) => {
-      if (activePickerContainer && !activePickerContainer.contains(e.target as Node)) {
-        closePicker();
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closePicker();
-    });
-
-    // Mount UI after Claude.ai renders
     setTimeout(mountUI, 2000);
     setTimeout(setupDragReceiver, 3000);
 
-    // Periodic tasks — store interval IDs for cleanup
     intervals.push(window.setInterval(injectShareButtons, 3000));
-    intervals.push(window.setInterval(scanForShareRequests, 3000));
-
-    // Initial injection
     setTimeout(injectShareButtons, 3000);
-    setTimeout(scanForShareRequests, 4000);
   },
 });
