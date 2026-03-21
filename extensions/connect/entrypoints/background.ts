@@ -4,45 +4,71 @@ import { getEntries, addEntry, getEntry, updateEntry, deleteEntry, clearEntries,
 
 export default defineBackground(() => {
   // --- Tab Registry ---
-  const tabs = new Map<number, TabInfo>();
+  // Persisted to chrome.storage.session to survive service worker hibernation
+  const MAX_TABS = 2;
 
-  function getTabList(): TabInfo[] {
+  async function getTabs(): Promise<Map<number, TabInfo>> {
+    const data = await chrome.storage.session.get('rc_tabs');
+    const arr: TabInfo[] = data.rc_tabs || [];
+    return new Map(arr.map(t => [t.tabId, t]));
+  }
+
+  async function setTabs(tabs: Map<number, TabInfo>) {
+    await chrome.storage.session.set({ rc_tabs: Array.from(tabs.values()) });
+  }
+
+  async function getTabList(): Promise<TabInfo[]> {
+    const tabs = await getTabs();
     return Array.from(tabs.values());
   }
 
-  function broadcastTabsUpdated() {
-    const tabList = getTabList();
+  async function broadcastTabsUpdated() {
+    const tabs = await getTabs();
+    const tabList = Array.from(tabs.values());
     for (const tabId of tabs.keys()) {
       const msg: CsMessage = { type: 'TABS_UPDATED', tabs: tabList, yourTabId: tabId };
-      chrome.tabs.sendMessage(tabId, msg).catch(() => {
-        tabs.delete(tabId);
+      chrome.tabs.sendMessage(tabId, msg).catch(async () => {
+        const current = await getTabs();
+        current.delete(tabId);
+        await setTabs(current);
       });
     }
+    // Also broadcast to any open extension pages (pop-out)
+    chrome.runtime.sendMessage({ type: 'TABS_UPDATED', tabs: tabList, yourTabId: -1 } as CsMessage).catch(() => {});
   }
 
   async function broadcastSharedSpaceUpdated() {
+    const tabs = await getTabs();
     const entries = await getEntries();
     const msg: CsMessage = { type: 'SHARED_SPACE_UPDATED', entries };
     for (const tabId of tabs.keys()) {
-      chrome.tabs.sendMessage(tabId, msg).catch(() => {
-        tabs.delete(tabId);
+      chrome.tabs.sendMessage(tabId, msg).catch(async () => {
+        const current = await getTabs();
+        current.delete(tabId);
+        await setTabs(current);
       });
     }
+    // Also broadcast to pop-out window
+    chrome.runtime.sendMessage(msg).catch(() => {});
   }
 
   // Clean up when tabs close
-  chrome.tabs.onRemoved.addListener((tabId) => {
+  chrome.tabs.onRemoved.addListener(async (tabId) => {
+    const tabs = await getTabs();
     if (tabs.has(tabId)) {
       tabs.delete(tabId);
+      await setTabs(tabs);
       broadcastTabsUpdated();
     }
   });
 
   // Clean up when tabs navigate away from claude.ai
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+    const tabs = await getTabs();
     if (changeInfo.url && tabs.has(tabId)) {
       if (!changeInfo.url.includes('claude.ai')) {
         tabs.delete(tabId);
+        await setTabs(tabs);
         broadcastTabsUpdated();
       }
     }
@@ -52,10 +78,9 @@ export default defineBackground(() => {
   chrome.runtime.onMessage.addListener((message: BgMessage, sender, sendResponse) => {
     const senderTabId = sender.tab?.id;
 
-    // Validate message has a type
     if (!message || !message.type) return false;
 
-    // Pop-out window doesn't come from a tab
+    // Pop-out window commands (no sender tab)
     if (message.type === 'POP_OUT_SHARED_SPACE') {
       chrome.windows.create({
         url: chrome.runtime.getURL('/shared-space.html'),
@@ -67,19 +92,23 @@ export default defineBackground(() => {
         const popoutWindowId = win.id;
 
         // Tell all tabs to collapse inline sidebar
-        const openMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: true };
-        for (const tabId of tabs.keys()) {
-          chrome.tabs.sendMessage(tabId, openMsg).catch(() => {});
-        }
+        getTabs().then(tabs => {
+          const openMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: true };
+          for (const tabId of tabs.keys()) {
+            chrome.tabs.sendMessage(tabId, openMsg).catch(() => {});
+          }
+        });
 
         // When pop-out closes, re-enable inline sidebars
         const onRemoved = (windowId: number) => {
           if (windowId === popoutWindowId) {
             chrome.windows.onRemoved.removeListener(onRemoved);
-            const closeMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: false };
-            for (const tabId of tabs.keys()) {
-              chrome.tabs.sendMessage(tabId, closeMsg).catch(() => {});
-            }
+            getTabs().then(tabs => {
+              const closeMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: false };
+              for (const tabId of tabs.keys()) {
+                chrome.tabs.sendMessage(tabId, closeMsg).catch(() => {});
+              }
+            });
           }
         };
         chrome.windows.onRemoved.addListener(onRemoved);
@@ -87,10 +116,11 @@ export default defineBackground(() => {
       return false;
     }
 
-    // GET_TABS and GET_SHARED_SPACE can come from the pop-out window (no tab)
     if (message.type === 'GET_TABS') {
-      const filterTabId = senderTabId || -1;
-      sendResponse(getTabList().filter(t => t.tabId !== filterTabId));
+      getTabList().then(list => {
+        const filterTabId = senderTabId || -1;
+        sendResponse(list.filter(t => t.tabId !== filterTabId));
+      });
       return true;
     }
 
@@ -99,17 +129,20 @@ export default defineBackground(() => {
       return true;
     }
 
-    // SEND_ENTRY can come from pop-out window
     if (message.type === 'SEND_ENTRY') {
-      getEntry(message.entryId).then(entry => {
+      getEntry(message.entryId).then(async entry => {
         if (!entry) return;
+        const tabs = await getTabs();
+        const tabList = Array.from(tabs.values());
         const targetIds = message.targetTabIds === 'all'
-          ? getTabList().filter(t => t.tabId !== (senderTabId || -1)).map(t => t.tabId)
+          ? tabList.filter(t => t.tabId !== (senderTabId || -1)).map(t => t.tabId)
           : message.targetTabIds;
         const injectMsg: CsMessage = { type: 'INJECT_AND_SEND', entry, autoSend: true };
         for (const targetId of targetIds) {
-          chrome.tabs.sendMessage(targetId, injectMsg).catch(() => {
-            tabs.delete(targetId);
+          chrome.tabs.sendMessage(targetId, injectMsg).catch(async () => {
+            const current = await getTabs();
+            current.delete(targetId);
+            await setTabs(current);
           });
         }
       });
@@ -121,24 +154,30 @@ export default defineBackground(() => {
 
     switch (message.type) {
       case 'REGISTER_TAB': {
-        // 2-tab limit: if already at capacity and this is a new tab, reject
-        if (!tabs.has(senderTabId) && tabs.size >= 2) {
-          return false;
-        }
-        tabs.set(senderTabId, {
-          tabId: senderTabId,
-          chatName: message.chatName,
-          chatUuid: message.chatUuid,
-          url: message.url,
+        getTabs().then(async tabs => {
+          // 2-tab limit: reject if at capacity and this is a new tab
+          if (!tabs.has(senderTabId) && tabs.size >= MAX_TABS) {
+            return;
+          }
+          tabs.set(senderTabId, {
+            tabId: senderTabId,
+            chatName: message.chatName,
+            chatUuid: message.chatUuid,
+            url: message.url,
+          });
+          await setTabs(tabs);
+          broadcastTabsUpdated();
+          broadcastSharedSpaceUpdated();
         });
-        broadcastTabsUpdated();
-        broadcastSharedSpaceUpdated();
         return false;
       }
 
       case 'UNREGISTER_TAB': {
-        tabs.delete(senderTabId);
-        broadcastTabsUpdated();
+        getTabs().then(async tabs => {
+          tabs.delete(senderTabId);
+          await setTabs(tabs);
+          broadcastTabsUpdated();
+        });
         return false;
       }
 
@@ -154,13 +193,17 @@ export default defineBackground(() => {
         };
         addEntry(entry).then(async () => {
           await broadcastSharedSpaceUpdated();
+          const tabs = await getTabs();
+          const tabList = Array.from(tabs.values());
           const targetIds = message.targetTabIds === 'all'
-            ? getTabList().filter(t => t.tabId !== senderTabId).map(t => t.tabId)
+            ? tabList.filter(t => t.tabId !== senderTabId).map(t => t.tabId)
             : message.targetTabIds;
           const injectMsg: CsMessage = { type: 'INJECT_AND_SEND', entry, autoSend: true };
           for (const targetId of targetIds) {
-            chrome.tabs.sendMessage(targetId, injectMsg).catch(() => {
-              tabs.delete(targetId);
+            chrome.tabs.sendMessage(targetId, injectMsg).catch(async () => {
+              const current = await getTabs();
+              current.delete(targetId);
+              await setTabs(current);
             });
           }
         });

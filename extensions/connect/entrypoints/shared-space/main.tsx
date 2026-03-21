@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { signal } from '@preact/signals';
+import { signal, effect } from '@preact/signals';
 import type { TabInfo, SharedEntry, BgMessage, CsMessage } from '../../lib/types';
 import { SharedSpaceWindow } from '../../components/SharedSpaceWindow';
 
@@ -14,7 +14,7 @@ chrome.runtime.sendMessage({ type: 'GET_SHARED_SPACE' } as BgMessage, (result: S
   entries.value = result || [];
 });
 
-// Listen for updates
+// Listen for updates from background
 chrome.runtime.onMessage.addListener((message: CsMessage) => {
   if (message.type === 'TABS_UPDATED') {
     tabs.value = message.tabs;
@@ -31,15 +31,24 @@ function handleClear() {
   chrome.runtime.sendMessage({ type: 'CLEAR_SHARED_SPACE' } as BgMessage);
 }
 
-function App() {
-  return (
+// Re-render whenever signals change
+const appRoot = document.getElementById('app')!;
+
+function renderApp() {
+  render(
     <SharedSpaceWindow
       entries={entries.value}
       tabs={tabs.value}
       onSendEntry={handleSendEntry}
       onClear={handleClear}
-    />
+    />,
+    appRoot
   );
 }
 
-render(<App />, document.getElementById('app')!);
+// Initial render
+renderApp();
+
+// Subscribe to signal changes
+tabs.subscribe(() => renderApp());
+entries.subscribe(() => renderApp());
