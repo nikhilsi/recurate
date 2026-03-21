@@ -254,12 +254,19 @@ All proven selectors from existing extensions:
 
 ### V0.3 (Planned)
 
+**Sidebar enhancements:**
 - Edit entries inline before sending (trim, rewrite, then share)
 - Pin/unpin entries (keep important context at top)
 - Delete individual entries
 - Search/filter across shared messages
 - Drag entries from sidebar into editor
 - Send from sidebar (re-share older entries)
+
+**Cross-platform sharing:**
+- Claude-to-Copilot context sharing (Urmila's request)
+- Content script runs on `m365.cloud.microsoft/chat` in addition to `claude.ai`
+- Uses Lexical editor injection (already proven in Annotator)
+- Same URL serves all Copilot tiers (free, paid MSA, enterprise AAD) with the same chat DOM
 
 ---
 

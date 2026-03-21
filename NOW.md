@@ -36,7 +36,7 @@
 - Search/filter shared messages
 - Drag entries from sidebar to editor
 - Send from sidebar (re-share older entries)
-- Cross-platform sharing (Claude to Copilot)
+- Cross-platform sharing: Claude to Copilot (`m365.cloud.microsoft/chat`) using existing Lexical injection from Annotator (Urmila's request)
 
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)
