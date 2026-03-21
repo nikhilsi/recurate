@@ -12,10 +12,9 @@ export default defineBackground(() => {
 
   function broadcastTabsUpdated() {
     const tabList = getTabList();
-    const msg: CsMessage = { type: 'TABS_UPDATED', tabs: tabList };
     for (const tabId of tabs.keys()) {
+      const msg: CsMessage = { type: 'TABS_UPDATED', tabs: tabList, yourTabId: tabId };
       chrome.tabs.sendMessage(tabId, msg).catch(() => {
-        // Tab may have closed — clean up
         tabs.delete(tabId);
       });
     }
@@ -52,7 +51,52 @@ export default defineBackground(() => {
   // --- Message Handler ---
   chrome.runtime.onMessage.addListener((message: BgMessage, sender, sendResponse) => {
     const senderTabId = sender.tab?.id;
-    if (!senderTabId) return;
+
+    // Validate message has a type
+    if (!message || !message.type) return false;
+
+    // Pop-out window doesn't come from a tab
+    if (message.type === 'POP_OUT_SHARED_SPACE') {
+      chrome.windows.create({
+        url: chrome.runtime.getURL('/shared-space.html'),
+        type: 'popup',
+        width: 480,
+        height: 640,
+      });
+      return false;
+    }
+
+    // GET_TABS and GET_SHARED_SPACE can come from the pop-out window (no tab)
+    if (message.type === 'GET_TABS') {
+      const filterTabId = senderTabId || -1;
+      sendResponse(getTabList().filter(t => t.tabId !== filterTabId));
+      return true;
+    }
+
+    if (message.type === 'GET_SHARED_SPACE') {
+      getEntries().then(entries => sendResponse(entries));
+      return true;
+    }
+
+    // SEND_ENTRY can come from pop-out window
+    if (message.type === 'SEND_ENTRY') {
+      getEntry(message.entryId).then(entry => {
+        if (!entry) return;
+        const targetIds = message.targetTabIds === 'all'
+          ? getTabList().filter(t => t.tabId !== (senderTabId || -1)).map(t => t.tabId)
+          : message.targetTabIds;
+        const injectMsg: CsMessage = { type: 'INJECT_AND_SEND', entry, autoSend: true };
+        for (const targetId of targetIds) {
+          chrome.tabs.sendMessage(targetId, injectMsg).catch(() => {
+            tabs.delete(targetId);
+          });
+        }
+      });
+      return false;
+    }
+
+    // All remaining messages require a sender tab
+    if (!senderTabId) return false;
 
     switch (message.type) {
       case 'REGISTER_TAB': {
@@ -63,28 +107,18 @@ export default defineBackground(() => {
           url: message.url,
         });
         broadcastTabsUpdated();
-        // Also send current shared space to the new tab
         broadcastSharedSpaceUpdated();
-        break;
+        return false;
       }
 
       case 'UNREGISTER_TAB': {
         tabs.delete(senderTabId);
         broadcastTabsUpdated();
-        break;
-      }
-
-      case 'GET_TABS': {
-        sendResponse(getTabList().filter(t => t.tabId !== senderTabId));
-        return true; // async response
-      }
-
-      case 'GET_SHARED_SPACE': {
-        getEntries().then(entries => sendResponse(entries));
-        return true;
+        return false;
       }
 
       case 'SHARE': {
+        if (!message.entry || !message.entry.from) return false;
         const entry: SharedEntry = {
           id: generateId(),
           from: message.entry.from,
@@ -93,86 +127,49 @@ export default defineBackground(() => {
           response: message.entry.response,
           timestamp: Date.now(),
         };
-
         addEntry(entry).then(async () => {
-          // Broadcast shared space update to all tabs (for sidebar)
           await broadcastSharedSpaceUpdated();
-
-          // Send to target tab(s) for injection
           const targetIds = message.targetTabIds === 'all'
             ? getTabList().filter(t => t.tabId !== senderTabId).map(t => t.tabId)
             : message.targetTabIds;
-
-          const injectMsg: CsMessage = {
-            type: 'INJECT_AND_SEND',
-            entry,
-            autoSend: true,
-          };
-
+          const injectMsg: CsMessage = { type: 'INJECT_AND_SEND', entry, autoSend: true };
           for (const targetId of targetIds) {
             chrome.tabs.sendMessage(targetId, injectMsg).catch(() => {
               tabs.delete(targetId);
             });
           }
         });
-        break;
-      }
-
-      case 'SEND_ENTRY': {
-        getEntry(message.entryId).then(entry => {
-          if (!entry) return;
-
-          const targetIds = message.targetTabIds === 'all'
-            ? getTabList().filter(t => t.tabId !== senderTabId).map(t => t.tabId)
-            : message.targetTabIds;
-
-          const injectMsg: CsMessage = {
-            type: 'INJECT_AND_SEND',
-            entry,
-            autoSend: true,
-          };
-
-          for (const targetId of targetIds) {
-            chrome.tabs.sendMessage(targetId, injectMsg).catch(() => {
-              tabs.delete(targetId);
-            });
-          }
-        });
-        break;
+        return false;
       }
 
       case 'EDIT_ENTRY': {
+        if (!message.entryId) return false;
         updateEntry(message.entryId, { response: message.response })
           .then(() => broadcastSharedSpaceUpdated());
-        break;
+        return false;
       }
 
       case 'PIN_ENTRY': {
+        if (!message.entryId) return false;
         updateEntry(message.entryId, { pinned: message.pinned })
           .then(() => broadcastSharedSpaceUpdated());
-        break;
+        return false;
       }
 
       case 'DELETE_ENTRY': {
+        if (!message.entryId) return false;
         deleteEntry(message.entryId)
           .then(() => broadcastSharedSpaceUpdated());
-        break;
+        return false;
       }
 
       case 'CLEAR_SHARED_SPACE': {
         clearEntries().then(() => broadcastSharedSpaceUpdated());
-        break;
+        return false;
       }
 
-      case 'POP_OUT_SHARED_SPACE': {
-        chrome.windows.create({
-          url: chrome.runtime.getURL('/shared-space.html'),
-          type: 'popup',
-          width: 480,
-          height: 640,
-        });
-        break;
-      }
+      default:
+        return false;
     }
   });
 });

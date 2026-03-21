@@ -21,7 +21,14 @@ export default defineContentScript({
     const currentChatUuid = signal('');
     let currentTabId = 0;
 
-    // --- Tab Registration ---
+    // --- Cleanup tracking ---
+    const intervals: number[] = [];
+    const observers: MutationObserver[] = [];
+    const unsubscribes: (() => void)[] = [];
+
+    // --- Tab Registration (debounced) ---
+
+    let registrationTimer: number | null = null;
 
     function getChatInfo(): { name: string; uuid: string } {
       const titleEl = document.querySelector(SELECTORS.chatTitle);
@@ -32,17 +39,24 @@ export default defineContentScript({
     }
 
     function register() {
-      const { name, uuid } = getChatInfo();
-      currentChatName.value = name;
-      currentChatUuid.value = uuid;
+      // Debounce: cancel any pending registration
+      if (registrationTimer !== null) {
+        clearTimeout(registrationTimer);
+      }
+      registrationTimer = window.setTimeout(() => {
+        registrationTimer = null;
+        const { name, uuid } = getChatInfo();
+        currentChatName.value = name;
+        currentChatUuid.value = uuid;
 
-      const msg: BgMessage = {
-        type: 'REGISTER_TAB',
-        chatName: name,
-        chatUuid: uuid,
-        url: window.location.href,
-      };
-      chrome.runtime.sendMessage(msg);
+        const msg: BgMessage = {
+          type: 'REGISTER_TAB',
+          chatName: name,
+          chatUuid: uuid,
+          url: window.location.href,
+        };
+        chrome.runtime.sendMessage(msg);
+      }, 300);
     }
 
     // Register on load
@@ -53,25 +67,26 @@ export default defineContentScript({
     const urlObserver = new MutationObserver(() => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
-        setTimeout(register, 500);
+        register();
       }
     });
     urlObserver.observe(document.querySelector('title') || document.head, {
       childList: true, subtree: true, characterData: true,
     });
+    observers.push(urlObserver);
 
-    // Also watch for title changes (chat gets named after first message)
-    const titleObserver = new MutationObserver(() => {
-      const { name } = getChatInfo();
-      if (name !== currentChatName.value && name !== 'New chat') {
-        register();
-      }
-    });
-    // Observe the area where the chat title lives
+    // Watch for title changes (chat gets named after first message)
     setTimeout(() => {
       const titleArea = document.querySelector(SELECTORS.chatTitle)?.closest('button');
       if (titleArea) {
+        const titleObserver = new MutationObserver(() => {
+          const { name } = getChatInfo();
+          if (name !== currentChatName.value && name !== 'New chat') {
+            register();
+          }
+        });
         titleObserver.observe(titleArea, { childList: true, subtree: true, characterData: true });
+        observers.push(titleObserver);
       }
     }, 2000);
 
@@ -80,11 +95,8 @@ export default defineContentScript({
     chrome.runtime.onMessage.addListener((message: CsMessage) => {
       switch (message.type) {
         case 'TABS_UPDATED':
-          // Store our own tabId by finding ourselves in the list
-          const self = message.tabs.find(
-            t => t.chatUuid === currentChatUuid.value && t.url === window.location.href
-          );
-          if (self) currentTabId = self.tabId;
+          // Background tells us our tabId explicitly
+          currentTabId = message.yourTabId;
           otherTabs.value = message.tabs.filter(t => t.tabId !== currentTabId);
           break;
 
@@ -179,7 +191,6 @@ export default defineContentScript({
     }
 
     function findMessageForActionBar(bar: HTMLElement): HTMLElement | null {
-      // Walk up from action bar to find the message container
       let el: HTMLElement | null = bar;
       while (el) {
         if (el.matches(SELECTORS.aiMessage) || el.matches(SELECTORS.userMessage)) {
@@ -187,14 +198,12 @@ export default defineContentScript({
         }
         el = el.parentElement;
       }
-      // Fallback: look for sibling/parent message content
       const parent = bar.closest('[data-is-streaming]') ||
                      bar.closest('[data-testid="user-message"]');
       return parent as HTMLElement | null;
     }
 
     function injectShareButtons() {
-      // Remove old injected buttons
       document.querySelectorAll('.rc-connect-injected').forEach(el => el.remove());
 
       const bars = document.querySelectorAll(SELECTORS.actionBar);
@@ -213,9 +222,7 @@ export default defineContentScript({
       });
     }
 
-    // --- V0.2: Chat-Requested Share Detection ---
-    // Watches for AI messages containing "share with {tab name}:" or
-    // "share this with {tab name}" patterns. Injects a one-click share button.
+    // --- Chat-Requested Share Detection ---
 
     const SHARE_PATTERNS = [
       /share (?:this )?with\s+(.+?):/i,
@@ -233,7 +240,6 @@ export default defineContentScript({
     }
 
     function scanForShareRequests() {
-      // Find AI messages that haven't been scanned yet
       const aiMessages = document.querySelectorAll(
         `${SELECTORS.aiMessage}:not([data-rc-share-scanned])`
       );
@@ -255,7 +261,6 @@ export default defineContentScript({
           const targetTab = findMatchingTab(targetName);
           if (!targetTab) continue;
 
-          // Inject a highlighted share button above the message
           injectRequestedShareButton(msgEl as HTMLElement, targetTab);
           break;
         }
@@ -263,7 +268,6 @@ export default defineContentScript({
     }
 
     function injectRequestedShareButton(msgEl: HTMLElement, targetTab: TabInfo) {
-      // Don't double-inject
       if (msgEl.querySelector('.rc-connect-requested-share')) return;
 
       const bar = document.createElement('div');
@@ -312,7 +316,6 @@ export default defineContentScript({
       bar.appendChild(btn);
       bar.appendChild(dismiss);
 
-      // Insert before the message action bar or at the end of the message
       const actionBar = msgEl.querySelector(SELECTORS.actionBar);
       if (actionBar) {
         actionBar.parentElement?.insertBefore(bar, actionBar);
@@ -321,10 +324,42 @@ export default defineContentScript({
       }
     }
 
+    // --- Drag-to-inject receiver ---
+
+    function setupDragReceiver() {
+      const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
+      if (!editor) return;
+
+      editor.addEventListener('dragover', (e) => {
+        const de = e as DragEvent;
+        // Only accept our extension's drag data
+        if (de.dataTransfer?.types.includes('application/rc-connect-entry')) {
+          e.preventDefault();
+          de.dataTransfer.dropEffect = 'copy';
+          editor.style.outline = '2px solid #4338CA';
+        }
+      });
+
+      editor.addEventListener('dragleave', () => {
+        editor.style.outline = '';
+      });
+
+      editor.addEventListener('drop', (e) => {
+        e.preventDefault();
+        editor.style.outline = '';
+        const de = e as DragEvent;
+        if (de.dataTransfer?.types.includes('application/rc-connect-entry')) {
+          const text = de.dataTransfer.getData('text/plain');
+          if (text) {
+            appendToEditor(text);
+          }
+        }
+      });
+    }
+
     // --- Sidebar + Badge Mount ---
 
     function mountUI() {
-      // Badge
       let badgeRoot = document.getElementById('rc-connect-badge');
       if (!badgeRoot) {
         badgeRoot = document.createElement('div');
@@ -332,7 +367,6 @@ export default defineContentScript({
         document.body.appendChild(badgeRoot);
       }
 
-      // Sidebar
       let sidebarRoot = document.getElementById('rc-connect-sidebar');
       if (!sidebarRoot) {
         sidebarRoot = document.createElement('div');
@@ -364,67 +398,36 @@ export default defineContentScript({
         );
       };
 
-      // Re-render when signals change
-      // Use effect-like pattern with signal subscriptions
       renderUI();
 
-      // Subscribe to signal changes for re-rendering
-      const unsubTabs = otherTabs.subscribe(() => renderUI());
-      const unsubEntries = sharedEntries.subscribe(() => renderUI());
-      const unsubName = currentChatName.subscribe(() => renderUI());
-    }
-
-    // --- V0.3: Drag-to-inject receiver ---
-    // When a sidebar entry is dragged onto the editor, append it
-
-    function setupDragReceiver() {
-      const editor = document.querySelector(SELECTORS.editor);
-      if (!editor) return;
-
-      editor.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        (e as DragEvent).dataTransfer!.dropEffect = 'copy';
-        (editor as HTMLElement).style.outline = '2px solid #4338CA';
-      });
-
-      editor.addEventListener('dragleave', () => {
-        (editor as HTMLElement).style.outline = '';
-      });
-
-      editor.addEventListener('drop', (e) => {
-        e.preventDefault();
-        (editor as HTMLElement).style.outline = '';
-        const text = (e as DragEvent).dataTransfer?.getData('text/plain');
-        if (text) {
-          appendToEditor(text);
-        }
-      });
+      // Subscribe to signal changes — store unsubscribe functions for cleanup
+      unsubscribes.push(otherTabs.subscribe(() => renderUI()));
+      unsubscribes.push(sharedEntries.subscribe(() => renderUI()));
+      unsubscribes.push(currentChatName.subscribe(() => renderUI()));
     }
 
     // --- Init ---
 
-    // Close picker on click outside
     document.addEventListener('click', (e) => {
       if (activePickerContainer && !activePickerContainer.contains(e.target as Node)) {
         closePicker();
       }
     });
 
-    // Close picker on Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePicker();
     });
 
-    // Mount UI after a delay (let Claude.ai render first)
+    // Mount UI after Claude.ai renders
     setTimeout(mountUI, 2000);
-
-    // Setup drag receiver after editor loads
     setTimeout(setupDragReceiver, 3000);
 
-    // Inject share buttons and scan for share requests periodically
+    // Periodic tasks — store interval IDs for cleanup
+    intervals.push(window.setInterval(injectShareButtons, 3000));
+    intervals.push(window.setInterval(scanForShareRequests, 3000));
+
+    // Initial injection
     setTimeout(injectShareButtons, 3000);
-    setInterval(injectShareButtons, 3000);
     setTimeout(scanForShareRequests, 4000);
-    setInterval(scanForShareRequests, 3000);
   },
 });

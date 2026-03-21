@@ -35,6 +35,6 @@ export type BgMessage =
   | { type: 'POP_OUT_SHARED_SPACE' };
 
 export type CsMessage =
-  | { type: 'TABS_UPDATED'; tabs: TabInfo[] }
+  | { type: 'TABS_UPDATED'; tabs: TabInfo[]; yourTabId: number }
   | { type: 'SHARED_SPACE_UPDATED'; entries: SharedEntry[] }
   | { type: 'INJECT_AND_SEND'; entry: SharedEntry; autoSend: boolean };

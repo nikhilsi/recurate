@@ -13,10 +13,8 @@ export function formatForInjection(entry: SharedEntry): string {
   }
 
   if (entry.response) {
-    // For multi-line responses, indent each line with >
     const responseLines = entry.response.split('\n');
     if (entry.prompt === '[Multi-message exchange]') {
-      // Multi-message exchange — already formatted with role labels
       for (const line of responseLines) {
         lines.push(`> ${line}`);
       }
@@ -28,28 +26,39 @@ export function formatForInjection(entry: SharedEntry): string {
     }
   }
 
-  lines.push(''); // blank line after quote block
+  lines.push('');
   return lines.join('\n');
 }
 
 /**
- * Inject text into Claude's ProseMirror editor.
- * Uses the same pattern as Annotator: clear, build <p> elements, dispatch input event.
+ * Inject text into Claude's ProseMirror editor using clipboard paste.
+ * This is the safe approach — ProseMirror handles the paste event natively
+ * and keeps its internal state in sync (same pattern as Annotator).
  */
 export function injectIntoEditor(text: string): boolean {
   const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
   if (!editor) return false;
 
-  editor.innerHTML = '';
-  const lines = text.split('\n');
-  for (const line of lines) {
-    const p = document.createElement('p');
-    p.textContent = line || '\u200B'; // zero-width space for empty lines
-    editor.appendChild(p);
+  // Focus and select all existing content
+  editor.focus();
+  const selection = window.getSelection();
+  if (selection) {
+    selection.selectAllChildren(editor);
   }
 
-  editor.dispatchEvent(new Event('input', { bubbles: true }));
-  editor.focus();
+  // Use clipboard paste event to inject — ProseMirror handles this natively
+  const dt = new DataTransfer();
+  dt.setData('text/plain', text);
+  const pasteEvent = new ClipboardEvent('paste', {
+    clipboardData: dt,
+    bubbles: true,
+    cancelable: true,
+  });
+  editor.dispatchEvent(pasteEvent);
+
+  // Dispatch selectionchange so ProseMirror syncs its internal state
+  document.dispatchEvent(new Event('selectionchange'));
+
   return true;
 }
 
@@ -57,16 +66,15 @@ export function injectIntoEditor(text: string): boolean {
  * Click Claude's send button to auto-send the injected text.
  */
 export function clickSendButton(): boolean {
-  // Try the primary send button selector
   const sendBtn = document.querySelector(SELECTORS.sendButton) as HTMLButtonElement | null;
   if (sendBtn && !sendBtn.disabled) {
     sendBtn.click();
     return true;
   }
 
-  // Fallback: look for any button with a send-like aria-label
+  // Fallback: look for send button by data-testid
   const fallback = document.querySelector(
-    'button[aria-label*="Send"], button[data-testid*="send"]'
+    'button[data-testid*="send"]'
   ) as HTMLButtonElement | null;
   if (fallback && !fallback.disabled) {
     fallback.click();
@@ -85,8 +93,8 @@ export function injectEntry(entry: SharedEntry, autoSend: boolean): boolean {
   if (!injected) return false;
 
   if (autoSend) {
-    // Small delay to let ProseMirror sync before clicking send
-    setTimeout(() => clickSendButton(), 150);
+    // Delay to let ProseMirror sync before clicking send
+    setTimeout(() => clickSendButton(), 250);
   }
 
   return true;
@@ -94,28 +102,31 @@ export function injectEntry(entry: SharedEntry, autoSend: boolean): boolean {
 
 /**
  * Append text to the current editor content (for drag-to-inject).
- * Unlike injectIntoEditor which replaces, this appends.
+ * Moves cursor to end, then pastes.
  */
 export function appendToEditor(text: string): boolean {
   const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
   if (!editor) return false;
 
-  // Add a blank line separator if editor already has content
-  const existing = editor.textContent?.trim();
-  if (existing) {
-    const sep = document.createElement('p');
-    sep.textContent = '\u200B';
-    editor.appendChild(sep);
-  }
-
-  const lines = text.split('\n');
-  for (const line of lines) {
-    const p = document.createElement('p');
-    p.textContent = line || '\u200B';
-    editor.appendChild(p);
-  }
-
-  editor.dispatchEvent(new Event('input', { bubbles: true }));
+  // Move cursor to end of editor
   editor.focus();
+  const selection = window.getSelection();
+  if (selection) {
+    selection.selectAllChildren(editor);
+    selection.collapseToEnd();
+  }
+
+  // Paste at cursor position
+  const dt = new DataTransfer();
+  dt.setData('text/plain', '\n\n' + text);
+  const pasteEvent = new ClipboardEvent('paste', {
+    clipboardData: dt,
+    bubbles: true,
+    cancelable: true,
+  });
+  editor.dispatchEvent(pasteEvent);
+
+  document.dispatchEvent(new Event('selectionchange'));
+
   return true;
 }
