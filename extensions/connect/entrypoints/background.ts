@@ -62,6 +62,27 @@ export default defineBackground(() => {
         type: 'popup',
         width: 480,
         height: 640,
+      }, (win) => {
+        if (!win) return;
+        const popoutWindowId = win.id;
+
+        // Tell all tabs to collapse inline sidebar
+        const openMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: true };
+        for (const tabId of tabs.keys()) {
+          chrome.tabs.sendMessage(tabId, openMsg).catch(() => {});
+        }
+
+        // When pop-out closes, re-enable inline sidebars
+        const onRemoved = (windowId: number) => {
+          if (windowId === popoutWindowId) {
+            chrome.windows.onRemoved.removeListener(onRemoved);
+            const closeMsg: CsMessage = { type: 'POPOUT_STATE', isOpen: false };
+            for (const tabId of tabs.keys()) {
+              chrome.tabs.sendMessage(tabId, closeMsg).catch(() => {});
+            }
+          }
+        };
+        chrome.windows.onRemoved.addListener(onRemoved);
       });
       return false;
     }

@@ -72,9 +72,9 @@ export function clickSendButton(): boolean {
     return true;
   }
 
-  // Fallback: look for send button by data-testid
+  // Fallback: case-insensitive search for send button
   const fallback = document.querySelector(
-    'button[data-testid*="send"]'
+    'button[aria-label="Send message"], button[aria-label="Send Message"]'
   ) as HTMLButtonElement | null;
   if (fallback && !fallback.disabled) {
     fallback.click();

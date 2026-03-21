@@ -2,11 +2,10 @@ import { defineContentScript } from 'wxt/sandbox';
 import { render } from 'preact';
 import { signal } from '@preact/signals';
 import { SELECTORS } from '../lib/selectors';
-import { extractExchange, getSelectedText } from '../lib/exchange';
-import { injectEntry, appendToEditor, formatForInjection } from '../lib/inject';
+import { getSelectedText } from '../lib/exchange';
+import { injectEntry, appendToEditor } from '../lib/inject';
 import type { TabInfo, SharedEntry, BgMessage, CsMessage } from '../lib/types';
 import { TabPicker } from '../components/TabPicker';
-import { TabBadge } from '../components/TabBadge';
 import { Sidebar } from '../components/Sidebar';
 
 export default defineContentScript({
@@ -19,6 +18,7 @@ export default defineContentScript({
     const sharedEntries = signal<SharedEntry[]>([]);
     const currentChatName = signal('');
     const currentChatUuid = signal('');
+    const popoutIsOpen = signal(false);
     let currentTabId = 0;
 
     // --- Cleanup tracking ---
@@ -107,6 +107,10 @@ export default defineContentScript({
         case 'INJECT_AND_SEND':
           injectEntry(message.entry, message.autoSend);
           break;
+
+        case 'POPOUT_STATE':
+          popoutIsOpen.value = message.isOpen;
+          break;
       }
     });
 
@@ -123,7 +127,7 @@ export default defineContentScript({
       }
     }
 
-    function showPicker(anchorEl: HTMLElement, messageEl: HTMLElement) {
+    function showPicker(anchorEl: HTMLElement) {
       closePicker();
 
       const container = document.createElement('div');
@@ -133,13 +137,44 @@ export default defineContentScript({
 
       const handleSelect = (targetTabIds: number[] | 'all') => {
         const selectedText = getSelectedText();
-        const exchange = extractExchange(messageEl);
+
+        // Extract the last exchange — same pattern as Copier/Annotator
+        // Last AI response + its preceding user prompt
+        const allMessages = document.querySelectorAll(
+          `${SELECTORS.userMessage}, ${SELECTORS.aiMessage}`
+        );
+        let prompt = '';
+        let response = '';
+
+        if (selectedText) {
+          response = selectedText;
+        } else if (allMessages.length > 0) {
+          // Walk backward to find last AI response and its preceding user prompt
+          for (let i = allMessages.length - 1; i >= 0; i--) {
+            const el = allMessages[i] as HTMLElement;
+            if (!response && !el.matches(SELECTORS.userMessage)) {
+              // AI message
+              const content = el.querySelector('.font-claude-message') ||
+                              el.querySelector('.prose') || el;
+              response = content.textContent?.trim() || '';
+            } else if (response && el.matches(SELECTORS.userMessage)) {
+              // User message preceding the AI response
+              prompt = el.textContent?.trim() || '';
+              break;
+            }
+          }
+        }
+
+        if (!response) {
+          closePicker();
+          return;
+        }
 
         const entry = {
           from: currentChatName.value,
           fromUuid: currentChatUuid.value,
-          prompt: selectedText ? '' : exchange.prompt,
-          response: selectedText || exchange.response,
+          prompt,
+          response,
         };
 
         const msg: BgMessage = {
@@ -162,7 +197,7 @@ export default defineContentScript({
       );
     }
 
-    function createShareButton(messageEl: HTMLElement): HTMLElement {
+    function createShareButton(): HTMLElement {
       const wrapper = document.createElement('div');
       wrapper.className = 'w-fit rc-connect-injected';
       wrapper.setAttribute('data-state', 'closed');
@@ -184,42 +219,30 @@ export default defineContentScript({
       btn.addEventListener('mousedown', e => e.preventDefault());
       btn.addEventListener('click', e => {
         e.stopPropagation();
-        showPicker(btn, messageEl);
+        // No message element needed — we extract the last exchange on click
+        showPicker(btn);
       });
 
       return wrapper;
     }
 
-    function findMessageForActionBar(bar: HTMLElement): HTMLElement | null {
-      let el: HTMLElement | null = bar;
-      while (el) {
-        if (el.matches(SELECTORS.aiMessage) || el.matches(SELECTORS.userMessage)) {
-          return el;
-        }
-        el = el.parentElement;
-      }
-      const parent = bar.closest('[data-is-streaming]') ||
-                     bar.closest('[data-testid="user-message"]');
-      return parent as HTMLElement | null;
-    }
-
     function injectShareButtons() {
       document.querySelectorAll('.rc-connect-injected').forEach(el => el.remove());
 
+      // Same pattern as Copier: find the last action bar, append our button
       const bars = document.querySelectorAll(SELECTORS.actionBar);
-      bars.forEach(bar => {
-        const messageEl = findMessageForActionBar(bar as HTMLElement);
-        if (!messageEl) return;
+      if (bars.length === 0) return;
 
-        const sep = document.createElement('div');
-        sep.className = 'rc-connect-injected';
-        sep.style.cssText = 'width:1px;height:16px;background:currentColor;opacity:0.15;margin:0 2px;align-self:center;';
+      const lastBar = bars[bars.length - 1];
 
-        const shareBtn = createShareButton(messageEl);
+      const sep = document.createElement('div');
+      sep.className = 'rc-connect-injected';
+      sep.style.cssText = 'width:1px;height:16px;background:currentColor;opacity:0.15;margin:0 2px;align-self:center;';
 
-        bar.appendChild(sep);
-        bar.appendChild(shareBtn);
-      });
+      const shareBtn = createShareButton();
+
+      lastBar.appendChild(sep);
+      lastBar.appendChild(shareBtn);
     }
 
     // --- Chat-Requested Share Detection ---
@@ -283,14 +306,17 @@ export default defineContentScript({
       btn.textContent = `Share to ${targetTab.chatName}`;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const exchange = extractExchange(msgEl);
+        // Extract text from this specific message
+        const content = msgEl.querySelector('.font-claude-message') ||
+                        msgEl.querySelector('.prose') || msgEl;
+        const response = content.textContent?.trim() || '';
         const msg: BgMessage = {
           type: 'SHARE',
           entry: {
             from: currentChatName.value,
             fromUuid: currentChatUuid.value,
-            prompt: exchange.prompt,
-            response: exchange.response,
+            prompt: '',
+            response,
           },
           targetTabIds: [targetTab.tabId],
         };
@@ -357,16 +383,19 @@ export default defineContentScript({
       });
     }
 
-    // --- Sidebar + Badge Mount ---
+    // --- Sidebar Mount (anchored next to input box) ---
+
+    function findInputContainer(): HTMLElement | null {
+      // Find Claude's input area — the form or container around the ProseMirror editor
+      const editor = document.querySelector(SELECTORS.editor);
+      if (!editor) return null;
+      // Walk up to find the outer container (the rounded box around the input)
+      return editor.closest('form') ||
+             editor.closest('[class*="composer"]') ||
+             editor.parentElement?.parentElement?.parentElement as HTMLElement || null;
+    }
 
     function mountUI() {
-      let badgeRoot = document.getElementById('rc-connect-badge');
-      if (!badgeRoot) {
-        badgeRoot = document.createElement('div');
-        badgeRoot.id = 'rc-connect-badge';
-        document.body.appendChild(badgeRoot);
-      }
-
       let sidebarRoot = document.getElementById('rc-connect-sidebar');
       if (!sidebarRoot) {
         sidebarRoot = document.createElement('div');
@@ -375,16 +404,18 @@ export default defineContentScript({
       }
 
       const renderUI = () => {
-        render(
-          <TabBadge tabs={otherTabs.value} currentName={currentChatName.value} />,
-          badgeRoot!
-        );
+        // Find the input container to anchor the toggle position
+        const inputContainer = findInputContainer();
+        const inputRect = inputContainer?.getBoundingClientRect() || null;
 
         render(
           <Sidebar
             entries={sharedEntries.value}
             tabs={[...otherTabs.value, { tabId: currentTabId, chatName: currentChatName.value, chatUuid: currentChatUuid.value, url: window.location.href }]}
             currentTabId={currentTabId}
+            connectedCount={otherTabs.value.length}
+            popoutIsOpen={popoutIsOpen.value}
+            inputRect={inputRect}
             onSendEntry={(entryId, targetTabIds) => {
               const msg: BgMessage = { type: 'SEND_ENTRY', entryId, targetTabIds };
               chrome.runtime.sendMessage(msg);
@@ -400,10 +431,17 @@ export default defineContentScript({
 
       renderUI();
 
-      // Subscribe to signal changes — store unsubscribe functions for cleanup
+      // Subscribe to signal changes
       unsubscribes.push(otherTabs.subscribe(() => renderUI()));
       unsubscribes.push(sharedEntries.subscribe(() => renderUI()));
       unsubscribes.push(currentChatName.subscribe(() => renderUI()));
+      unsubscribes.push(popoutIsOpen.subscribe(() => renderUI()));
+
+      // Re-render on scroll/resize so the toggle stays anchored to the input box
+      const reposition = () => renderUI();
+      window.addEventListener('resize', reposition);
+      // Periodic reposition to handle dynamic layout changes
+      intervals.push(window.setInterval(reposition, 2000));
     }
 
     // --- Init ---

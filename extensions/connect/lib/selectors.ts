@@ -17,5 +17,5 @@ export const SELECTORS = {
   editor: 'div.ProseMirror[contenteditable="true"]',
 
   // Send button
-  sendButton: 'button[aria-label="Send Message"]',
+  sendButton: 'button[aria-label="Send message"]',
 } as const;

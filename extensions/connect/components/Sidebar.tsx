@@ -6,22 +6,22 @@ const isExpanded = signal(false);
 const editingId = signal<string | null>(null);
 const editText = signal('');
 const searchQuery = signal('');
-const panelWidth = signal(300);
-const panelHeight = signal(500);
-const isResizing = signal(false);
 
 interface SidebarProps {
   entries: SharedEntry[];
   tabs: TabInfo[];
   currentTabId: number;
+  connectedCount: number;
+  popoutIsOpen: boolean;
+  inputRect: DOMRect | null;
   onSendEntry: (entryId: string, targetTabIds: number[] | 'all') => void;
   onClear: () => void;
 }
 
-export function Sidebar({ entries, tabs, currentTabId, onSendEntry, onClear }: SidebarProps) {
+export function Sidebar({ entries, tabs, currentTabId, connectedCount, popoutIsOpen, inputRect, onSendEntry, onClear }: SidebarProps) {
   const otherTabs = tabs.filter(t => t.tabId !== currentTabId);
 
-  // Filter entries by search query
+  // Filter + sort
   const query = searchQuery.value.toLowerCase();
   const filtered = query
     ? entries.filter(e =>
@@ -30,79 +30,88 @@ export function Sidebar({ entries, tabs, currentTabId, onSendEntry, onClear }: S
         e.response.toLowerCase().includes(query)
       )
     : entries;
-
-  // Sort: pinned first, then by timestamp descending
   const sorted = filtered.slice().sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return b.timestamp - a.timestamp;
   });
 
+  // Position in the right margin gutter, outside Claude's chat content
+  // Toggle: vertically centered with input box, just to its right
+  const gutterLeft = inputRect
+    ? `${inputRect.right + 12}px`  // 12px gap after input container
+    : 'auto';
+  const toggleBottom = inputRect
+    ? `${window.innerHeight - inputRect.bottom + Math.floor((inputRect.height - 32) / 2)}px`
+    : '80px';
+  const fallbackRight = inputRect ? 'auto' : '20px';
+
+  const togglePos = { bottom: toggleBottom, left: gutterLeft, right: fallbackRight };
+
+  // Panel: anchored at same left position, bottom just above the input, expands upward
+  const panelPos = {
+    bottom: inputRect
+      ? `${window.innerHeight - inputRect.top + 8}px`
+      : '120px',
+    left: gutterLeft,
+    right: fallbackRight,
+  };
+
+  if (connectedCount === 0) return null;
+
+  // Hide inline sidebar when pop-out window is open
+  if (popoutIsOpen) {
+    isExpanded.value = false;
+    return null;
+  }
+
   return (
-    <div style={containerStyle(isExpanded.value)}>
-      {/* Toggle button */}
+    <div>
+      {/* Toggle button — anchored next to input box */}
       <button
-        style={toggleStyle}
+        type="button"
+        style={{ ...toggleStyle, ...togglePos }}
         onClick={() => { isExpanded.value = !isExpanded.value; }}
         title={isExpanded.value ? 'Collapse shared space' : 'Expand shared space'}
       >
-        <span style={{ fontSize: '14px' }}>&#x27F7;</span>
+        <span style={{ fontSize: '13px' }}>&#x27F7;</span>
+        <span style={{ fontSize: '11px' }}>{connectedCount} connected</span>
         {!isExpanded.value && entries.length > 0 && (
           <span style={countBadgeStyle}>{entries.length}</span>
         )}
       </button>
 
-      {/* Panel content */}
+      {/* Panel — expands upward from toggle into right margin */}
       {isExpanded.value && (
-        <div style={{ ...panelStyle, width: `${panelWidth.value}px`, maxHeight: `${panelHeight.value}px` }}>
-          {/* Resize handle — left edge */}
-          <div
-            style={resizeHandleStyle}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              isResizing.value = true;
-              const startX = e.clientX;
-              const startY = e.clientY;
-              const startW = panelWidth.value;
-              const startH = panelHeight.value;
-
-              const onMove = (ev: MouseEvent) => {
-                // Dragging left edge leftward = wider
-                panelWidth.value = Math.max(250, Math.min(600, startW - (ev.clientX - startX)));
-                panelHeight.value = Math.max(300, Math.min(800, startH + (ev.clientY - startY)));
-              };
-              const onUp = () => {
-                isResizing.value = false;
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-              };
-              document.addEventListener('mousemove', onMove);
-              document.addEventListener('mouseup', onUp);
-            }}
-          />
+        <div style={{ ...panelStyle, ...panelPos }}>
           {/* Header */}
           <div style={headerStyle}>
-            <span style={{ fontWeight: '600', fontSize: '13px' }}>Shared Space</span>
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              <button
-                style={popOutBtnStyle}
-                onClick={() => {
-                  chrome.runtime.sendMessage({ type: 'POP_OUT_SHARED_SPACE' });
-                  isExpanded.value = false;
-                }}
-                title="Open in separate window"
-              >
-                &#x2197;
-              </button>
-              {entries.length > 0 && (
-                <button style={clearBtnStyle} onClick={onClear} title="Clear all">
-                  Clear
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: '700', fontSize: '13px', color: '#4338CA' }}>Recurate Connect</span>
+                <button
+                  style={popOutBtnStyle}
+                  onClick={() => {
+                    chrome.runtime.sendMessage({ type: 'POP_OUT_SHARED_SPACE' });
+                    isExpanded.value = false;
+                  }}
+                  title="Open in separate window"
+                >
+                  &#x2197;
                 </button>
-              )}
+              </div>
+              <div style={connectedToStyle}>
+                {formatConnectedTo(otherTabs)}
+              </div>
             </div>
+            {entries.length > 0 && (
+              <button style={clearBtnStyle} onClick={onClear} title="Clear all">
+                Clear
+              </button>
+            )}
           </div>
 
-          {/* Search bar */}
+          {/* Search */}
           {entries.length > 3 && (
             <div style={searchBarStyle}>
               <input
@@ -113,10 +122,7 @@ export function Sidebar({ entries, tabs, currentTabId, onSendEntry, onClear }: S
                 style={searchInputStyle}
               />
               {searchQuery.value && (
-                <button
-                  style={searchClearStyle}
-                  onClick={() => { searchQuery.value = ''; }}
-                >
+                <button style={searchClearStyle} onClick={() => { searchQuery.value = ''; }}>
                   &#x00d7;
                 </button>
               )}
@@ -148,7 +154,7 @@ export function Sidebar({ entries, tabs, currentTabId, onSendEntry, onClear }: S
   );
 }
 
-// --- Entry Card Component ---
+// --- Entry Card ---
 
 interface EntryCardProps {
   entry: SharedEntry;
@@ -196,7 +202,6 @@ function EntryCard({ entry, otherTabs, onSendEntry }: EntryCardProps) {
       draggable
       onDragStart={handleDragStart}
     >
-      {/* Entry header with actions */}
       <div style={entryHeaderStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {entry.pinned && <span style={{ fontSize: '10px' }} title="Pinned">&#x1f4cc;</span>}
@@ -216,12 +221,10 @@ function EntryCard({ entry, otherTabs, onSendEntry }: EntryCardProps) {
         </div>
       </div>
 
-      {/* Prompt */}
       {entry.prompt && entry.prompt !== '[Multi-message exchange]' && (
         <div style={promptStyle}>You: {truncate(entry.prompt, 80)}</div>
       )}
 
-      {/* Response — editable or display */}
       {isEditing ? (
         <div style={{ marginBottom: '6px' }}>
           <textarea
@@ -243,14 +246,10 @@ function EntryCard({ entry, otherTabs, onSendEntry }: EntryCardProps) {
         <div style={responseStyle}>{truncate(entry.response, 120)}</div>
       )}
 
-      {/* Send actions */}
       {!isEditing && (
         <div style={actionsStyle}>
           {otherTabs.length > 1 && (
-            <button
-              style={sendBtnStyle}
-              onClick={() => onSendEntry(entry.id, 'all')}
-            >
+            <button style={sendBtnStyle} onClick={() => onSendEntry(entry.id, 'all')}>
               Send to all
             </button>
           )}
@@ -266,13 +265,20 @@ function EntryCard({ entry, otherTabs, onSendEntry }: EntryCardProps) {
         </div>
       )}
 
-      {/* Drag hint */}
       <div style={dragHintStyle}>Drag to input</div>
     </div>
   );
 }
 
 // --- Helpers ---
+
+function formatConnectedTo(tabs: TabInfo[]): string {
+  if (tabs.length === 0) return 'No connections';
+  const names = tabs.map(t => `"${truncate(t.chatName || 'Untitled', 10)}"`);
+  if (names.length === 1) return `Connected to ${names[0]}`;
+  if (names.length === 2) return `Connected to ${names[0]} and ${names[1]}`;
+  return `Connected to ${names[0]}, ${names[1]}, and ${names.length - 2} more`;
+}
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
@@ -286,74 +292,47 @@ function truncate(text: string, max: number): string {
 
 // --- Styles ---
 
-function containerStyle(expanded: boolean): Record<string, string> {
-  return {
-    position: 'fixed',
-    top: '60px',
-    right: '0',
-    zIndex: '2147483646',
-    display: 'flex',
-    flexDirection: 'row-reverse',
-    alignItems: 'flex-start',
-    gap: '0',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  };
-}
-
 const toggleStyle: Record<string, string> = {
-  position: 'relative',
-  width: '32px',
-  height: '32px',
-  border: '1px solid rgba(0,0,0,0.1)',
-  borderRight: 'none',
-  borderRadius: '8px 0 0 8px',
-  background: '#fff',
-  cursor: 'pointer',
+  position: 'fixed',
+  zIndex: '2147483646',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
+  gap: '6px',
+  padding: '6px 12px',
+  border: '1px solid rgba(67,56,202,0.2)',
+  borderRadius: '10px',
+  background: 'rgba(67,56,202,0.06)',
+  cursor: 'pointer',
   color: '#4338CA',
-  boxShadow: '-2px 2px 8px rgba(0,0,0,0.06)',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontWeight: '500',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+  whiteSpace: 'nowrap',
 };
 
 const countBadgeStyle: Record<string, string> = {
-  position: 'absolute',
-  top: '-4px',
-  left: '-4px',
-  width: '16px',
-  height: '16px',
-  borderRadius: '50%',
+  marginLeft: '2px',
+  padding: '1px 6px',
+  borderRadius: '10px',
   background: '#4338CA',
   color: '#fff',
   fontSize: '10px',
   fontWeight: '600',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
-
-const resizeHandleStyle: Record<string, string> = {
-  position: 'absolute',
-  left: '0',
-  top: '0',
-  width: '6px',
-  height: '100%',
-  cursor: 'ew-resize',
-  zIndex: '1',
 };
 
 const panelStyle: Record<string, string> = {
-  position: 'relative',
-  width: '300px',
-  maxHeight: '500px',
+  position: 'fixed',
+  zIndex: '2147483646',
+  width: '320px',
+  maxHeight: '60vh',
   background: '#fff',
   border: '1px solid rgba(0,0,0,0.1)',
-  borderRight: 'none',
-  borderRadius: '8px 0 0 8px',
-  boxShadow: '-4px 4px 16px rgba(0,0,0,0.08)',
+  borderRadius: '12px',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 };
 
 const headerStyle: Record<string, string> = {
@@ -363,6 +342,12 @@ const headerStyle: Record<string, string> = {
   padding: '10px 12px',
   borderBottom: '1px solid rgba(0,0,0,0.06)',
   color: '#1a1a2e',
+};
+
+const connectedToStyle: Record<string, string> = {
+  fontSize: '10px',
+  color: '#888',
+  marginTop: '2px',
 };
 
 const popOutBtnStyle: Record<string, string> = {

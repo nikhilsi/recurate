@@ -37,4 +37,5 @@ export type BgMessage =
 export type CsMessage =
   | { type: 'TABS_UPDATED'; tabs: TabInfo[]; yourTabId: number }
   | { type: 'SHARED_SPACE_UPDATED'; entries: SharedEntry[] }
-  | { type: 'INJECT_AND_SEND'; entry: SharedEntry; autoSend: boolean };
+  | { type: 'INJECT_AND_SEND'; entry: SharedEntry; autoSend: boolean }
+  | { type: 'POPOUT_STATE'; isOpen: boolean };
