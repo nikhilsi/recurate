@@ -84,6 +84,7 @@ Connect two AI chat tabs with one-click context sharing. Works across **Claude.a
 - One-click share or `\rc` command — last exchange injected and auto-sent to the other tab
 - Cross-platform: Claude-to-Claude, Claude-to-Copilot, Copilot-to-Copilot
 - Shared space sidebar and pop-out window for multi-monitor workflows
+- Works in Chrome and Microsoft Edge
 - 2-tab connection
 
 **Status:** Built and tested — Chrome Web Store publication pending

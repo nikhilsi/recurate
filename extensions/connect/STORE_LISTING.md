@@ -55,6 +55,8 @@ PRIVACY
 - No permissions beyond host access to supported sites and storage.
 - Open source: github.com/nikhilsi/recurate
 
+Also works in Microsoft Edge (enable "Allow extensions from other stores" in edge://extensions).
+
 Free forever. Part of the Recurate family: Compose, Annotate, Copy, Connect.
 
 ### Additional Fields

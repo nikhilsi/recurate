@@ -58,7 +58,7 @@ Copy or download your full AI conversation — both your messages and the AI's r
 
 ### Recurate Connect — Cross-Chat Context Sharing
 
-Connect two AI chat tabs with one-click context sharing. Works across Claude.ai and Microsoft Copilot. When you run specialist chats (e.g., a Claude chat for strategy, a Copilot chat for work tasks), Connect lets you share messages between them without copy-paste. Type `\rc` to share the last exchange, or click the share button. A shared space sidebar shows everything that's been shared, and a pop-out window gives you a command center on a second monitor.
+Connect two AI chat tabs with one-click context sharing. Works across Claude.ai and Microsoft Copilot, in both Chrome and Edge. When you run specialist chats (e.g., a Claude chat for strategy, a Copilot chat for work tasks), Connect lets you share messages between them without copy-paste. Type `\rc` to share the last exchange, or click the share button. A shared space sidebar shows everything that's been shared, and a pop-out window gives you a command center on a second monitor.
 
 *Coming soon to Chrome Web Store*
 

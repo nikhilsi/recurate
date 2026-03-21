@@ -44,7 +44,7 @@ On claude.ai, each chat is a **specialist** carrying persistent memory, project-
 3. **Full exchange context.** Sharing an AI response automatically includes the user prompt that triggered it. The receiving chat gets the full context, not a fragment.
 4. **Command palette.** `\rc` to share, `\rcp` to pop out, `\rcc` to clear. Typed into the input box, intercepted before Claude sees it. Keyboard-first workflow.
 5. **Zero configuration.** Chat names and tab identities are discovered automatically from Claude.ai's UI and URL. No setup, no naming prompts.
-6. **Claude.ai and Microsoft Copilot.** Cross-platform sharing between any combination of Claude and Copilot tabs. Platform-aware selectors and injection (ProseMirror for Claude, Lexical for Copilot).
+6. **Claude.ai and Microsoft Copilot.** Cross-platform sharing between any combination of Claude and Copilot tabs. Platform-aware selectors and injection (ProseMirror for Claude, Lexical for Copilot). Works in both Chrome and Microsoft Edge.
 
 ---
 
