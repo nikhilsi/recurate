@@ -1,0 +1,75 @@
+name: Build Extensions
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # --- Annotator (Chrome) ---
+      - name: Build Annotator Chrome
+        working-directory: extensions/chrome
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package Annotator Chrome
+        run: |
+          cd extensions/chrome/.output/chrome-mv3
+          zip -r ../../../../recurate-annotator-chrome.zip .
+
+      # --- Connect ---
+      - name: Build Connect
+        working-directory: extensions/connect
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package Connect
+        run: |
+          cd extensions/connect/.output/chrome-mv3
+          zip -r ../../../../recurate-connect.zip .
+
+      # --- Composer (no build step) ---
+      - name: Package Composer
+        run: |
+          cd extensions/markdown-toolbar
+          zip -r ../../recurate-composer.zip manifest.json content.js icon-16.png icon-32.png icon-48.png icon-128.png
+
+      # --- Copier (no build step) ---
+      - name: Package Copier
+        run: |
+          cd extensions/conversation-copier
+          zip -r ../../recurate-copier.zip manifest.json content.js icon-16.png icon-32.png icon-48.png icon-128.png
+
+      # --- Annotator (VS Code) ---
+      - name: Build Annotator VS Code
+        working-directory: extensions/vscode
+        run: |
+          npm ci
+          npm run compile
+          npx @vscode/vsce package --no-dependencies -o ../../recurate-annotator-vscode.vsix
+
+      # --- Create GitHub Release ---
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            recurate-annotator-chrome.zip
+            recurate-connect.zip
+            recurate-composer.zip
+            recurate-copier.zip
+            recurate-annotator-vscode.vsix
+          generate_release_notes: true
