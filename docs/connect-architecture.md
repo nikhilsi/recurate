@@ -1,6 +1,6 @@
 # Recurate Connect — Architecture
 
-**Status:** Design
+**Status:** Built, testing in progress
 **Date:** March 20, 2026
 **Author:** Nikhil Singhal
 
