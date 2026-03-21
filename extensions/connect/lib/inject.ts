@@ -100,33 +100,3 @@ export function injectEntry(entry: SharedEntry, autoSend: boolean): boolean {
   return true;
 }
 
-/**
- * Append text to the current editor content (for drag-to-inject).
- * Moves cursor to end, then pastes.
- */
-export function appendToEditor(text: string): boolean {
-  const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
-  if (!editor) return false;
-
-  // Move cursor to end of editor
-  editor.focus();
-  const selection = window.getSelection();
-  if (selection) {
-    selection.selectAllChildren(editor);
-    selection.collapseToEnd();
-  }
-
-  // Paste at cursor position
-  const dt = new DataTransfer();
-  dt.setData('text/plain', '\n\n' + text);
-  const pasteEvent = new ClipboardEvent('paste', {
-    clipboardData: dt,
-    bubbles: true,
-    cancelable: true,
-  });
-  editor.dispatchEvent(pasteEvent);
-
-  document.dispatchEvent(new Event('selectionchange'));
-
-  return true;
-}

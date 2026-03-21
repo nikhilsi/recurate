@@ -24,12 +24,19 @@
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
-- [x] Extension built: tab registry (2-tab limit), share button, command palette (\rc, \rcp, \rcc), shared space sidebar, edit/pin/delete, search, drag-to-inject, pop-out window with state sync
-- [x] Testing: tab discovery, share button, auto-send, sidebar positioning, pop-out window
-- [x] Simplified: removed pattern detection, tab picker dropdown, multi-message range, tab badge. Added command palette.
-- [ ] Continue testing remaining features (edit, pin, delete, search, drag, commands)
+- [x] Extension built: tab registry (2-tab limit), share button, command palette (\rc, \rcp, \rcc), shared space sidebar (read-only), pop-out window with state sync
+- [x] Testing: tab discovery, share button, auto-send, sidebar, pop-out, commands, text selection, SPA navigation, persistence
+- [x] Simplified: removed pattern detection, tab picker dropdown, multi-message range, tab badge, edit/pin/delete/search/drag (moved to V0.3). Added command palette.
+- [x] Bug fixes: service worker hibernation (chrome.storage.session), pop-out state sync, share echo prevention
 - [ ] Store listing, screenshots
 - [ ] Publish to Chrome Web Store
+
+**V0.3 (Planned):**
+- Edit/pin/delete entries in sidebar
+- Search/filter shared messages
+- Drag entries from sidebar to editor
+- Send from sidebar (re-share older entries)
+- Cross-platform sharing (Claude to Copilot)
 
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)

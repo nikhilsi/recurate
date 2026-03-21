@@ -16,7 +16,6 @@ export interface SharedEntry {
   prompt: string; // user message that triggered the response
   response: string; // AI response (or selected portion)
   timestamp: number;
-  pinned?: boolean;
 }
 
 // --- Messages between content script and background ---
@@ -28,9 +27,6 @@ export type BgMessage =
   | { type: 'SHARE'; entry: Omit<SharedEntry, 'id' | 'timestamp'>; targetTabIds: number[] | 'all' }
   | { type: 'GET_SHARED_SPACE' }
   | { type: 'SEND_ENTRY'; entryId: string; targetTabIds: number[] | 'all' }
-  | { type: 'EDIT_ENTRY'; entryId: string; response: string }
-  | { type: 'PIN_ENTRY'; entryId: string; pinned: boolean }
-  | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'CLEAR_SHARED_SPACE' }
   | { type: 'POP_OUT_SHARED_SPACE' };
 

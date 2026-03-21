@@ -1,6 +1,6 @@
 import { defineBackground } from 'wxt/sandbox';
 import type { TabInfo, BgMessage, CsMessage, SharedEntry } from '../lib/types';
-import { getEntries, addEntry, getEntry, updateEntry, deleteEntry, clearEntries, generateId } from '../lib/shared-space';
+import { getEntries, addEntry, getEntry, clearEntries, generateId } from '../lib/shared-space';
 
 export default defineBackground(() => {
   // --- Tab Registry ---
@@ -207,27 +207,6 @@ export default defineBackground(() => {
             });
           }
         });
-        return false;
-      }
-
-      case 'EDIT_ENTRY': {
-        if (!message.entryId) return false;
-        updateEntry(message.entryId, { response: message.response })
-          .then(() => broadcastSharedSpaceUpdated());
-        return false;
-      }
-
-      case 'PIN_ENTRY': {
-        if (!message.entryId) return false;
-        updateEntry(message.entryId, { pinned: message.pinned })
-          .then(() => broadcastSharedSpaceUpdated());
-        return false;
-      }
-
-      case 'DELETE_ENTRY': {
-        if (!message.entryId) return false;
-        deleteEntry(message.entryId)
-          .then(() => broadcastSharedSpaceUpdated());
         return false;
       }
 

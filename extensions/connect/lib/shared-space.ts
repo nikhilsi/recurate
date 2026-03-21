@@ -25,25 +25,6 @@ export async function getEntry(id: string): Promise<SharedEntry | undefined> {
   return entries.find(e => e.id === id);
 }
 
-/** Update an entry's response text (for editing before sending) */
-export async function updateEntry(id: string, updates: Partial<Pick<SharedEntry, 'response' | 'pinned'>>): Promise<SharedEntry[]> {
-  const entries = await getEntries();
-  const idx = entries.findIndex(e => e.id === id);
-  if (idx !== -1) {
-    entries[idx] = { ...entries[idx], ...updates };
-    await chrome.storage.local.set({ [STORAGE_KEY]: entries });
-  }
-  return entries;
-}
-
-/** Delete a single entry */
-export async function deleteEntry(id: string): Promise<SharedEntry[]> {
-  const entries = await getEntries();
-  const filtered = entries.filter(e => e.id !== id);
-  await chrome.storage.local.set({ [STORAGE_KEY]: filtered });
-  return filtered;
-}
-
 /** Clear all entries */
 export async function clearEntries(): Promise<void> {
   await chrome.storage.local.set({ [STORAGE_KEY]: [] });

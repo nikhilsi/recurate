@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - **Command palette:** `\rc` (share last exchange), `\rcp` (pop out shared space), `\rcc` (clear shared space). Typed in the input box, intercepted before Claude sees it. Keyboard-first workflow.
 - **Full exchange context:** sharing includes both the user prompt and AI response.
 - **Text selection:** if text is selected, shares only the selection.
-- **Shared space sidebar:** toggle anchored next to input box in the right margin. Panel expands upward. Header shows "Recurate Connect" + connected tab name. Entries with send, edit, pin, delete. Search/filter with 4+ entries. Drag entries to editor.
+- **Shared space sidebar:** toggle anchored next to input box in the right margin. Panel expands upward. Header shows "Recurate Connect" + connected tab name. Read-only entry list with source, timestamp, and content preview.
 - **Pop-out window:** opens shared space in a separate browser window for multi-monitor workflows. All inline sidebars auto-collapse when window opens, restore when closed.
 - **Architecture doc:** `docs/connect-architecture.md` with "Why Connect, not the Platform" section, decisions log.
 - Icon: indigo gradient with two arrows in opposite directions (white right arrow, green left arrow).

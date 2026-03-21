@@ -95,11 +95,9 @@
 - **Text selection:** if text is selected, shares only the selection
 - **Auto-send:** shared content injected and sent automatically
 - **Shared space sidebar:** toggle anchored next to input box, panel in right margin. Header shows "Recurate Connect" + connected tab name.
-- **Edit/pin/delete entries:** curate shared space before sending
-- **Search/filter:** across all shared messages (appears with 4+ entries)
-- **Drag-to-inject:** drag sidebar entries into editor
+- **Shared space sidebar:** read-only view of all shared exchanges with timestamps and source
 - **Pop-out window:** open shared space in separate browser window for multi-monitor. All inline sidebars collapse when pop-out opens, restore when closed.
-- Build output: 120KB (content script + background + shared space page + icons)
+- Build output: 112KB (content script + background + shared space page + icons)
 - Icon: indigo gradient with two arrows in opposite directions (white right, green left)
 
 ### Icons & Visual Identity (Complete)

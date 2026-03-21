@@ -227,6 +227,8 @@ All proven selectors from existing extensions:
 
 ## Versioning Plan
 
+### V0.1 (Current)
+
 **Sharing**
 - Two-tab limit: exactly two Claude.ai tabs connected at a time
 - Share button on the last message's action bar (one click, no dropdown)
@@ -234,23 +236,30 @@ All proven selectors from existing extensions:
 - Full exchange context: share includes both the prompt and response
 - Text selection support: share only the selected portion
 - Auto-send: shared content is injected and sent automatically
+- Skips injected share messages when extracting (prevents echo on round-trips)
 
 **Shared Space Sidebar**
 - Toggle anchored in the right margin next to the input box
 - Panel expands upward into the right gutter
 - Header: "Recurate Connect" with connected tab name
-- Entry list: send, edit, pin, delete per entry
-- Search/filter (appears with 4+ entries)
-- Drag entries from sidebar into editor
+- Read-only entry list with source, timestamp, and content preview
 - Auto-collapses when pop-out window is open
 
 **Pop-out Window**
 - Opens in a separate browser window (480x640)
 - Draggable to another monitor for multi-monitor workflows
-- Full-width entry cards with complete message text
-- Same functionality as inline sidebar: send, edit, pin, delete, search
+- Full-width entry cards with complete message text (read-only)
 - Real-time updates via chrome.runtime messaging
 - Inline sidebars on all tabs auto-collapse when window opens, restore when closed
+
+### V0.3 (Planned)
+
+- Edit entries inline before sending (trim, rewrite, then share)
+- Pin/unpin entries (keep important context at top)
+- Delete individual entries
+- Search/filter across shared messages
+- Drag entries from sidebar into editor
+- Send from sidebar (re-share older entries)
 
 ---
 
@@ -273,8 +282,8 @@ extensions/connect/
 ├── lib/
 │   ├── selectors.ts                 # Claude.ai DOM selectors (shared constants)
 │   ├── exchange.ts                  # Text selection helper
-│   ├── inject.ts                    # ProseMirror injection (clipboard paste + send)
-│   ├── shared-space.ts              # Shared space CRUD (chrome.storage.local)
+│   ├── inject.ts                    # ProseMirror injection (clipboard paste + auto-send)
+│   ├── shared-space.ts              # Shared space read/write/clear (chrome.storage.local)
 │   └── types.ts                     # Shared types (TabInfo, SharedEntry, messages)
 ├── assets/
 │   └── icon.svg                     # Master icon SVG (two arrows, indigo gradient)

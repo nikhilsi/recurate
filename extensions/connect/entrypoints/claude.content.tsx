@@ -3,7 +3,7 @@ import { render } from 'preact';
 import { signal } from '@preact/signals';
 import { SELECTORS } from '../lib/selectors';
 import { getSelectedText } from '../lib/exchange';
-import { injectEntry, appendToEditor } from '../lib/inject';
+import { injectEntry } from '../lib/inject';
 import type { TabInfo, SharedEntry, BgMessage, CsMessage } from '../lib/types';
 import { Sidebar } from '../components/Sidebar';
 
@@ -271,38 +271,6 @@ export default defineContentScript({
       }
     }, true); // capture phase to intercept before Claude
 
-    // --- Drag-to-inject receiver ---
-
-    function setupDragReceiver() {
-      const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
-      if (!editor) return;
-
-      editor.addEventListener('dragover', (e) => {
-        const de = e as DragEvent;
-        if (de.dataTransfer?.types.includes('application/rc-connect-entry')) {
-          e.preventDefault();
-          de.dataTransfer.dropEffect = 'copy';
-          editor.style.outline = '2px solid #4338CA';
-        }
-      });
-
-      editor.addEventListener('dragleave', () => {
-        editor.style.outline = '';
-      });
-
-      editor.addEventListener('drop', (e) => {
-        e.preventDefault();
-        editor.style.outline = '';
-        const de = e as DragEvent;
-        if (de.dataTransfer?.types.includes('application/rc-connect-entry')) {
-          const text = de.dataTransfer.getData('text/plain');
-          if (text) {
-            appendToEditor(text);
-          }
-        }
-      });
-    }
-
     // --- Sidebar Mount ---
 
     function findInputContainer(): HTMLElement | null {
@@ -361,7 +329,6 @@ export default defineContentScript({
     // --- Init ---
 
     setTimeout(mountUI, 2000);
-    setTimeout(setupDragReceiver, 3000);
 
     intervals.push(window.setInterval(injectShareButtons, 3000));
     setTimeout(injectShareButtons, 3000);
