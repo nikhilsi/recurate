@@ -89,25 +89,20 @@ Connect two AI chat tabs with one-click context sharing. Works across **Claude.a
 
 **Status:** Built and tested — Chrome Web Store publication pending
 
-## How It Works
+## The Suite
 
-```
-Turn 1: You ask a question
-        → AI responds with a detailed answer
-        → You highlight the brilliant parts, strikethrough the wrong parts,
-          flag what needs elaboration or fact-checking
-        → The AI carries forward what you valued
+Four Chrome extensions that cover the full AI conversation lifecycle:
 
-Turn 2: You ask a follow-up
-        → The AI's response is already better — informed by your curation
-        → You annotate again
-        → The conversation compounds in quality
+| Extension | What it does | Platforms |
+|-----------|-------------|-----------|
+| **Composer** | Shape the input | Claude, ChatGPT, Grok, Gemini, Copilot, Google Search |
+| **Annotator** | Curate the output | Claude, ChatGPT, Copilot |
+| **Copier** | Capture the conversation | Claude, ChatGPT, Grok, Gemini, Copilot, Google AI Mode |
+| **Connect** | Connect the conversations | Claude, Copilot (Chrome + Edge) |
 
-Turn N: Every turn is sharper than the last
-        → Because the AI knows what matters to you
-        → Not because you typed paragraphs explaining it
-        → But because you curated
-```
+Plus a **VS Code extension** for annotating Claude Code responses in the terminal workflow.
+
+No backend. No API keys. No data collection. Everything runs in the browser.
 
 ## Why "Recurate"
 
@@ -146,14 +141,14 @@ recurate/
 │   ├── vscode/              # Recurate Annotator (Claude Code)
 │   ├── markdown-toolbar/    # Recurate Composer (8 platforms)
 │   ├── conversation-copier/ # Recurate Copier (7 platforms)
-│   └── connect/             # Recurate Connect (Claude.ai, 2-tab)
+│   └── connect/             # Recurate Connect (Claude + Copilot, 2-tab)
 ├── docs/                # MkDocs site (recurate.ai)
 └── scripts/             # Icon and social card generation
 ```
 
 ## Contributing
 
-This project is in early development. If the problem resonates with you, star the repo and watch for updates. Contributions welcome once the initial architecture is in place.
+If the problem resonates with you, star the repo and watch for updates. Issues and contributions welcome.
 
 ## License
 
