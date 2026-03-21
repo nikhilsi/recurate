@@ -1,8 +1,8 @@
 # Recurate: Design & Architecture Document
 ### recurate.ai — "Don't just chat, recurate."
 
-**Status:** Phase 0 Complete (Chrome + VS Code extensions built and working)
-**Date:** February 21, 2026 (last updated: March 6, 2026)
+**Status:** 5 extensions built (3 published, 1 submitted, 1 testing)
+**Date:** February 21, 2026 (last updated: March 21, 2026)
 **Domain:** recurate.ai (registered)
 **Author:** Nikhil Singhal
 
@@ -55,34 +55,33 @@ Problem 1.1 (text-box-only input) exists within every single-model conversation.
 
 The vision is delivered through two products, built in sequence, sharing a common design language and core feature (the annotation mechanism):
 
-### Phase 0: Recurate Annotator — Extensions (Standalone Products)
+### The Recurate Extension Family
 
-Extensions that add annotation tools to existing AI workflows. Both share the same core UI (Preact + Preact Signals) and annotation components, but differ in how they capture AI output and deliver feedback.
+What started as a single annotation extension has grown into a suite of five extensions covering the full AI conversation lifecycle. Each was born from a real friction point in daily AI workflow.
 
-**Chrome Extension** — Adds a side panel to web-based LLM chat interfaces. Mirrors the AI's latest response and lets users annotate (highlight, strikethrough, dig deeper, verify). Structured KEEP/DROP/EXPLORE DEEPER/VERIFY feedback auto-injects into the platform's text box. Works on claude.ai, ChatGPT (chat.com), and Microsoft Copilot (consumer + enterprise). **Built and working.**
+| Extension | What it does | Platforms | Status |
+|-----------|-------------|-----------|--------|
+| **Annotator** (Chrome) | Curate the output — highlight, strikethrough, dig deeper, verify | Claude, ChatGPT, Copilot (consumer + enterprise) | Published |
+| **Annotator** (VS Code) | Same annotation UX for Claude Code terminal workflow | VS Code, Antigravity, VSCodium, Theia | Published |
+| **Composer** | Compose the input — floating markdown toolbar for AI chat inputs | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google Search | Published |
+| **Copier** | Capture the conversation — copy as markdown or download as styled HTML | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google AI Mode | Submitted |
+| **Connect** | Connect the conversations — share context between two Claude.ai chat tabs | Claude (2-tab limit) | Testing |
 
-**VS Code Extension** — A sidebar for the Claude Code terminal workflow. Watches Claude Code's JSONL conversation files, renders assistant text responses with full markdown formatting, and auto-copies annotation feedback to clipboard. User pastes into Claude Code when ready. **Built and working.**
+- **No backend, no API keys, fully client-side.** All extensions run entirely in the browser.
+- **Annotator and Connect** share WXT + Preact + Signals + TypeScript stack.
+- **Composer and Copier** are vanilla JS with no build step (Chrome Manifest V3).
 
-- **Solves:** Problem 1.1 (text-box-only input)
-- **Chrome works on:** claude.ai, chat.com, copilot.microsoft.com, m365.cloud.microsoft/chat (web-based LLM chat)
-- **VS Code works on:** Claude Code in VS Code terminal
-- **Requires:** No backend, no API keys, no new interface to learn
-- **Target user:** Anyone who uses LLMs for substantive conversations on desktop
+For detailed architecture of each extension:
 
-### Phase 1: Recurate Roundtable — Multi-LLM Platform
+- [Chrome Extension Architecture](extension-architecture.md) — Annotator implementation
+- [VS Code Extension Architecture](vscode-extension-architecture.md) — VS Code Annotator
+- [Connect Architecture](connect-architecture.md) — Cross-chat context sharing
 
-A web application that sends the user's question to multiple LLMs simultaneously, synthesizes their perspectives into a shared context, and lets the user curate across all of them.
+### Recurate Platform — Multi-LLM Coordination
 
-**Status:** In development (private repository).
+A web application at [app.recurate.ai](https://app.recurate.ai) that sends the user's question to Claude, ChatGPT, Grok, and Gemini simultaneously and synthesizes their responses into a Condensed Context (CC). The user curates the CC before continuing, and each model builds on the shared context in subsequent turns. Stateless LLM calls — the CC is the sole persistent state.
 
-### Why This Sequencing
-
-1. **The annotation mechanism is the most defensible feature.** Shipping it first as standalone products validates the core UX innovation independently.
-2. **Adoption barrier is minimal for extensions.** Users don't switch tools — they enhance the tools they already use.
-3. **The extensions are a trojan horse.** Once users build the habit of annotating LLM responses, the natural next step is "what if I could do this across models?" The extensions create demand for the platform.
-4. **Portfolio value.** Shipped, installable extensions across two surfaces (browser + editor) demonstrate product thinking and the ability to ship.
-5. **Risk management.** If a major LLM provider builds annotation natively (which validates the idea), the multi-model platform remains defensible because it's cross-platform.
-6. **Two workflows, one UX.** The Chrome extension covers the web chat workflow. The VS Code extension covers the terminal/editor workflow. Together, they reach developers where they actually work.
+**Status:** Live (private repository).
 
 ---
 
@@ -98,7 +97,7 @@ For full implementation details, see:
 - [Chrome Extension Architecture](extension-architecture.md)
 - [VS Code Extension Architecture](vscode-extension-architecture.md)
 
-### 3.2 Supported Platforms
+### 3.2 Supported Platforms (Annotator)
 
 | Platform | Site | Status |
 |----------|------|--------|
@@ -106,8 +105,8 @@ For full implementation details, see:
 | ChatGPT | chat.com, chatgpt.com | Working |
 | Copilot (Consumer) | copilot.microsoft.com | Working |
 | Copilot (Enterprise) | m365.cloud.microsoft/chat | Working |
-| Grok | grok.com | Planned |
-| Gemini | gemini.google.com | Planned |
+
+Note: Grok and Gemini are supported by Composer (8 platforms) and Copier (7 platforms) but not yet by the Annotator. Annotator platform expansion is on the roadmap.
 
 ### 3.3 Architecture Overview
 
@@ -259,41 +258,47 @@ Two things are novel in the Recurate design:
 | Markdown rendering | marked (~30KB, converts JSONL text to HTML) |
 | Language | TypeScript (all code) |
 
-### 6.3 Shared Design Language
+### 6.3 Composer & Copier
 
-All products use the same annotation UX patterns (highlight = green, strikethrough = red, dig deeper = blue, verify = amber) and the same KEEP/DROP/EXPLORE DEEPER/VERIFY feedback format. The Chrome and VS Code extensions share ~70% of their UI code — the same Preact components (ResponseView, AnnotationToolbar, AnnotationList), the same Signals-based state management, and the same CSS. If a user moves between the browser and VS Code, the annotation experience is identical.
+| Component | Technology |
+|-----------|------------|
+| Architecture | Vanilla JS, no build step, Chrome Manifest V3 |
+| Platforms | Composer: 8, Copier: 7 (see extension family table above) |
+
+### 6.4 Connect
+
+| Component | Technology |
+|-----------|------------|
+| Extension framework | WXT (same as Annotator) |
+| UI | Preact + Preact Signals |
+| Language | TypeScript |
+| Persistence | chrome.storage.local (shared space) |
+| Communication | chrome.runtime.sendMessage (tab-to-tab via background) |
+
+### 6.5 Shared Design Language
+
+All extensions share a common brand identity (indigo gradient icons, same color palette) and design principles (no backend, no API keys, fully client-side). The Annotator Chrome and VS Code extensions share ~70% of their UI code — the same Preact components, Signals state management, and CSS. Annotator and Connect share the same WXT + Preact + TypeScript stack.
 
 ---
 
-## 7. Phased Roadmap
+## 7. Current Status & Roadmap
 
-### Phase 0: Recurate Annotator Extensions — Complete
+### Shipped
 
-**Chrome Extension — Built and working.**
+- **Annotator (Chrome)** v0.2.0 — published on Chrome Web Store. 4 platforms.
+- **Annotator (VS Code)** v0.2.1 — published on VS Code Marketplace + Open VSX.
+- **Composer** v0.1.0 — published on Chrome Web Store. 8 platforms.
 
-- Side panel annotation on claude.ai, chat.com, and Microsoft Copilot (consumer + enterprise)
-- Four annotation gestures: highlight, strikethrough, dig deeper, verify
-- Proactive feedback auto-injection into platform text box
-- No backend, no API keys, fully client-side
+### In Progress
 
-**VS Code Extension — Built and working.**
+- **Copier** v0.1.0 — submitted to Chrome Web Store, pending review. 7 platforms, tested on 6.
+- **Connect** v0.1.0 — built, testing in progress. Claude.ai only, 2-tab connection.
+- **Recurate Platform** — live at app.recurate.ai. 4 LLMs with Condensed Context synthesis.
 
-- Sidebar annotation for Claude Code terminal workflow
-- Watches JSONL conversation files, renders markdown
-- Last 5 responses with back/forward navigation
-- Auto-copy feedback to clipboard on every annotation change
+### Planned
 
-**Remaining Phase 0 work:**
-
-- Add grok.com and gemini.google.com platform support to Chrome extension
-
-### Phase 1: Recurate Roundtable Platform — In Development
-
-Multi-LLM conversation platform with cross-model synthesis and native annotation. In development in a private repository.
-
-### Phase 2: Convergence
-
-The Chrome extension connects to the Roundtable platform. Users can annotate responses on individual LLM platforms and have those annotations feed into the centralized context across all models.
+- Add Grok and Gemini platform support to the Annotator Chrome extension
+- Connect: fix broadcast/re-render bugs, complete testing, publish to Chrome Web Store
 
 ---
 
@@ -313,4 +318,4 @@ The Chrome extension connects to the Roundtable platform. Users can annotate res
 
 ---
 
-*This document captures the design of the Recurate Annotator extensions. Phase 0 (Chrome + VS Code extensions) is built and working. The Roundtable platform is in development separately.*
+*This document captures the design of the Recurate extension family. For detailed implementation, see the architecture docs for each extension: [Chrome Annotator](extension-architecture.md), [VS Code Annotator](vscode-extension-architecture.md), [Connect](connect-architecture.md).*

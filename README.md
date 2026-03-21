@@ -75,7 +75,18 @@ Copy or download your full AI conversation — both your messages and the AI's r
 - Native action bar injection on **Claude** and **Grok**; floating buttons on other platforms
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** Built and tested on 6 of 7 platforms — Chrome Web Store publication pending
+**Status:** Submitted to Chrome Web Store (pending review)
+
+### Recurate Connect — Cross-Chat Context Sharing
+
+Connect two Claude.ai chat tabs with one-click context sharing. Share messages between specialist chats via a shared space sidebar, or type `\rc` in the input box. Built for multi-chat workflows where each Claude instance has its own role, memory, and project context.
+
+- One-click share or `\rc` command — last exchange injected and auto-sent to the other tab
+- Shared space sidebar with edit, pin, delete, search
+- Pop-out window for multi-monitor workflows
+- **Claude.ai** only — 2-tab connection
+
+**Status:** Built, testing in progress
 
 ## How It Works
 
@@ -110,6 +121,7 @@ Turn N: Every turn is sharper than the last
 - **[Design & Architecture](https://recurate.ai/design/)** — Design document and extension architecture
 - **[Chrome Extension Architecture](https://recurate.ai/extension-architecture/)** — Implementation details for the Chrome extension
 - **[VS Code Extension Architecture](https://recurate.ai/vscode-extension-architecture/)** — Implementation details for the VS Code extension
+- **[Connect Architecture](https://recurate.ai/connect-architecture/)** — Cross-chat context sharing design
 - **[Product Brief](https://recurate.ai/product_brief/)** — Non-technical product brief — the "why" and "what"
 - **[Blog: The Text Box Problem](https://recurate.ai/blog/text-box-problem)** — Why the text box is AI's biggest UX blind spot
 - **[Blog: 20+ Multi-Model AI Tools](https://recurate.ai/blog/multi-model-ai-tools-no-curation)** — The competitive landscape and the curation gap
@@ -122,16 +134,18 @@ Turn N: Every turn is sharper than the last
 | VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
 | Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
 | Chrome Extension (Copier) | Vanilla JS, Chrome Manifest V3 |
+| Chrome Extension (Connect) | WXT, Preact, Preact Signals, TypeScript |
 
 ## Project Structure
 
 ```
 recurate/
 ├── extensions/
-│   ├── chrome/              # Recurate Annotator (claude.ai + ChatGPT + Copilot)
+│   ├── chrome/              # Recurate Annotator (Claude, ChatGPT, Copilot)
 │   ├── vscode/              # Recurate Annotator (Claude Code)
 │   ├── markdown-toolbar/    # Recurate Composer (8 platforms)
-│   └── conversation-copier/ # Recurate Copier (7 platforms)
+│   ├── conversation-copier/ # Recurate Copier (7 platforms)
+│   └── connect/             # Recurate Connect (Claude.ai, 2-tab)
 ├── docs/                # MkDocs site (recurate.ai)
 └── scripts/             # Icon and social card generation
 ```

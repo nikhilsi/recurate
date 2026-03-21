@@ -1,6 +1,6 @@
 # Don't just chat, recurate.
 
-**Recurate** is a suite of tools for AI conversations. Annotate the output, compose the input, and capture the conversation — all from your browser.
+**Recurate** is a suite of browser extensions for AI conversations. Annotate the output, compose the input, capture the conversation, and connect your chats.
 
 ---
 
@@ -53,6 +53,12 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer adds a
 Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown to clipboard, or download as a styled HTML file with formatted responses, smart filenames, and a print-ready layout. Buttons appear in the platform's own action bar on Claude and Grok, or as floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
 
 ![Recurate Copier — ChatGPT conversation exported as styled HTML](assets/images/copier-hero.png)
+
+*Coming soon to Chrome Web Store*
+
+### Recurate Connect — Cross-Chat Context Sharing
+
+Connect two Claude.ai chat tabs with one-click context sharing. When you run specialist chats (e.g., Ops-HQ for strategy, Book HQ for writing), Connect lets you share messages between them without copy-paste. Type `\rc` to share the last exchange, or click the share button in the action bar. A shared space sidebar shows everything that's been shared across tabs, and a pop-out window gives you a full-screen command center on a second monitor. Claude.ai only.
 
 *Coming soon to Chrome Web Store*
 
