@@ -75,7 +75,7 @@ Copy or download your full AI conversation — both your messages and the AI's r
 - Native action bar injection on **Claude** and **Grok**; floating buttons on other platforms
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** Submitted to Chrome Web Store (pending review)
+**Status:** Submitted to Chrome Web Store — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 
@@ -87,7 +87,7 @@ Connect two AI chat tabs with one-click context sharing. Works across **Claude.a
 - Works in Chrome and Microsoft Edge
 - 2-tab connection
 
-**Status:** Built and tested — Chrome Web Store publication pending
+**Status:** Built and tested — [Download and install from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest)
 
 ## The Suite
 

@@ -75,4 +75,50 @@ jobs:
             recurate-composer.zip
             recurate-copier.zip
             recurate-annotator-vscode.vsix
-          generate_release_notes: true
+          body: |
+            ## Recurate Extensions
+
+            Five extensions for AI conversations. No backend, no API keys, everything runs in your browser.
+
+            | Extension | What it does | Install from |
+            |-----------|-------------|-------------|
+            | **Annotator** (Chrome) | Curate AI responses: highlight, strikethrough, dig deeper, verify | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm) |
+            | **Annotator** (VS Code) | Same UX for Claude Code terminal workflow | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode) |
+            | **Composer** | Markdown formatting toolbar for AI chat inputs | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg) |
+            | **Copier** | Copy/download full AI conversations | Chrome Web Store (pending) |
+            | **Connect** | Share context between Claude and Copilot tabs | See install guide below |
+
+            ## Install Connect (or Copier) from ZIP
+
+            These extensions are not yet on the Chrome Web Store. To install from this release:
+
+            **Chrome:**
+            1. Download `recurate-connect.zip` (or `recurate-copier.zip`) from the assets below
+            2. Unzip it to a folder on your computer
+            3. Open `chrome://extensions` in Chrome
+            4. Turn on **Developer mode** (toggle in the top-right corner)
+            5. Click **Load unpacked**
+            6. Select the unzipped folder
+            7. Done! The extension is now active.
+
+            **Microsoft Edge:**
+            1. Download the ZIP and unzip it (same as above)
+            2. Open `edge://extensions` in Edge
+            3. Turn on **Developer mode** (toggle in the left sidebar)
+            4. Click **Load unpacked**
+            5. Select the unzipped folder
+
+            ## Using Connect
+
+            1. Open two AI chat tabs (Claude.ai and/or Microsoft Copilot)
+            2. Look for the **"1 connected"** toggle near the input box
+            3. To share the last exchange to the other tab:
+               - Click the **share button** in the message action bar, OR
+               - Type `\rc` in the input box and press Enter
+            4. Type `\rcp` to pop out the shared space into a separate window
+            5. Type `\rcc` to clear all shared messages
+
+            ## Install VS Code Extension from VSIX
+
+            1. Download `recurate-annotator-vscode.vsix`
+            2. In VS Code: `Cmd+Shift+P` > "Install from VSIX" > select the file
