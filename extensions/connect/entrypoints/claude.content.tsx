@@ -132,7 +132,10 @@ export default defineContentScript({
                             el.querySelector('.prose') || el;
             response = content.textContent?.trim() || '';
           } else if (response && el.matches(SELECTORS.userMessage)) {
-            prompt = el.textContent?.trim() || '';
+            const text = el.textContent?.trim() || '';
+            // Skip injected share messages — these start with **[From
+            if (text.startsWith('**[From')) continue;
+            prompt = text;
             break;
           }
         }
