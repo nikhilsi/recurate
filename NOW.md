@@ -28,7 +28,11 @@
 - [x] Testing: tab discovery, share button, auto-send, sidebar, pop-out, commands, text selection, SPA navigation, persistence
 - [x] Simplified: removed pattern detection, tab picker dropdown, multi-message range, tab badge, edit/pin/delete/search/drag (moved to V0.3). Added command palette.
 - [x] Bug fixes: service worker hibernation (chrome.storage.session), pop-out state sync, share echo prevention
-- [ ] Store listing, screenshots
+- [x] Store listing (STORE_LISTING.md)
+- [x] Tagged v1.3.0 (clean Claude-to-Claude state)
+- [ ] Cross-platform sharing: Claude to Copilot (`m365.cloud.microsoft/chat`) using existing Lexical injection from Annotator (Urmila's request)
+- [ ] Test cross-platform sharing
+- [ ] Screenshots
 - [ ] Publish to Chrome Web Store
 
 **V0.3 (Planned):**
@@ -36,7 +40,6 @@
 - Search/filter shared messages
 - Drag entries from sidebar to editor
 - Send from sidebar (re-share older entries)
-- Cross-platform sharing: Claude to Copilot (`m365.cloud.microsoft/chat`) using existing Lexical injection from Annotator (Urmila's request)
 
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)
