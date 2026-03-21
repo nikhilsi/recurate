@@ -30,8 +30,9 @@
 - [x] Bug fixes: service worker hibernation (chrome.storage.session), pop-out state sync, share echo prevention
 - [x] Store listing (STORE_LISTING.md)
 - [x] Tagged v1.3.0 (clean Claude-to-Claude state)
-- [ ] Cross-platform sharing: Claude to Copilot (`m365.cloud.microsoft/chat`) using existing Lexical injection from Annotator (Urmila's request)
-- [ ] Test cross-platform sharing
+- [x] Cross-platform sharing: Claude to Copilot (`m365.cloud.microsoft/chat`) using Lexical injection (Urmila's request)
+- [x] Test cross-platform sharing (Claude-to-Copilot, Copilot-to-Claude)
+- [x] Version bump to 0.2.0
 - [ ] Screenshots
 - [ ] Publish to Chrome Web Store
 

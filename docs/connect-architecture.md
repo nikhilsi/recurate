@@ -44,7 +44,7 @@ On claude.ai, each chat is a **specialist** carrying persistent memory, project-
 3. **Full exchange context.** Sharing an AI response automatically includes the user prompt that triggered it. The receiving chat gets the full context, not a fragment.
 4. **Command palette.** `\rc` to share, `\rcp` to pop out, `\rcc` to clear. Typed into the input box, intercepted before Claude sees it. Keyboard-first workflow.
 5. **Zero configuration.** Chat names and tab identities are discovered automatically from Claude.ai's UI and URL. No setup, no naming prompts.
-6. **Claude.ai only.** Single platform. Single set of selectors. Focused.
+6. **Claude.ai and Microsoft Copilot.** Cross-platform sharing between any combination of Claude and Copilot tabs. Platform-aware selectors and injection (ProseMirror for Claude, Lexical for Copilot).
 
 ---
 
@@ -237,6 +237,9 @@ All proven selectors from existing extensions:
 - Text selection support: share only the selected portion
 - Auto-send: shared content is injected and sent automatically
 - Skips injected share messages when extracting (prevents echo on round-trips)
+- Cross-platform: Claude.ai and Microsoft Copilot (`m365.cloud.microsoft/chat`). Any combination: Claude-to-Claude, Claude-to-Copilot, Copilot-to-Copilot
+- Platform-aware selectors and injection: ProseMirror (Claude) and Lexical (Copilot)
+- Lexical zero-width character stripping for command detection
 
 **Shared Space Sidebar**
 - Toggle anchored in the right margin next to the input box
@@ -262,11 +265,8 @@ All proven selectors from existing extensions:
 - Drag entries from sidebar into editor
 - Send from sidebar (re-share older entries)
 
-**Cross-platform sharing:**
-- Claude-to-Copilot context sharing (Urmila's request)
-- Content script runs on `m365.cloud.microsoft/chat` in addition to `claude.ai`
-- Uses Lexical editor injection (already proven in Annotator)
-- Same URL serves all Copilot tiers (free, paid MSA, enterprise AAD) with the same chat DOM
+**Cross-platform expansion:**
+- Additional platforms (Grok, Gemini, ChatGPT) if demand exists
 
 ---
 
@@ -313,4 +313,4 @@ extensions/connect/
 | Auto-send | Always auto-send | The human gate is the click or keystroke. No second review step. |
 | Exchange context | Always include prompt + response | An AI message without its prompt is context-free. The exchange is the unit of sharing. |
 | Pop-out window | Separate browser window, collapses all inline sidebars | One shared space view at a time. Pop-out gives full-width reading on any monitor. Inline sidebars auto-restore when pop-out closes. |
-| Platform scope | Claude.ai only | Each claude.ai chat carries persistent memory, project context, file access, and conversation history. API-based multi-LLM coordination is a different product (Recurate Platform). |
+| Platform scope | Claude.ai + Copilot | Cross-platform sharing. Claude has persistent memory and project context. Copilot has enterprise/work context. Connect coordinates between them. Platform-aware selectors (ProseMirror for Claude, Lexical for Copilot). |

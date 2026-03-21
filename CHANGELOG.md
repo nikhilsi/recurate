@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.3.1] - 2026-03-21
+
+### Added
+- **Cross-platform sharing** — Connect now works across Claude.ai and Microsoft Copilot (`m365.cloud.microsoft/chat`). Any combination: Claude-to-Claude, Claude-to-Copilot, Copilot-to-Copilot.
+- **Platform-aware selectors and injection** — content script detects platform (Claude vs Copilot) and uses the appropriate DOM selectors and editor injection (ProseMirror for Claude, Lexical for Copilot).
+- **Lexical zero-width character stripping** — command detection strips invisible Unicode characters (`\u200B`, `\u200C`, etc.) that Lexical appends to text nodes.
+- **Lexical editor clear** — uses `select all` + `deleteContentBackward` InputEvent instead of paste-empty-string.
+- **Floating share button on Copilot** — since Copilot has no per-message action bars, a floating share button appears when connected.
+
+### Changed
+- Connect version bumped to 0.2.0
+- Content script renamed from `claude.content.tsx` to `connect.content.tsx` (platform-agnostic)
+- Manifest matches expanded: `*://claude.ai/*` + `*://m365.cloud.microsoft/chat*`
+
+---
+
 ## [1.3.0] - 2026-03-21
 
 ### Added

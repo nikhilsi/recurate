@@ -9,7 +9,7 @@ export default defineConfig({
   manifest: {
     name: 'Recurate Connect',
     description: 'Connect your Claude.ai chats. Share context between tabs with one click.',
-    version: '0.1.0',
+    version: '0.2.0',
     permissions: ['storage'],
     icons: {
       16: 'icon-16.png',

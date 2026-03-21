@@ -84,10 +84,10 @@
 - Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
 - Icon: indigo gradient with clipboard + green export arrow
 
-### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai only)
+### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai + Copilot)
 - WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)
-- Version 0.1.0
-- Connect exactly 2 Claude.ai chat tabs with one-click context sharing
+- Version 0.2.0
+- Connect 2 AI chat tabs with one-click context sharing (Claude-to-Claude, Claude-to-Copilot, Copilot-to-Copilot)
 - **Tab auto-discovery:** reads chat name from DOM, UUID from URL, registers with background. 2-tab limit enforced.
 - **Share button:** injected into last message action bar. One click shares to the other tab (no dropdown).
 - **Command palette:** `\rc` (share), `\rcp` (pop out), `\rcc` (clear). Typed in input, intercepted before Claude sees it.
@@ -110,7 +110,7 @@
 
 ## Not Yet Built
 
-- Recurate Connect — testing on Claude.ai (built, not yet tested)
+- Recurate Connect — tested on Claude.ai + Copilot, not yet submitted to Chrome Web Store
 - Recurate Copier — Chrome Web Store publication pending (submitted Mar 20)
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)

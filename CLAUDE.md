@@ -85,7 +85,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 *Conversation Copier (Recurate Copier)* — Copy or download full AI conversations (both user messages and AI responses). Copies as clean markdown to clipboard, or downloads as styled HTML with full sanitization (strips platform DOM cruft). Injects into native action bars on Claude and Grok; floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google AI Mode. Vanilla JS, no build step.
 
-*Chat Connector (Recurate Connect)* — Connect multiple Claude.ai chat tabs with one-click context sharing. Share messages between specialist chats (e.g., Ops-HQ, Book HQ) via a shared space sidebar. Shared context is injected into the target chat's input and auto-sent. Claude.ai only. WXT + Preact + TypeScript.
+*Chat Connector (Recurate Connect)* — Connect two AI chat tabs with one-click context sharing. Works across Claude.ai and Microsoft Copilot. Share messages between specialist chats via a shared space sidebar or `\rc` command. Shared context is injected into the target chat's input and auto-sent. WXT + Preact + TypeScript.
 
 - No backend, no API keys, fully client-side
 - Annotator and Connect share WXT + Preact + Signals stack

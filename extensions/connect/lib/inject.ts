@@ -1,4 +1,4 @@
-import { SELECTORS } from './selectors';
+import { getPlatform, CLAUDE, COPILOT } from './selectors';
 import type { SharedEntry } from './types';
 
 /**
@@ -31,22 +31,33 @@ export function formatForInjection(entry: SharedEntry): string {
 }
 
 /**
- * Inject text into Claude's ProseMirror editor using clipboard paste.
- * This is the safe approach — ProseMirror handles the paste event natively
- * and keeps its internal state in sync (same pattern as Annotator).
+ * Get the editor element for the current platform.
  */
-export function injectIntoEditor(text: string): boolean {
-  const editor = document.querySelector(SELECTORS.editor) as HTMLElement | null;
+function getEditor(): HTMLElement | null {
+  const platform = getPlatform();
+  if (platform === 'copilot') {
+    return (
+      document.querySelector(COPILOT.editor) ||
+      document.querySelector(COPILOT.editorFallback) ||
+      document.querySelector(COPILOT.lexicalEditor)
+    ) as HTMLElement | null;
+  }
+  return document.querySelector(CLAUDE.editor) as HTMLElement | null;
+}
+
+/**
+ * Inject text into Claude's ProseMirror editor using clipboard paste.
+ */
+function injectProseMirror(text: string): boolean {
+  const editor = document.querySelector(CLAUDE.editor) as HTMLElement | null;
   if (!editor) return false;
 
-  // Focus and select all existing content
   editor.focus();
   const selection = window.getSelection();
   if (selection) {
     selection.selectAllChildren(editor);
   }
 
-  // Use clipboard paste event to inject — ProseMirror handles this natively
   const dt = new DataTransfer();
   dt.setData('text/plain', text);
   const pasteEvent = new ClipboardEvent('paste', {
@@ -55,26 +66,71 @@ export function injectIntoEditor(text: string): boolean {
     cancelable: true,
   });
   editor.dispatchEvent(pasteEvent);
-
-  // Dispatch selectionchange so ProseMirror syncs its internal state
   document.dispatchEvent(new Event('selectionchange'));
 
   return true;
 }
 
 /**
- * Click Claude's send button to auto-send the injected text.
+ * Inject text into Copilot's Lexical editor using clipboard paste.
+ * Lexical requires selectionchange dispatch + delay before paste.
+ */
+function injectLexical(text: string): boolean {
+  const editor = getEditor();
+  if (!editor) return false;
+
+  editor.focus();
+
+  // Select all existing content
+  const sel = document.getSelection();
+  if (sel) {
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  // Lexical needs selectionchange dispatch + tick delay before paste
+  document.dispatchEvent(new Event('selectionchange'));
+
+  setTimeout(() => {
+    const dt = new DataTransfer();
+    dt.setData('text/plain', text);
+    editor.dispatchEvent(new ClipboardEvent('paste', {
+      clipboardData: dt,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }, 10);
+
+  return true;
+}
+
+/**
+ * Inject text into the editor (platform-aware).
+ */
+export function injectIntoEditor(text: string): boolean {
+  const platform = getPlatform();
+  if (platform === 'copilot') return injectLexical(text);
+  return injectProseMirror(text);
+}
+
+/**
+ * Click the send button (platform-aware).
  */
 export function clickSendButton(): boolean {
-  const sendBtn = document.querySelector(SELECTORS.sendButton) as HTMLButtonElement | null;
+  const platform = getPlatform();
+  const selector = platform === 'copilot' ? COPILOT.sendButton : CLAUDE.sendButton;
+
+  const sendBtn = document.querySelector(selector) as HTMLButtonElement | null;
   if (sendBtn && !sendBtn.disabled) {
     sendBtn.click();
     return true;
   }
 
-  // Fallback: case-insensitive search for send button
+  // Fallback: broader search
   const fallback = document.querySelector(
-    'button[aria-label="Send message"], button[aria-label="Send Message"]'
+    'button[aria-label="Send message"], button[aria-label="Send Message"], button[aria-label="Send"]'
   ) as HTMLButtonElement | null;
   if (fallback && !fallback.disabled) {
     fallback.click();
@@ -93,10 +149,11 @@ export function injectEntry(entry: SharedEntry, autoSend: boolean): boolean {
   if (!injected) return false;
 
   if (autoSend) {
-    // Delay to let ProseMirror sync before clicking send
-    setTimeout(() => clickSendButton(), 250);
+    // Lexical needs more time (10ms paste delay + processing)
+    const platform = getPlatform();
+    const delay = platform === 'copilot' ? 500 : 250;
+    setTimeout(() => clickSendButton(), delay);
   }
 
   return true;
 }
-
