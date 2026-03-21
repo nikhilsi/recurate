@@ -85,8 +85,10 @@ The core insight: every AI chat interface gives you a text box as the only way t
 
 *Conversation Copier (Recurate Copier)* — Copy or download full AI conversations (both user messages and AI responses). Copies as clean markdown to clipboard, or downloads as styled HTML with full sanitization (strips platform DOM cruft). Injects into native action bars on Claude and Grok; floating buttons on other platforms. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot (consumer + enterprise), and Google AI Mode. Vanilla JS, no build step.
 
+*Chat Connector (Recurate Connect)* — Connect multiple Claude.ai chat tabs with one-click context sharing. Share messages between specialist chats (e.g., Ops-HQ, Book HQ) via a shared space sidebar. Shared context is injected into the target chat's input and auto-sent. Claude.ai only. WXT + Preact + TypeScript.
+
 - No backend, no API keys, fully client-side
-- Annotator extensions share Preact + Signals UI
+- Annotator and Connect share WXT + Preact + Signals stack
 - Composer and Copier are standalone vanilla JS (no framework, no build)
 
 ### Tech Stack
@@ -97,6 +99,7 @@ The core insight: every AI chat interface gives you a text box as the only way t
 | VS Code Extension (Annotator) | VS Code Webview API, Preact, esbuild, Vite |
 | Chrome Extension (Composer) | Vanilla JS, Chrome Manifest V3 |
 | Chrome Extension (Copier) | Vanilla JS, Chrome Manifest V3 |
+| Chrome Extension (Connect) | WXT, Preact, Preact Signals, TypeScript |
 
 ---
 
@@ -150,10 +153,18 @@ recurate/
 │   │   ├── icon.svg             (Master icon SVG)
 │   │   └── STORE_LISTING.md     (Chrome Web Store listing text)
 │   │
-│   └── conversation-copier/     (Recurate Copier — 7 platforms)
-│       ├── manifest.json        (Chrome Manifest V3)
-│       ├── content.js           (All logic — conversation extraction, export)
-│       └── icon.svg             (Master icon SVG)
+│   ├── conversation-copier/     (Recurate Copier — 7 platforms)
+│   │   ├── manifest.json        (Chrome Manifest V3)
+│   │   ├── content.js           (All logic — conversation extraction, export)
+│   │   └── icon.svg             (Master icon SVG)
+│   │
+│   └── connect/                 (Recurate Connect — Claude.ai only)
+│       ├── wxt.config.ts        (WXT + Vite + Preact configuration)
+│       ├── entrypoints/
+│       │   ├── background.ts    (Service worker: tab registry, shared space, routing)
+│       │   └── claude.content.tsx (Content script: share buttons, sidebar, inject)
+│       ├── components/          (Preact: ShareButton, TabPicker, Sidebar, TabBadge)
+│       └── lib/                 (Selectors, exchange extraction, injection, types)
 │
 └── scripts/                     (Icon generation, social card generation)
 ```
@@ -206,3 +217,7 @@ recurate/
 | **Copier content script** | `extensions/conversation-copier/content.js` |
 | **Copier manifest** | `extensions/conversation-copier/manifest.json` |
 | **Copier icon** | `extensions/conversation-copier/icon.svg` |
+| **Connect config** | `extensions/connect/wxt.config.ts` |
+| **Connect content script** | `extensions/connect/entrypoints/claude.content.tsx` |
+| **Connect background** | `extensions/connect/entrypoints/background.ts` |
+| **Connect architecture** | `docs/connect-architecture.md` |

@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.3.0] - 2026-03-20
+
+### Added
+- **Recurate Connect** — new Chrome extension: connect multiple Claude.ai chat tabs with one-click context sharing. Fifth extension in the Recurate family, completing the circle: Compose, Annotate, Copy, Connect.
+- **Tab auto-discovery:** extension automatically reads chat name from Claude.ai UI and UUID from URL. Zero configuration.
+- **Share buttons** injected into Claude's native message action bars on both AI and user messages.
+- **Full exchange context:** sharing an AI message automatically includes the user prompt that triggered it.
+- **Tab picker** dropdown with individual tabs + "All tabs" broadcast option.
+- **One-click auto-send:** shared context is injected into the target tab's ProseMirror input and sent automatically. Shift+click to inject without sending.
+- **Shared space sidebar:** floating panel showing all shared exchanges across tabs with send, edit, pin, delete, and search.
+- **Chat-requested share:** MutationObserver detects "share with X:" patterns in AI messages, shows one-click share button.
+- **Edit entries** inline before sending (trim, rewrite, then share).
+- **Pin entries** to keep important context at the top.
+- **Search/filter** across all shared messages.
+- **Drag-to-inject:** drag sidebar entries directly into the editor.
+- **Resizable sidebar:** drag left edge to resize (250-600px).
+- **Pop-out window:** open shared space in a separate browser window for multi-monitor workflows.
+- **Architecture doc:** `docs/connect-architecture.md` with full design rationale, "Why Connect, not the Platform" section, decisions log.
+- Icon: indigo gradient with two arrows in opposite directions (white right arrow, green left arrow).
+
+### Technical Notes
+- WXT + Preact + Preact Signals + TypeScript (same stack as Annotator). Chosen over vanilla JS because Connect has real-time reactive state across tabs.
+- Background service worker manages tab registry + shared space (chrome.storage.local) + message routing.
+- Content script handles share button injection, chat-requested share detection, ProseMirror injection, and sidebar/badge mounting.
+- Pop-out window is a separate extension page opened via chrome.windows.create, communicates with background via chrome.runtime messaging.
+- Build output: 124KB (content script 54KB, background 13KB, shared space page, icons).
+- Claude.ai only. Born from the multi-intelligence workflow (Ops-HQ, Book HQ, AI Trust Commons coordination).
+
+---
+
 ## [1.2.1] - 2026-03-20
 
 ### Fixed

@@ -87,3 +87,4 @@ nav:
     - Design & Architecture: design.md
     - Chrome Extension Architecture: extension-architecture.md
     - VS Code Extension Architecture: vscode-extension-architecture.md
+    - Connect Architecture: connect-architecture.md

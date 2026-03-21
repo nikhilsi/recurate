@@ -6,7 +6,7 @@
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Published & Live | **Status**: Both extensions published | **4 platforms**: claude.ai, ChatGPT, Copilot (consumer + enterprise)
+**Phase**: Published & Building | **Status**: 3 extensions published, 1 submitted, 1 built | **5 extensions**: Annotator (Chrome + VS Code), Composer, Copier, Connect
 
 ---
 
@@ -84,8 +84,29 @@
 - Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
 - Icon: indigo gradient with clipboard + green export arrow
 
+### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai only)
+- WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)
+- Version 0.1.0
+- Connect multiple Claude.ai chat tabs with one-click context sharing
+- **Tab auto-discovery:** reads chat name from DOM, UUID from URL, registers with background
+- **Share buttons:** injected into Claude's message action bars (AI and user messages)
+- **Full exchange context:** share includes both the user prompt and AI response
+- **Text selection + multi-message:** share a portion or a range of messages
+- **Tab picker:** dropdown with individual tabs + "All tabs" broadcast
+- **Auto-send:** one click shares and sends (shift+click to inject without sending)
+- **Shared space sidebar:** view all shared exchanges, send any entry to any tab
+- **Chat-requested share:** detects "share with X:" patterns in AI messages, one-click approve
+- **Edit/pin/delete entries:** curate shared space before sending
+- **Search/filter:** across all shared messages
+- **Drag-to-inject:** drag sidebar entries into editor
+- **Resizable sidebar:** drag left edge to resize
+- **Pop-out window:** open shared space in separate browser window for multi-monitor workflows
+- **Tab badge:** connection count indicator
+- Build output: 124KB (content script + background + shared space page + icons)
+- Icon: indigo gradient with two arrows in opposite directions (white right, green left)
+
 ### Icons & Visual Identity (Complete)
-- Master SVG icon (Annotator), Composer icon SVG
+- Master SVG icon (Annotator), Composer icon SVG, Connect icon SVG
 - Chrome extension icons (16-128px), VS Code marketplace icon
 - Site logo, favicon, social card
 - Generation scripts in `scripts/`
@@ -94,7 +115,8 @@
 
 ## Not Yet Built
 
-- Recurate Copier — Chrome Web Store publication pending (built, tested on 6 of 7 platforms — Copilot not yet tested)
+- Recurate Connect — testing on Claude.ai (built, not yet tested)
+- Recurate Copier — Chrome Web Store publication pending (submitted Mar 20)
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Settings page (auto-inject vs manual confirmation toggle)
 
@@ -118,6 +140,10 @@
 | **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
 | **Copier content script** | `extensions/conversation-copier/content.js` |
 | **Copier manifest** | `extensions/conversation-copier/manifest.json` |
+| **Connect config** | `extensions/connect/wxt.config.ts` |
+| **Connect content script** | `extensions/connect/entrypoints/claude.content.tsx` |
+| **Connect background** | `extensions/connect/entrypoints/background.ts` |
+| **Connect architecture** | `docs/connect-architecture.md` |
 
 ---
 

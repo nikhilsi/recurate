@@ -22,6 +22,14 @@
 - [ ] Store listing, screenshots
 - [ ] Publish to Chrome Web Store
 
+### Recurate Connect
+- [x] Architecture design (docs/connect-architecture.md)
+- [x] Extension built: tab registry, share buttons, shared space sidebar, chat-requested share, edit/pin/delete, search, drag-to-inject, resize, pop-out window
+- [ ] Test on Claude.ai with 2+ tabs
+- [ ] Fix issues found during testing
+- [ ] Store listing, screenshots
+- [ ] Publish to Chrome Web Store
+
 ### Annotator — New Platforms
 - [ ] Add grok.com platform support (DOM inspection needed)
 - [ ] Add gemini.google.com platform support (DOM inspection needed)
