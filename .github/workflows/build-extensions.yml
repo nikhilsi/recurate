@@ -22,7 +22,7 @@ jobs:
       - name: Build Annotator Chrome
         working-directory: extensions/chrome
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Package Annotator Chrome
@@ -34,7 +34,7 @@ jobs:
       - name: Build Connect
         working-directory: extensions/connect
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Package Connect
@@ -58,7 +58,7 @@ jobs:
       - name: Build Annotator VS Code
         working-directory: extensions/vscode
         run: |
-          npm ci
+          npm install
           npm run compile
           npx @vscode/vsce package --no-dependencies -o ../../recurate-annotator-vscode.vsix
 
