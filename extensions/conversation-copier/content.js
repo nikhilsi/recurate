@@ -687,6 +687,13 @@ ${manifestHTML}
     });
   }
 
+  function getDateTimeStamp() {
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '');
+    return { date, time, dateTime: `${date}-${time}` };
+  }
+
   function downloadHTML() {
     const messages = extractConversation();
     if (messages.length === 0) {
@@ -695,9 +702,9 @@ ${manifestHTML}
     }
     const title = getConversationTitle();
     const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
-    const date = new Date().toISOString().slice(0, 10);
+    const { dateTime } = getDateTimeStamp();
     const slug = title ? slugify(title) : 'conversation';
-    downloadSimpleHTML(messages, title, platformName, date, slug);
+    downloadSimpleHTML(messages, title, platformName, dateTime, slug);
   }
 
   function exportFullZIP() {
@@ -708,9 +715,9 @@ ${manifestHTML}
     }
     const title = getConversationTitle();
     const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
-    const date = new Date().toISOString().slice(0, 10);
+    const { dateTime } = getDateTimeStamp();
     const slug = title ? slugify(title) : 'conversation';
-    downloadWithArtifacts(messages, title, platformName, date, slug);
+    downloadWithArtifacts(messages, title, platformName, dateTime, slug);
   }
 
   function downloadSimpleHTML(messages, title, platformName, date, slug) {
@@ -781,6 +788,7 @@ ${manifestHTML}
     let failed = 0;
     const downloadAndAdd = async (files, subfolder) => {
       for (const file of files) {
+        if (exportCancelled) return;
         const blob = await downloadFile(orgId, chatId, file.path);
         if (blob) {
           zip.file(folderName + '/' + subfolder + '/' + file.filename, blob);
@@ -794,6 +802,8 @@ ${manifestHTML}
 
     await downloadAndAdd(outputFiles, 'artifacts');
     await downloadAndAdd(uploadFiles, 'uploads');
+
+    if (exportCancelled) return;
 
     updateExportModal(totalFiles, totalFiles, 'Building ZIP...');
 
@@ -822,7 +832,10 @@ ${manifestHTML}
 
   // --- Export progress modal ---
 
+  let exportCancelled = false;
+
   function showExportModal(totalFiles) {
+    exportCancelled = false;
     removeExportModal();
 
     const overlay = document.createElement('div');
@@ -853,6 +866,7 @@ ${manifestHTML}
         <div id="rc-modal-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4338CA,#6366F1);border-radius:8px;transition:width 0.3s ease;"></div>
       </div>
       <div id="rc-modal-detail" style="font-size:11px;color:#9ca3af;">0 of ${totalFiles} files</div>
+      <button id="rc-modal-cancel" type="button" style="margin-top:8px;border:1px solid #d1d5db;background:#fff;color:#6b7280;padding:5px 16px;border-radius:8px;font-size:12px;cursor:pointer;">Cancel</button>
     `;
 
     const style = document.createElement('style');
@@ -864,6 +878,12 @@ ${manifestHTML}
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+
+    document.getElementById('rc-modal-cancel').addEventListener('click', () => {
+      exportCancelled = true;
+      removeExportModal();
+      showToast('Export cancelled');
+    });
   }
 
   function updateExportModal(downloaded, total, statusText) {
