@@ -85,6 +85,8 @@ Exports full AI conversations as markdown, HTML, or ZIP archive (with artifacts 
 
 **Host permissions**: Content script runs on claude.ai, chatgpt.com, grok.com, gemini.google.com, copilot.microsoft.com, m365.cloud.microsoft, and google.com to read conversation content from the page DOM and export it as markdown, HTML, or ZIP. On Claude.ai, also calls Claude's internal API to list and download artifact files. No data is sent externally.
 
+**Tabs**: Used by the background service worker to find open Claude.ai tabs for automatic periodic backups. The extension queries tabs by URL to determine which tabs contain AI conversations that should be backed up.
+
 **Alarms**: Used to schedule automatic conversation backups every 2 hours. The background service worker triggers a backup of any open Claude.ai tab.
 
 **Downloads**: Used to silently save auto-backup HTML files to the user's Downloads folder without requiring a file picker dialog.
