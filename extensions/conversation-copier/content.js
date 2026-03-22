@@ -401,13 +401,14 @@
 
   // --- Format as styled HTML ---
 
-  function toHTML(messages) {
+  function toHTML(messages, outputFiles, uploadFiles) {
     const platform = getPlatformDisplayName();
     const title = getConversationTitle();
     const date = new Date().toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
     });
 
+    // For Claude with artifacts: process message HTML to replace artifact blocks with links
     let body = '';
     for (const msg of messages) {
       if (msg.role === 'user') {
@@ -416,13 +417,25 @@
           <div class="content">${escapeHtml(msg.text)}</div>
         </div>`;
       } else {
-        // Use innerHTML from DOM — already rendered with proper formatting
+        let msgHtml = msg.html;
+        // If we have artifact files, replace artifact blocks with links
+        if (outputFiles && outputFiles.length > 0) {
+          const temp = document.createElement('div');
+          temp.innerHTML = msgHtml;
+          replaceArtifactBlocksInHTML(temp, outputFiles);
+          msgHtml = temp.innerHTML;
+        }
         body += `<div class="message assistant">
           <div class="label">${platform}</div>
-          <div class="content">${msg.html}</div>
+          <div class="content">${msgHtml}</div>
         </div>`;
       }
     }
+
+    // Add artifact manifest at the end
+    const manifestHTML = (outputFiles || uploadFiles)
+      ? buildArtifactManifestHTML(outputFiles || [], uploadFiles || [])
+      : '';
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -496,6 +509,7 @@
   <div class="meta">${date}</div>
 </div>
 ${body}
+${manifestHTML}
 <div class="footer">Exported with <a href="https://recurate.ai">Recurate Copier</a></div>
 </body>
 </html>`;
@@ -505,6 +519,156 @@ ${body}
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // --- Claude Artifact Export (claude.ai only) ---
+
+  async function getOrgId() {
+    try {
+      const resp = await fetch('/api/organizations');
+      const data = await resp.json();
+      return Array.isArray(data) && data.length > 0 ? data[0].uuid : null;
+    } catch (e) {
+      console.error('Recurate Copier: failed to get org ID', e);
+      return null;
+    }
+  }
+
+  function getChatId() {
+    const parts = window.location.pathname.split('/');
+    // URL is /chat/{uuid}
+    return parts[2] || null;
+  }
+
+  async function listFiles(orgId, chatId) {
+    try {
+      const resp = await fetch(`/api/organizations/${orgId}/conversations/${chatId}/wiggle/list-files?prefix=`);
+      const data = await resp.json();
+      return data.success ? data.files : [];
+    } catch (e) {
+      console.error('Recurate Copier: failed to list files', e);
+      return [];
+    }
+  }
+
+  async function downloadFile(orgId, chatId, filePath) {
+    try {
+      const encodedPath = encodeURIComponent(filePath);
+      const resp = await fetch(`/api/organizations/${orgId}/conversations/${chatId}/wiggle/download-file?path=${encodedPath}`);
+      if (!resp.ok) return null;
+      return await resp.blob();
+    } catch (e) {
+      console.error('Recurate Copier: failed to download file', filePath, e);
+      return null;
+    }
+  }
+
+  function getFilename(filePath) {
+    return filePath.split('/').pop() || filePath;
+  }
+
+  function deduplicateFilenames(filePaths) {
+    // Returns array of {path, filename} with unique filenames
+    const seen = {};
+    return filePaths.map(path => {
+      let name = getFilename(path);
+      if (seen[name]) {
+        seen[name]++;
+        const ext = name.lastIndexOf('.');
+        if (ext > 0) {
+          name = name.slice(0, ext) + '-' + seen[name] + name.slice(ext);
+        } else {
+          name = name + '-' + seen[name];
+        }
+      } else {
+        seen[name] = 1;
+      }
+      return { path, filename: name };
+    });
+  }
+
+  function slugifyForMatch(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function findMatchingFile(artifactName, outputFiles) {
+    // Match DOM artifact name to API file path
+    const slug = slugifyForMatch(artifactName);
+    // Find files whose stem starts with this slug
+    const matches = outputFiles.filter(f => {
+      const stem = getFilename(f.path).replace(/\.[^.]+$/, '');
+      return slugifyForMatch(stem).startsWith(slug);
+    });
+    if (matches.length === 0) return null;
+    // Return the last match (latest version)
+    return matches[matches.length - 1];
+  }
+
+  function replaceArtifactBlocksInHTML(clone, outputFiles) {
+    // Find artifact blocks in the cloned HTML and replace with links
+    const blocks = clone.querySelectorAll('.artifact-block-cell');
+    blocks.forEach(block => {
+      const parent = block.closest('[role="button"][aria-label]');
+      if (!parent) return;
+
+      const ariaLabel = parent.getAttribute('aria-label') || '';
+      const nameMatch = ariaLabel.match(/^Open artifact:\s*(.+)$/);
+      if (!nameMatch) return;
+
+      const artifactName = nameMatch[1].trim();
+      const text = block.textContent || '';
+
+      // Parse type and format from text like "Ch01 paper reamsDocument · MD Download"
+      const typeMatch = text.match(/(Document|Code|Application|Presentation|Spreadsheet)\s*[·.]\s*(\w+)/);
+      const type = typeMatch ? typeMatch[1] : '';
+      const format = typeMatch ? typeMatch[2] : '';
+
+      const matchedFile = findMatchingFile(artifactName, outputFiles);
+
+      const link = document.createElement('div');
+      link.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;margin:8px 0;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;';
+
+      if (matchedFile) {
+        link.innerHTML = '<span style="font-size:16px;">&#x1F4CE;</span>' +
+          '<a href="artifacts/' + escapeHtml(matchedFile.filename) + '" style="color:#4f46e5;text-decoration:none;font-weight:500;">' + escapeHtml(artifactName) + '</a>' +
+          (type ? '<span style="color:#888;font-size:11px;">' + escapeHtml(type + ', ' + format) + '</span>' : '');
+      } else {
+        link.innerHTML = '<span style="font-size:16px;">&#x1F4CE;</span>' +
+          '<span style="color:#4f46e5;font-weight:500;">' + escapeHtml(artifactName) + '</span>' +
+          (type ? '<span style="color:#888;font-size:11px;">' + escapeHtml(type + ', ' + format) + '</span>' : '');
+      }
+
+      // Replace the parent button element with our link
+      parent.replaceWith(link);
+    });
+  }
+
+  function buildArtifactManifestHTML(outputFiles, uploadFiles) {
+    let html = '';
+
+    if (outputFiles.length > 0) {
+      html += '<div class="artifacts-section" style="margin-top:2rem;padding-top:1rem;border-top:2px solid #4f46e5;">';
+      html += '<h2 style="color:#4f46e5;font-size:1.2rem;margin-bottom:0.5rem;">Artifacts</h2>';
+      html += '<p style="color:#888;font-size:0.85rem;margin-bottom:0.75rem;">Claude generated ' + outputFiles.length + ' artifact' + (outputFiles.length !== 1 ? 's' : '') + ' during this conversation:</p>';
+      html += '<ul style="list-style:none;padding:0;">';
+      outputFiles.forEach(f => {
+        html += '<li style="margin-bottom:4px;"><a href="artifacts/' + escapeHtml(f.filename) + '" style="color:#4f46e5;text-decoration:none;">&#x1F4CE; ' + escapeHtml(f.filename) + '</a></li>';
+      });
+      html += '</ul></div>';
+    }
+
+    if (uploadFiles.length > 0) {
+      html += '<div class="uploads-section" style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e5e7eb;">';
+      html += '<h2 style="color:#4f46e5;font-size:1.2rem;margin-bottom:0.5rem;">Uploaded Files</h2>';
+      html += '<p style="color:#888;font-size:0.85rem;margin-bottom:0.75rem;">' + uploadFiles.length + ' file' + (uploadFiles.length !== 1 ? 's were' : ' was') + ' uploaded during this conversation:</p>';
+      html += '<ul style="list-style:none;padding:0;">';
+      uploadFiles.forEach(f => {
+        html += '<li style="margin-bottom:4px;"><a href="uploads/' + escapeHtml(f.filename) + '" style="color:#4f46e5;text-decoration:none;">&#x1F4CE; ' + escapeHtml(f.filename) + '</a></li>';
+      });
+      html += '</ul></div>';
+    }
+
+    return html;
   }
 
   // --- Actions ---
@@ -529,12 +693,26 @@ ${body}
       showToast('No conversation found on this page');
       return;
     }
-    const html = toHTML(messages);
+
+    const platform = getPlatform();
     const title = getConversationTitle();
-    const platform = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
+    const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
     const date = new Date().toISOString().slice(0, 10);
     const slug = title ? slugify(title) : 'conversation';
-    const filename = `recurate-${platform}-${slug}-${date}.html`;
+
+    // Claude.ai: check for artifacts and do full export
+    if (platform === 'claude') {
+      downloadWithArtifacts(messages, title, platformName, date, slug);
+      return;
+    }
+
+    // All other platforms: simple HTML download
+    downloadSimpleHTML(messages, title, platformName, date, slug);
+  }
+
+  function downloadSimpleHTML(messages, title, platformName, date, slug) {
+    const html = toHTML(messages);
+    const filename = `recurate-${platformName}-${slug}-${date}.html`;
 
     try {
       const blob = new Blob([html], { type: 'text/html' });
@@ -553,6 +731,90 @@ ${body}
     } catch (err) {
       showToast('Download failed — try Cmd+Shift+D');
       console.error('Recurate Copier download error:', err);
+    }
+  }
+
+  async function downloadWithArtifacts(messages, title, platformName, date, slug) {
+    const chatId = getChatId();
+    if (!chatId) {
+      // No chat ID — fall back to simple download
+      downloadSimpleHTML(messages, title, platformName, date, slug);
+      return;
+    }
+
+    showToast('Checking for artifacts...');
+
+    const orgId = await getOrgId();
+    if (!orgId) {
+      downloadSimpleHTML(messages, title, platformName, date, slug);
+      return;
+    }
+
+    const allFiles = await listFiles(orgId, chatId);
+    const outputPaths = allFiles.filter(f => f.includes('/outputs/'));
+    const uploadPaths = allFiles.filter(f => f.includes('/uploads/'));
+
+    if (outputPaths.length === 0 && uploadPaths.length === 0) {
+      // No artifacts — simple download
+      downloadSimpleHTML(messages, title, platformName, date, slug);
+      return;
+    }
+
+    // We have artifacts — build a ZIP
+    const totalFiles = outputPaths.length + uploadPaths.length;
+    showToast(`Downloading ${totalFiles} files...`);
+
+    const outputFiles = deduplicateFilenames(outputPaths);
+    const uploadFiles = deduplicateFilenames(uploadPaths);
+
+    // Build the HTML with inline artifact links and manifest
+    const html = toHTML(messages, outputFiles, uploadFiles);
+
+    // Create ZIP
+    const zip = new JSZip();
+    const folderName = `recurate-${platformName}-${slug}-${date}`;
+
+    // Add conversation HTML
+    zip.file(folderName + '/conversation.html', html);
+
+    // Download and add artifacts
+    let downloaded = 0;
+    const downloadAndAdd = async (files, subfolder) => {
+      for (const file of files) {
+        const blob = await downloadFile(orgId, chatId, file.path);
+        if (blob) {
+          zip.file(folderName + '/' + subfolder + '/' + file.filename, blob);
+        }
+        downloaded++;
+        if (downloaded % 5 === 0 || downloaded === totalFiles) {
+          showToast(`Downloaded ${downloaded} of ${totalFiles} files...`);
+        }
+      }
+    };
+
+    await downloadAndAdd(outputFiles, 'artifacts');
+    await downloadAndAdd(uploadFiles, 'uploads');
+
+    showToast('Building ZIP...');
+
+    try {
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = folderName + '.zip';
+      a.style.display = 'none';
+      document.documentElement.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 100);
+      showToast(`Downloaded ${messages.length} messages + ${totalFiles} files as ZIP`);
+    } catch (err) {
+      showToast('ZIP creation failed — downloading HTML only');
+      console.error('Recurate Copier ZIP error:', err);
+      downloadSimpleHTML(messages, title, platformName, date, slug);
     }
   }
 
