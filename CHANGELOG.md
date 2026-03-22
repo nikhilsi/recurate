@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.5.0] - 2026-03-22
+
+### Added
+- **Copier: Three-button UX** on Claude.ai: Copy (markdown to clipboard), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads). Two buttons on other platforms (Copy + Download). Export button uses a ZIP/folder icon.
+- **Copier: Auto-backup** via background service worker. Uses `chrome.alarms` to trigger every 2 hours. Finds open Claude.ai tabs, extracts conversation HTML, downloads silently via `chrome.downloads` API. No user interaction needed.
+- **Copier: Message count warning** at 400+ messages. Amber banner warns about capacity limits. Dismissible. Re-warns at 500, 600, etc.
+- **Copier: Cancel button** in the export progress modal. Aborts the download loop and dismisses the modal.
+- **Copier: Timestamps in filenames** using user's local timezone (e.g., `recurate-claude-ops-hq-2026-03-22-1145.html`).
+
+### Changed
+- Copier version bumped to 0.3.0
+- Copier manifest: added `alarms` and `downloads` permissions, added `background.js` service worker
+- Download button on Claude.ai now produces quick HTML only (no artifact check). Full ZIP export moved to separate Export button.
+
+---
+
 ## [1.4.0] - 2026-03-22
 
 ### Added

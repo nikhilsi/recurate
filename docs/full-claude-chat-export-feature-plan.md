@@ -1,6 +1,6 @@
 # Full Claude Chat Export — Feature Plan
 
-**Status:** Built and tested (v0.2.0)
+**Status:** Built and tested (v0.3.0 — three buttons, auto-backup, message warnings)
 **Date:** March 22, 2026
 **Author:** Nikhil Singhal + Claude Code
 

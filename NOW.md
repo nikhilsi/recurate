@@ -21,15 +21,13 @@
 - [x] Test Copilot enterprise
 - [x] Store listing, screenshots
 - [x] Submitted to Chrome Web Store (Mar 20)
-- [x] **Full Claude Chat Export** — one-click ZIP with conversation + artifacts + uploads. See docs/full-claude-chat-export-feature-plan.md
-  - [x] Bundle JSZip into extension
-  - [x] Add Claude API helpers (getOrgId, listFiles, downloadFile)
-  - [x] Modify downloadHTML to detect artifacts and build ZIP
-  - [x] Inline artifact links in conversation HTML
-  - [x] Artifact + upload manifest at end of HTML
-  - [x] Progress modal (not toast) during download
-  - [x] Tested with 52 artifacts + 18 uploads (70 files, 4.1MB ZIP)
-  - [x] Version bumped to 0.2.0
+- [x] **Full Claude Chat Export** — ZIP with conversation + artifacts + uploads (v0.2.0)
+- [x] **Three-button UX** — Copy (markdown), Download (quick HTML), Export (ZIP). Export only on Claude.ai (v0.3.0)
+- [x] **Auto-backup** — background service worker, chrome.alarms, every 2 hours, silent HTML snapshots (v0.3.0)
+- [x] **Message count warning** — amber banner at 400+ messages (v0.3.0)
+- [x] **Cancel button** in export modal (v0.3.0)
+- [x] **Timestamps** in filenames (user's local timezone) (v0.3.0)
+- [x] Version bumped to 0.3.0
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

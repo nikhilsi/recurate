@@ -64,7 +64,7 @@ What started as a single annotation extension has grown into a suite of five ext
 | **Annotator** (Chrome) | Curate the output — highlight, strikethrough, dig deeper, verify | Claude, ChatGPT, Copilot (consumer + enterprise) | Published |
 | **Annotator** (VS Code) | Same annotation UX for Claude Code terminal workflow | VS Code, Antigravity, VSCodium, Theia | Published |
 | **Composer** | Compose the input — floating markdown toolbar for AI chat inputs | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google Search | Published |
-| **Copier** | Capture the conversation — copy as markdown, or download as ZIP with artifacts | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google AI Mode | v0.2.0 Submitted |
+| **Copier** | Capture the conversation — Copy/Download/Export (ZIP with artifacts), auto-backup | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google AI Mode | v0.3.0 Submitted |
 | **Connect** | Connect the conversations — share context between two AI chat tabs | Claude, Copilot (2-tab, cross-platform, Chrome + Edge) | v0.2.0 Built |
 
 - **No backend, no API keys, fully client-side.** All extensions run entirely in the browser.
@@ -291,7 +291,7 @@ All extensions share a common brand identity (indigo gradient icons, same color 
 
 ### Built and Tested
 
-- **Copier** v0.2.0 — submitted to Chrome Web Store (pending review). 7 platforms. Full Claude chat export with artifacts + uploads as ZIP.
+- **Copier** v0.3.0 — submitted to Chrome Web Store (pending review). 7 platforms. Three buttons (Copy/Download/Export), full ZIP with artifacts, auto-backup every 2 hours, message warnings.
 - **Connect** v0.2.0 — built and tested. Claude + Copilot cross-platform, 2-tab connection. Chrome + Edge. Not yet submitted.
 - **Recurate Platform** — live at app.recurate.ai. 4 LLMs with Condensed Context synthesis.
 
