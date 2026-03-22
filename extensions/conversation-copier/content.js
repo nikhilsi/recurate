@@ -693,21 +693,24 @@ ${manifestHTML}
       showToast('No conversation found on this page');
       return;
     }
-
-    const platform = getPlatform();
     const title = getConversationTitle();
     const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
     const date = new Date().toISOString().slice(0, 10);
     const slug = title ? slugify(title) : 'conversation';
+    downloadSimpleHTML(messages, title, platformName, date, slug);
+  }
 
-    // Claude.ai: check for artifacts and do full export
-    if (platform === 'claude') {
-      downloadWithArtifacts(messages, title, platformName, date, slug);
+  function exportFullZIP() {
+    const messages = extractConversation();
+    if (messages.length === 0) {
+      showToast('No conversation found on this page');
       return;
     }
-
-    // All other platforms: simple HTML download
-    downloadSimpleHTML(messages, title, platformName, date, slug);
+    const title = getConversationTitle();
+    const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
+    const date = new Date().toISOString().slice(0, 10);
+    const slug = title ? slugify(title) : 'conversation';
+    downloadWithArtifacts(messages, title, platformName, date, slug);
   }
 
   function downloadSimpleHTML(messages, title, platformName, date, slug) {
@@ -933,6 +936,8 @@ ${manifestHTML}
   // SVG icons matching Claude's button style (20x20, fill="currentColor")
   const COPY_ALL_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 2a2 2 0 0 0-2 2v1H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H6zm8 10a1 1 0 0 1-1 1H5V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5zM3 6h1v7a2 2 0 0 0 2 2h6v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/></svg>';
   const DOWNLOAD_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a.5.5 0 0 1 .5.5v9.793l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 0 1 .708-.708L9.5 12.293V2.5A.5.5 0 0 1 10 2zM4 14.5a.5.5 0 0 1 1 0v1a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 1 1 0v1a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 15.5v-1z"/></svg>';
+  // ZIP/archive icon for full export (only on Claude.ai)
+  const EXPORT_ZIP_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M2 4a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4zm7.5 2a.5.5 0 0 0-.5.5v5.793l-1.646-1.647a.5.5 0 0 0-.708.708l2.5 2.5a.5.5 0 0 0 .708 0l2.5-2.5a.5.5 0 0 0-.708-.708L10 12.293V6.5a.5.5 0 0 0-.5-.5z"/></svg>';
 
   function findLastActionBar() {
     const platform = getPlatform();
@@ -1039,6 +1044,13 @@ ${manifestHTML}
       bar.appendChild(sep);
       bar.appendChild(copyBtn);
       bar.appendChild(dlBtn);
+
+      // Add Export ZIP button on Claude.ai only
+      if (getPlatform() === 'claude') {
+        const exportBtn = createActionButton(EXPORT_ZIP_SVG, 'Export conversation + artifacts (ZIP)', exportFullZIP);
+        exportBtn.classList.add('rc-copier-injected');
+        bar.appendChild(exportBtn);
+      }
     } else {
       // Fallback: floating buttons for platforms without action bar injection
       showFloatingButtons();
@@ -1168,9 +1180,83 @@ ${manifestHTML}
     }
   });
 
+  // --- Message count warning (Claude.ai only) ---
+
+  let lastWarningCount = 0;
+
+  function checkMessageCount() {
+    if (getPlatform() !== 'claude') return;
+    const messages = document.querySelectorAll('[data-testid="user-message"], [data-is-streaming="false"]');
+    const count = messages.length;
+    // Warn at 400, 500, 600, etc.
+    const threshold = Math.floor(count / 100) * 100;
+    if (threshold >= 400 && threshold > lastWarningCount) {
+      lastWarningCount = threshold;
+      showMessageCountWarning(count);
+    }
+  }
+
+  function showMessageCountWarning(count) {
+    const existing = document.getElementById('rc-copier-warning');
+    if (existing) existing.remove();
+
+    const banner = document.createElement('div');
+    banner.id = 'rc-copier-warning';
+    Object.assign(banner.style, {
+      position: 'fixed', top: '8px', left: '50%', transform: 'translateX(-50%)',
+      zIndex: '2147483647', padding: '10px 16px', borderRadius: '10px',
+      background: '#fef3c7', color: '#92400e', fontSize: '13px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '10px',
+      border: '1px solid #fcd34d',
+    });
+
+    banner.innerHTML = `
+      <span style="font-size:16px;">&#x26A0;</span>
+      <span>This conversation has <strong>${count}+ messages</strong>. Long conversations may hit Claude's capacity limit. Consider exporting.</span>
+      <button id="rc-copier-warning-dismiss" style="border:none;background:transparent;color:#92400e;font-size:16px;cursor:pointer;padding:0 4px;margin-left:8px;">&times;</button>
+    `;
+
+    document.body.appendChild(banner);
+    document.getElementById('rc-copier-warning-dismiss').addEventListener('click', () => banner.remove());
+    // Auto-dismiss after 15 seconds
+    setTimeout(() => { if (banner.parentElement) banner.remove(); }, 15000);
+  }
+
+  // --- Auto-backup listener (triggered by background service worker) ---
+
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message.type === 'RC_AUTO_BACKUP') {
+        const messages = extractConversation();
+        if (messages.length === 0) {
+          sendResponse({ success: false, reason: 'no messages' });
+          return;
+        }
+        const html = toHTML(messages);
+        const title = getConversationTitle();
+        const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
+        const now = new Date();
+        const date = now.toISOString().slice(0, 10);
+        const time = now.toTimeString().slice(0, 5).replace(':', '');
+        const slug = title ? slugify(title) : 'conversation';
+        const filename = `backup-${platformName}-${slug}-${date}-${time}.html`;
+
+        // Send back to background for silent download
+        sendResponse({ success: true, html, filename, messageCount: messages.length });
+      }
+    });
+  }
+
   // --- Init ---
   // Inject after page loads, and re-inject periodically
   // (new AI responses create new action bars, our buttons need to follow the latest one)
   setTimeout(buildUI, 2000);
   setInterval(buildUI, 3000);
+
+  // Check message count periodically (Claude.ai only)
+  if (getPlatform() === 'claude') {
+    setInterval(checkMessageCount, 30000); // every 30 seconds
+    setTimeout(checkMessageCount, 5000); // initial check
+  }
 })();
