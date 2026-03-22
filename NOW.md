@@ -21,6 +21,14 @@
 - [x] Test Copilot enterprise
 - [x] Store listing, screenshots
 - [x] Submitted to Chrome Web Store (Mar 20)
+- [ ] **Full Claude Chat Export** — one-click download of conversation + all artifacts + uploads as ZIP. See docs/full-claude-chat-export-feature-plan.md
+  - [ ] Bundle JSZip into extension
+  - [ ] Add Claude API helpers (getOrgId, listFiles, downloadFile)
+  - [ ] Modify downloadHTML to detect artifacts and build ZIP
+  - [ ] Inline artifact links in conversation HTML
+  - [ ] Artifact + upload manifest at end of HTML
+  - [ ] Progress toast during download
+  - [ ] Test with large conversations (50+ artifacts)
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

@@ -183,15 +183,39 @@ Recommendation: Bundle it. The Copier is currently ~32KB. Adding JSZip brings it
 
 ---
 
-## Open Questions
+## Decisions (March 22, 2026)
 
-1. **User uploads: include images?** Uploaded images (screenshots, photos) could be large. Include them by default or make it optional? Recommendation: include everything — the goal is a complete archive.
+1. **User uploads:** Include everything (images, PDFs, text files). The goal is a complete archive.
+2. **Naming conflicts:** If multiple files have the same name, append a counter (`filename-2.md`). API paths already include version info (`ch01-paper-reams-V5.md`) so most are naturally unique.
+3. **Download button:** Same button, smarter behavior. One button, detects artifacts automatically.
+4. **Progress feedback:** Toast message updates as files download ("Downloading 23 of 51..."). No progress bar needed.
+5. **Build approach:** Full feature in one pass. No intermediate versions.
 
-2. **Naming conflicts:** Multiple artifacts could have the same filename (e.g., different versions). The file paths from the API include version info (e.g., `ch01-paper-reams-V5.md`) so this should be handled naturally.
+## Inline Artifact Links (Point 2)
 
-3. **ZIP size limits:** Browser memory limits apply. A conversation with many large binary artifacts could hit memory limits when building the ZIP. JSZip supports streaming, which helps. For most conversations this won't be an issue.
+When Claude presents an artifact inline in a response (e.g., "Ch02.5 a note from claude / Document / MD / Download"), the exported HTML should show a clickable link to the actual file in the `artifacts/` folder at that exact position in the conversation.
 
-4. **Should the download button change appearance?** When artifacts are present, the download button could show a different icon or tooltip to indicate "Download conversation + artifacts." Or keep it simple — same button, smarter behavior.
+### DOM-to-File Matching
+
+The artifact block in the DOM has `aria-label="Open artifact: Ch01 paper reams"`. The API file path is `/mnt/user-data/outputs/ch01-paper-reams-V5.md`. Matching approach:
+
+1. Extract artifact name from DOM (`aria-label` on parent of `.artifact-block-cell`)
+2. Slugify the name: "Ch01 paper reams" becomes `ch01-paper-reams`
+3. Find matching files in the API file list by prefix match
+4. If multiple versions exist, link to the latest (highest version number)
+5. Replace the artifact block in the cloned DOM with a styled link to `artifacts/filename`
+
+### HTML Output (inline)
+
+Where Claude presented an artifact, the exported HTML shows:
+```html
+<div class="artifact-link">
+  <a href="artifacts/ch01-paper-reams-V5.md">Ch01 paper reams</a>
+  <span class="artifact-type">Document, MD</span>
+</div>
+```
+
+The full manifest at the bottom still lists ALL artifacts and uploads with links.
 
 ---
 
