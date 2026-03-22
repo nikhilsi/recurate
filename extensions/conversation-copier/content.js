@@ -742,8 +742,6 @@ ${manifestHTML}
       return;
     }
 
-    showToast('Checking for artifacts...');
-
     const orgId = await getOrgId();
     if (!orgId) {
       downloadSimpleHTML(messages, title, platformName, date, slug);
@@ -755,14 +753,13 @@ ${manifestHTML}
     const uploadPaths = allFiles.filter(f => f.includes('/uploads/'));
 
     if (outputPaths.length === 0 && uploadPaths.length === 0) {
-      // No artifacts — simple download
       downloadSimpleHTML(messages, title, platformName, date, slug);
       return;
     }
 
-    // We have artifacts — build a ZIP
+    // We have artifacts — show modal and build a ZIP
     const totalFiles = outputPaths.length + uploadPaths.length;
-    showToast(`Downloading ${totalFiles} files...`);
+    showExportModal(totalFiles);
 
     const outputFiles = deduplicateFilenames(outputPaths);
     const uploadFiles = deduplicateFilenames(uploadPaths);
@@ -774,28 +771,28 @@ ${manifestHTML}
     const zip = new JSZip();
     const folderName = `recurate-${platformName}-${slug}-${date}`;
 
-    // Add conversation HTML
     zip.file(folderName + '/conversation.html', html);
 
-    // Download and add artifacts
+    // Download and add all files
     let downloaded = 0;
+    let failed = 0;
     const downloadAndAdd = async (files, subfolder) => {
       for (const file of files) {
         const blob = await downloadFile(orgId, chatId, file.path);
         if (blob) {
           zip.file(folderName + '/' + subfolder + '/' + file.filename, blob);
+        } else {
+          failed++;
         }
         downloaded++;
-        if (downloaded % 5 === 0 || downloaded === totalFiles) {
-          showToast(`Downloaded ${downloaded} of ${totalFiles} files...`);
-        }
+        updateExportModal(downloaded, totalFiles, `Downloading ${subfolder}...`);
       }
     };
 
     await downloadAndAdd(outputFiles, 'artifacts');
     await downloadAndAdd(uploadFiles, 'uploads');
 
-    showToast('Building ZIP...');
+    updateExportModal(totalFiles, totalFiles, 'Building ZIP...');
 
     try {
       const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -810,12 +807,104 @@ ${manifestHTML}
         a.remove();
         URL.revokeObjectURL(url);
       }, 100);
-      showToast(`Downloaded ${messages.length} messages + ${totalFiles} files as ZIP`);
+      completeExportModal(messages.length, totalFiles - failed);
     } catch (err) {
-      showToast('ZIP creation failed — downloading HTML only');
       console.error('Recurate Copier ZIP error:', err);
-      downloadSimpleHTML(messages, title, platformName, date, slug);
+      failExportModal('ZIP creation failed');
+      setTimeout(() => {
+        downloadSimpleHTML(messages, title, platformName, date, slug);
+      }, 2000);
     }
+  }
+
+  // --- Export progress modal ---
+
+  function showExportModal(totalFiles) {
+    removeExportModal();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'rc-copier-modal-overlay';
+    Object.assign(overlay.style, {
+      position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+      zIndex: '2147483647', background: 'rgba(0,0,0,0.4)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)',
+    });
+
+    const modal = document.createElement('div');
+    modal.id = 'rc-copier-modal';
+    Object.assign(modal.style, {
+      background: '#fff', borderRadius: '16px', padding: '28px 32px',
+      minWidth: '340px', maxWidth: '420px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      textAlign: 'center',
+    });
+
+    modal.innerHTML = `
+      <div style="margin-bottom:16px;">
+        <div id="rc-modal-spinner" style="width:36px;height:36px;border:3px solid #e0e7ff;border-top-color:#4f46e5;border-radius:50%;animation:rc-spin 0.8s linear infinite;margin:0 auto;"></div>
+      </div>
+      <div id="rc-modal-title" style="font-size:16px;font-weight:600;color:#1e1b4b;margin-bottom:6px;">Exporting conversation</div>
+      <div id="rc-modal-status" style="font-size:13px;color:#6b7280;margin-bottom:16px;">Checking for artifacts...</div>
+      <div style="background:#f3f4f6;border-radius:8px;height:6px;overflow:hidden;margin-bottom:12px;">
+        <div id="rc-modal-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4338CA,#6366F1);border-radius:8px;transition:width 0.3s ease;"></div>
+      </div>
+      <div id="rc-modal-detail" style="font-size:11px;color:#9ca3af;">0 of ${totalFiles} files</div>
+    `;
+
+    const style = document.createElement('style');
+    style.id = 'rc-copier-modal-style';
+    style.textContent = '@keyframes rc-spin { to { transform: rotate(360deg); } }';
+    if (!document.getElementById('rc-copier-modal-style')) {
+      document.head.appendChild(style);
+    }
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  }
+
+  function updateExportModal(downloaded, total, statusText) {
+    const status = document.getElementById('rc-modal-status');
+    const detail = document.getElementById('rc-modal-detail');
+    const bar = document.getElementById('rc-modal-progress-bar');
+    if (status && statusText) status.textContent = statusText;
+    if (detail) detail.textContent = `${downloaded} of ${total} files`;
+    if (bar) bar.style.width = Math.round((downloaded / total) * 100) + '%';
+  }
+
+  function completeExportModal(messageCount, fileCount) {
+    const spinner = document.getElementById('rc-modal-spinner');
+    const title = document.getElementById('rc-modal-title');
+    const status = document.getElementById('rc-modal-status');
+    const detail = document.getElementById('rc-modal-detail');
+    const bar = document.getElementById('rc-modal-progress-bar');
+
+    if (spinner) spinner.style.cssText = 'width:36px;height:36px;margin:0 auto;font-size:28px;line-height:36px;';
+    if (spinner) spinner.textContent = '\u2713';
+    if (title) title.textContent = 'Export complete';
+    if (status) status.textContent = `${messageCount} messages + ${fileCount} files`;
+    if (detail) detail.textContent = 'ZIP downloaded to your computer';
+    if (bar) bar.style.width = '100%';
+
+    setTimeout(removeExportModal, 2500);
+  }
+
+  function failExportModal(errorText) {
+    const spinner = document.getElementById('rc-modal-spinner');
+    const title = document.getElementById('rc-modal-title');
+    const status = document.getElementById('rc-modal-status');
+
+    if (spinner) spinner.style.cssText = 'width:36px;height:36px;margin:0 auto;font-size:28px;line-height:36px;color:#ef4444;';
+    if (spinner) spinner.textContent = '\u2717';
+    if (title) { title.textContent = 'Export failed'; title.style.color = '#ef4444'; }
+    if (status) status.textContent = errorText;
+
+    setTimeout(removeExportModal, 3000);
+  }
+
+  function removeExportModal() {
+    const overlay = document.getElementById('rc-copier-modal-overlay');
+    if (overlay) overlay.remove();
   }
 
   // --- Toast notification ---

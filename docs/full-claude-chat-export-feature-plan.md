@@ -170,9 +170,13 @@ Recommendation: Bundle it. The Copier is currently ~32KB. Adding JSZip brings it
    - Accept optional artifact/upload file lists
    - If present, append the artifact manifest section to the HTML
 
-5. **Progress feedback:**
-   - Update the toast to show progress: "Downloading 51 artifacts..."
-   - Update as files download: "Downloaded 23 of 51..."
+5. **Progress modal (not toast):**
+   - Semi-transparent overlay blocks the page during export
+   - Centered modal with spinner, title ("Exporting conversation"), status text, progress bar, file count
+   - Progress bar fills as files download
+   - Cannot be dismissed until complete (prevents user from interfering)
+   - On completion: checkmark icon, "Export complete", auto-dismisses after 2.5 seconds
+   - On failure: X icon, error message, auto-dismisses, falls back to simple HTML download
 
 ### Phase 2: Polish
 
