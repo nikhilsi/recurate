@@ -191,8 +191,8 @@ Recommendation: Bundle it. The Copier is currently ~32KB. Adding JSZip brings it
 
 1. **User uploads:** Include everything (images, PDFs, text files). The goal is a complete archive.
 2. **Naming conflicts:** If multiple files have the same name, append a counter (`filename-2.md`). API paths already include version info (`ch01-paper-reams-V5.md`) so most are naturally unique.
-3. **Download button:** Same button, smarter behavior. One button, detects artifacts automatically.
-4. **Progress feedback:** Toast message updates as files download ("Downloading 23 of 51..."). No progress bar needed.
+3. **Download buttons:** ~~Same button, smarter behavior.~~ Updated March 22: separate Download (quick HTML) and Export (full ZIP) buttons. Export button uses a ZIP icon and only appears on Claude.ai.
+4. **Progress feedback:** ~~Toast message.~~ Updated March 22: blocking progress modal with spinner, progress bar, file count. Auto-dismisses on completion.
 5. **Build approach:** Full feature in one pass. No intermediate versions.
 
 ## Inline Artifact Links (Point 2)
@@ -220,6 +220,61 @@ Where Claude presented an artifact, the exported HTML shows:
 ```
 
 The full manifest at the bottom still lists ALL artifacts and uploads with links.
+
+---
+
+## Phase 3: Three-Button UX + Auto-Backup (Next)
+
+### Status: Designed, not yet built
+
+### Three-Button Design
+
+The current single download button conflates "quick HTML" and "full ZIP with artifacts." These are different operations with different time costs (instant vs ~60 seconds). Users need separate controls.
+
+**Button row on Claude.ai:**
+
+| Button | Icon | Action | Time |
+|--------|------|--------|------|
+| **Copy** | Clipboard | Markdown to clipboard | Instant |
+| **Download** | Arrow (existing) | Quick HTML only, no API calls | <1 second |
+| **Export** | ZIP/archive icon | Full ZIP with conversation + artifacts + uploads + progress modal | ~60 seconds |
+
+**Button row on other platforms (ChatGPT, Grok, Gemini, Copilot, Google AI):**
+
+| Button | Icon | Action |
+|--------|------|--------|
+| **Copy** | Clipboard | Markdown to clipboard |
+| **Download** | Arrow | HTML file |
+
+The Export (ZIP) button only appears on Claude.ai because artifacts are Claude-only.
+
+### Auto-Backup (Periodic HTML Snapshots)
+
+**The problem:** When a Claude chat hits capacity and becomes non-responsive, everything in that chat is lost unless the user manually exported beforehand. Urmila lost 615 messages and 90 minutes recovering. Non-technical users won't remember to click Export.
+
+**The solution:** The Copier automatically saves a snapshot of the conversation HTML every 2 hours. No user interaction required. Just the HTML (no artifacts, no API calls), so it's fast and silent.
+
+**Design:**
+- Uses `chrome.alarms` API to trigger every 2 hours (configurable)
+- Background service worker sends message to active Claude.ai tab content script: "export now"
+- Content script extracts conversation and saves HTML silently via `chrome.downloads` API with `saveAs: false`
+- Filename: `backup-{chat-name}-{date}-{time}.html`
+- Only exports if the Claude.ai tab is open and has messages
+- Shows a brief, non-blocking notification: "Conversation backed up (423 messages)"
+- No modal, no blocking, no user action required
+
+**Message count warning:**
+- At 400+ messages, show a one-time warning: "This conversation has 400+ messages. Long conversations may hit Claude's capacity limit. Consider exporting with the Export button."
+- Dismissible. Does not block.
+- Re-shows if message count crosses 500, 600, etc.
+
+**Scope:**
+- Claude.ai only (other platforms don't have the capacity problem)
+- HTML only (no artifacts) for speed and simplicity
+- Requires adding `chrome.alarms`, `chrome.downloads`, and a background service worker to the Copier (currently has none)
+
+**Relationship to V3 State Management:**
+This auto-backup is one piece of the larger state persistence puzzle being designed in `ns-2026-the-big-push/ws-ai-partnership-command-center/v3-state-management/PROBLEM-DEFINITION.md`. It addresses failure mode #1 (chat hits capacity) and #3 (human forgets to trigger state save) from that document. It does NOT solve conversational context preservation (that requires a different approach).
 
 ---
 
