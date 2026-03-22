@@ -8,11 +8,11 @@ Copy-paste these into the Chrome Web Store developer dashboard.
 
 ### Short Description (132 chars max)
 
-Copy or download your full AI conversation — both sides, not just the last reply. Clean markdown or styled HTML, one click.
+Export your full AI conversation with one click. On Claude, includes all artifacts and uploads as a ZIP. Clean markdown or HTML.
 
 ### Manifest Description (132 chars max)
 
-Copy or download your full AI conversation — both your messages and the AI's responses. Clean markdown or styled HTML.
+Export your full AI conversation — messages, artifacts, and uploads. One click for markdown, or download as a complete ZIP archive.
 
 ### Detailed Description
 
@@ -94,9 +94,9 @@ Check the compliance checkbox. The extension collects no user data, transmits no
 # The extension is plain JS — no build step needed.
 # ZIP the extension directory (icons must be pre-generated):
 cd extensions/conversation-copier
-zip -r recurate-copier-0.1.0.zip manifest.json content.js icon-16.png icon-32.png icon-48.png icon-128.png
+zip -r recurate-copier-0.2.0.zip manifest.json content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
-# Upload recurate-copier-0.1.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-copier-0.2.0.zip to Chrome Web Store Developer Dashboard
 ```
 
 ---

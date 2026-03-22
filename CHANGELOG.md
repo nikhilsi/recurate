@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.4.0] - 2026-03-22
+
+### Added
+- **Copier: Full Claude chat export** — one-click download of conversation + all artifacts + all uploads as a ZIP file. Claude.ai only; other platforms continue to export as single HTML.
+- **Artifact ZIP structure:** `conversation.html` + `artifacts/` folder (Claude-generated files) + `uploads/` folder (user-uploaded files). HTML includes inline artifact links at the point each artifact was presented, plus a full manifest at the end.
+- **Claude API integration:** uses `wiggle/list-files` to enumerate artifacts and `wiggle/download-file` to fetch each one. Authenticated via session cookies, no API keys.
+- **Progress modal:** blocks the page during artifact download with spinner, progress bar, file count, and status text. Auto-dismisses on completion. Falls back to simple HTML download on failure.
+- **JSZip bundled** (v3.10.1, 97KB) for in-browser ZIP creation.
+- **GitHub Actions CI/CD:** workflow builds all 5 extensions on tag push and creates GitHub Release with downloadable artifacts and install guide.
+
+### Changed
+- Copier version bumped to 0.2.0
+- Manifest updated to load `jszip.min.js` as content script
+
+### Technical Notes
+- API discovery via network interception: `GET /api/organizations` (org UUID), `GET .../wiggle/list-files` (file enumeration), `GET .../wiggle/download-file?path=` (individual file download).
+- Inline artifact replacement: DOM `.artifact-block-cell` elements matched to API file paths via slugified name prefix matching. Latest version linked when multiple versions exist.
+- Tested with 52 artifacts + 18 uploads (70 files total, 4.1MB ZIP, ~60 seconds export time).
+
+---
+
 ## [1.3.1] - 2026-03-21
 
 ### Added

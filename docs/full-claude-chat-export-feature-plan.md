@@ -1,6 +1,6 @@
 # Full Claude Chat Export — Feature Plan
 
-**Status:** Planning
+**Status:** Built and tested (v0.2.0)
 **Date:** March 22, 2026
 **Author:** Nikhil Singhal + Claude Code
 

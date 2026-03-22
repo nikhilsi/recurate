@@ -72,14 +72,15 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer adds a
 Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown to clipboard, or download as a styled HTML file with formatted responses, smart filenames, and a print-ready layout.
 
 - Works on **claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot** (consumer + enterprise), **Google AI Mode** — 7 platforms
-- Submitted to Chrome Web Store (pending review)
+- On Claude.ai: full conversation + artifacts + uploads exported as ZIP with inline links and manifest
+- v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest). Submitted to Chrome Web Store (pending review).
 
 ### Recurate Connect — Connect the Conversations
 
 Connect two Claude.ai chat tabs with one-click context sharing. When you run specialist chats (e.g., Ops-HQ for strategy, Book HQ for writing), Connect lets you share messages between them without copy-paste. Type `\rc` to share the last exchange, or click the share button. A shared space sidebar shows everything that's been shared, and a pop-out window lets you view it on a second monitor.
 
-- Works on **claude.ai** — 2-tab connection
-- Built, testing in progress
+- Works on **claude.ai** and **Microsoft Copilot** (m365.cloud.microsoft/chat) — cross-platform, 2-tab connection. Works in Chrome and Edge.
+- v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest). Built and tested.
 
 ### The Circle
 

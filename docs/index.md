@@ -54,13 +54,13 @@ Copy or download your full AI conversation — both your messages and the AI's r
 
 ![Recurate Copier — ChatGPT conversation exported as styled HTML](assets/images/copier-hero.png)
 
-*Coming soon to Chrome Web Store*
+[Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest){ .md-button } Submitted to Chrome Web Store (pending review)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 
 Connect two AI chat tabs with one-click context sharing. Works across Claude.ai and Microsoft Copilot, in both Chrome and Edge. When you run specialist chats (e.g., a Claude chat for strategy, a Copilot chat for work tasks), Connect lets you share messages between them without copy-paste. Type `\rc` to share the last exchange, or click the share button. A shared space sidebar shows everything that's been shared, and a pop-out window gives you a command center on a second monitor.
 
-*Coming soon to Chrome Web Store*
+[Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest){ .md-button }
 
 ---
 

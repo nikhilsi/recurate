@@ -67,15 +67,14 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer levels
 
 ### Recurate Copier — Conversation Export
 
-Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown, or download as a styled HTML file you can open anywhere.
+Copy or download your full AI conversation — both your messages and the AI's responses. On Claude.ai, exports the complete archive: conversation + all artifacts + all uploads as a ZIP file.
 
-- Full conversation export (not just the last response)
-- Smart filenames with platform name and conversation title
-- HTML sanitization strips platform DOM cruft for clean, portable exports
-- Native action bar injection on **Claude** and **Grok**; floating buttons on other platforms
+- **Claude.ai:** one-click ZIP with conversation HTML, artifacts folder, uploads folder, inline links, and manifest
+- Full conversation export on all platforms (not just the last response)
+- Progress modal with progress bar during artifact download
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** Submitted to Chrome Web Store — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest)
+**Status:** v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest) | Submitted to Chrome Web Store (pending review)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

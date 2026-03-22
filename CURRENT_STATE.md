@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 20, 2026
+**Last Updated**: March 22, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -71,15 +71,17 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier — Conversation Export (Working — 7 platforms)
-- Vanilla JS Chrome extension, no build step
-- Version 0.1.0
-- Copy full AI conversations (user messages + AI responses) as markdown or download as styled HTML
+### Recurate Copier — Conversation Export (Working — v0.2.0, 7 platforms)
+- Vanilla JS Chrome extension + JSZip (bundled, 97KB)
+- Version 0.2.0
+- Copy full AI conversations as markdown or download as styled HTML
+- **Claude.ai full export:** conversation + all artifacts + all uploads as ZIP with inline artifact links and manifest
 - **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
-- **Tested on 6 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode (Copilot not yet tested)
+- **Tested on 7 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer, Copilot enterprise
 - Claude: buttons injected into native action bar. Grok: buttons injected into action bar. Other platforms: floating buttons.
+- Progress modal with progress bar during artifact download (blocks page interaction)
 - HTML sanitization: strips class/style/dir attributes, Google's js* and data-* attributes, empty wrappers, buttons, icons, UI chrome, HTML comments
-- Smart filename with conversation title from platform (per-platform title extraction including Grok page title)
+- Smart filename with conversation title from platform
 - Styled HTML: indigo-branded, responsive, print-ready
 - Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
 - Icon: indigo gradient with clipboard + green export arrow
@@ -108,12 +110,16 @@
 
 ---
 
-## Not Yet Built
+## Not Yet Published
 
-- Recurate Connect — tested on Claude.ai + Copilot, not yet submitted to Chrome Web Store
-- Recurate Copier — Chrome Web Store publication pending (submitted Mar 20)
+- Recurate Connect v0.2.0 — built and tested, not yet submitted to Chrome Web Store
+- Recurate Copier v0.2.0 — submitted to Chrome Web Store as v0.1.0 (Mar 20), pending review
+
+## Planned
+
 - Additional Annotator platforms — grok.com, gemini.google.com
-- Settings page (auto-inject vs manual confirmation toggle)
+- Copier: periodic auto-export for non-technical users
+- Connect V0.3: edit/pin/delete/search in sidebar, additional platforms
 
 ---
 

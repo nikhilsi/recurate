@@ -55,7 +55,7 @@ jobs:
       - name: Package Copier
         run: |
           cd extensions/conversation-copier
-          zip -r ../../recurate-copier.zip manifest.json content.js icon-16.png icon-32.png icon-48.png icon-128.png
+          zip -r ../../recurate-copier.zip manifest.json content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
       # --- Annotator (VS Code) ---
       - name: Build Annotator VS Code

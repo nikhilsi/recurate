@@ -101,7 +101,7 @@ cd extensions/connect
 npm run build
 cd .output/chrome-mv3 && zip -r ../../recurate-connect-0.2.0.zip .
 
-# Upload recurate-connect-0.1.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-connect-0.2.0.zip to Chrome Web Store Developer Dashboard
 ```
 
 ---
