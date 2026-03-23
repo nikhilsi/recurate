@@ -1200,83 +1200,9 @@ ${manifestHTML}
     }
   });
 
-  // --- Message count warning (Claude.ai only) ---
-
-  let lastWarningCount = 0;
-
-  function checkMessageCount() {
-    if (getPlatform() !== 'claude') return;
-    const messages = document.querySelectorAll('[data-testid="user-message"], [data-is-streaming="false"]');
-    const count = messages.length;
-    // Warn at 400, 500, 600, etc.
-    const threshold = Math.floor(count / 100) * 100;
-    if (threshold >= 400 && threshold > lastWarningCount) {
-      lastWarningCount = threshold;
-      showMessageCountWarning(count);
-    }
-  }
-
-  function showMessageCountWarning(count) {
-    const existing = document.getElementById('rc-copier-warning');
-    if (existing) existing.remove();
-
-    const banner = document.createElement('div');
-    banner.id = 'rc-copier-warning';
-    Object.assign(banner.style, {
-      position: 'fixed', top: '8px', left: '50%', transform: 'translateX(-50%)',
-      zIndex: '2147483647', padding: '10px 16px', borderRadius: '10px',
-      background: '#fef3c7', color: '#92400e', fontSize: '13px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '10px',
-      border: '1px solid #fcd34d',
-    });
-
-    banner.innerHTML = `
-      <span style="font-size:16px;">&#x26A0;</span>
-      <span>This conversation has <strong>${count}+ messages</strong>. Long conversations may hit Claude's capacity limit. Consider exporting.</span>
-      <button id="rc-copier-warning-dismiss" style="border:none;background:transparent;color:#92400e;font-size:16px;cursor:pointer;padding:0 4px;margin-left:8px;">&times;</button>
-    `;
-
-    document.body.appendChild(banner);
-    document.getElementById('rc-copier-warning-dismiss').addEventListener('click', () => banner.remove());
-    // Auto-dismiss after 15 seconds
-    setTimeout(() => { if (banner.parentElement) banner.remove(); }, 15000);
-  }
-
-  // --- Auto-backup listener (triggered by background service worker) ---
-
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.type === 'RC_AUTO_BACKUP') {
-        const messages = extractConversation();
-        if (messages.length === 0) {
-          sendResponse({ success: false, reason: 'no messages' });
-          return;
-        }
-        const html = toHTML(messages);
-        const title = getConversationTitle();
-        const platformName = getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
-        const now = new Date();
-        const date = now.toISOString().slice(0, 10);
-        const time = now.toTimeString().slice(0, 5).replace(':', '');
-        const slug = title ? slugify(title) : 'conversation';
-        const filename = `backup-${platformName}-${slug}-${date}-${time}.html`;
-
-        // Send back to background for silent download
-        sendResponse({ success: true, html, filename, messageCount: messages.length });
-      }
-    });
-  }
-
   // --- Init ---
   // Inject after page loads, and re-inject periodically
   // (new AI responses create new action bars, our buttons need to follow the latest one)
   setTimeout(buildUI, 2000);
   setInterval(buildUI, 3000);
-
-  // Check message count periodically (Claude.ai only)
-  if (getPlatform() === 'claude') {
-    setInterval(checkMessageCount, 30000); // every 30 seconds
-    setTimeout(checkMessageCount, 5000); // initial check
-  }
 })();

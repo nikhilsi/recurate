@@ -1,6 +1,6 @@
 # Full Claude Chat Export — Feature Plan
 
-**Status:** Built and tested (v0.3.0 — three buttons, auto-backup, message warnings)
+**Status:** Content features built and tested (v0.2.0 — three buttons, ZIP export, progress modal, timestamps). Auto-backup and message warnings moved to Persist extension (private repo, state management only).
 **Date:** March 22, 2026
 **Author:** Nikhil Singhal + Claude Code
 

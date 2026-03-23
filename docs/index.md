@@ -50,11 +50,11 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer adds a
 
 ### Recurate Copier — Conversation Export
 
-Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML), Export (full ZIP with conversation + all artifacts + all uploads). Two buttons on other platforms. Auto-backup silently saves your conversation every 2 hours. Message warning at 400+ messages. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
+Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads). Two buttons on other platforms. On Claude, the Export button creates a complete archive with conversation, all generated artifacts, and all uploaded files. Works on claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot, and Google AI Mode.
 
 ![Recurate Copier — ChatGPT conversation exported as styled HTML](assets/images/copier-hero.png)
 
-[Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest){ .md-button } v0.3.0 | Submitted to Chrome Web Store (pending review)
+[Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest){ .md-button } v0.2.0 | Submitted to Chrome Web Store (pending review)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

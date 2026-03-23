@@ -1,21 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Recurate Copier",
-  "description": "Export your full AI conversation — messages, artifacts, and uploads. One click for markdown, or download as a complete ZIP archive.",
-  "version": "0.3.0",
+  "description": "Export your full AI conversation. Copy as markdown, download as HTML, or export as ZIP with artifacts and uploads.",
+  "version": "0.2.0",
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
-  },
-  "permissions": [
-    "alarms",
-    "downloads",
-    "tabs"
-  ],
-  "background": {
-    "service_worker": "background.js"
   },
   "content_scripts": [
     {

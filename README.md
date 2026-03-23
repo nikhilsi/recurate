@@ -67,14 +67,13 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer levels
 
 ### Recurate Copier — Conversation Export
 
-Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML), Export (full ZIP with conversation + artifacts + uploads). Two buttons on other platforms.
+Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML), Export (full ZIP with artifacts + uploads). Two buttons on other platforms.
 
-- **Export on Claude.ai:** ZIP with conversation HTML, artifacts folder, uploads folder, inline links, and manifest. Progress modal with cancel button.
-- **Auto-backup:** silently saves conversation HTML every 2 hours for open Claude.ai tabs. No clicks needed.
-- **Message warning:** amber banner at 400+ messages warning about capacity limits
+- **Export on Claude.ai:** ZIP with conversation HTML, artifacts folder, uploads folder, inline artifact links, and manifest. Progress modal with cancel button.
+- Timestamped filenames in your local timezone
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** v0.3.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest) | Submitted to Chrome Web Store (pending review)
+**Status:** v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest) | Submitted to Chrome Web Store (pending review)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 22, 2026
+**Last Updated**: March 23, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -22,12 +22,10 @@
 - [x] Store listing, screenshots
 - [x] Submitted to Chrome Web Store (Mar 20)
 - [x] **Full Claude Chat Export** — ZIP with conversation + artifacts + uploads (v0.2.0)
-- [x] **Three-button UX** — Copy (markdown), Download (quick HTML), Export (ZIP). Export only on Claude.ai (v0.3.0)
-- [x] **Auto-backup** — background service worker, chrome.alarms, every 2 hours, silent HTML snapshots (v0.3.0)
-- [x] **Message count warning** — amber banner at 400+ messages (v0.3.0)
-- [x] **Cancel button** in export modal (v0.3.0)
-- [x] **Timestamps** in filenames (user's local timezone) (v0.3.0)
-- [x] Version bumped to 0.3.0
+- [x] **Three-button UX** — Copy (markdown), Download (quick HTML), Export (ZIP). Export only on Claude.ai (v0.2.0)
+- [x] **Cancel button** in export modal (v0.2.0)
+- [x] **Timestamps** in filenames (user's local timezone) (v0.2.0)
+- [x] Version bumped to 0.2.0
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

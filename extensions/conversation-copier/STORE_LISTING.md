@@ -32,12 +32,6 @@ Download — saves a quick HTML snapshot of the conversation. Instant, no API ca
 
 Export (Claude.ai only) — downloads a complete ZIP archive: your conversation HTML plus all artifacts Claude generated (documents, code, presentations) and all files you uploaded. Inline links in the HTML connect each artifact to the point in the conversation where it was created.
 
-AUTO-BACKUP
-
-The extension automatically saves a snapshot of your Claude.ai conversation every 2 hours. No clicks needed. If your chat ever hits Claude's capacity limit, you have a recent backup ready.
-
-At 400+ messages, a warning banner reminds you to consider exporting.
-
 HOW IT WORKS
 
 1. Have a conversation on any supported AI chat platform
@@ -55,7 +49,6 @@ PRIVACY
 
 - No backend. No API keys. No data collection.
 - Conversations never leave your browser. Copy goes to clipboard, downloads go to your filesystem.
-- Auto-backups save to your Downloads folder.
 - Open source: github.com/nikhilsi/recurate
 
 Free forever. Install and your AI conversations are yours to keep.
@@ -85,12 +78,6 @@ Exports full AI conversations as markdown, HTML, or ZIP archive (with artifacts 
 
 **Host permissions**: Content script runs on claude.ai, chatgpt.com, grok.com, gemini.google.com, copilot.microsoft.com, m365.cloud.microsoft, and google.com to read conversation content from the page DOM and export it as markdown, HTML, or ZIP. On Claude.ai, also calls Claude's internal API to list and download artifact files. No data is sent externally.
 
-**Tabs**: Used by the background service worker to find open Claude.ai tabs for automatic periodic backups. The extension queries tabs by URL to determine which tabs contain AI conversations that should be backed up.
-
-**Alarms**: Used to schedule automatic conversation backups every 2 hours. The background service worker triggers a backup of any open Claude.ai tab.
-
-**Downloads**: Used to silently save auto-backup HTML files to the user's Downloads folder without requiring a file picker dialog.
-
 **Remote code**: This extension does not use remote code. All JavaScript (including JSZip) is bundled locally in the extension package.
 
 ### Data Use Certification
@@ -105,9 +92,9 @@ Check the compliance checkbox. The extension collects no user data, transmits no
 # The extension is plain JS — no build step needed.
 # ZIP the extension directory (icons must be pre-generated):
 cd extensions/conversation-copier
-zip -r recurate-copier-0.3.0.zip manifest.json content.js background.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
+zip -r recurate-copier-0.2.0.zip manifest.json content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
-# Upload recurate-copier-0.3.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-copier-0.2.0.zip to Chrome Web Store Developer Dashboard
 ```
 
 ---
