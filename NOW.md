@@ -26,6 +26,8 @@
 - [x] **Cancel button** in export modal (v0.2.0)
 - [x] **Timestamps** in filenames (user's local timezone) (v0.2.0)
 - [x] Version bumped to 0.2.0
+- [x] v0.1.0 published on Chrome Web Store (Mar 25)
+- [ ] Upload v0.2.0 to Chrome Web Store (update listing text, new screenshots showing three buttons + ZIP export, upload ZIP with JSZip)
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
