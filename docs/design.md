@@ -291,7 +291,7 @@ All extensions share a common brand identity (indigo gradient icons, same color 
 
 ### Built and Tested
 
-- **Copier** v0.2.0 — submitted to Chrome Web Store (pending review). 7 platforms. Three buttons on Claude (Copy/Download/Export), full ZIP with artifacts and uploads.
+- **Copier** v0.1.0 published on Chrome Web Store. v0.2.0 with three buttons and ZIP export built locally. 7 platforms.
 - **Connect** v0.2.0 — built and tested. Claude + Copilot cross-platform, 2-tab connection. Chrome + Edge. Not yet submitted.
 - **Recurate Platform** — live at app.recurate.ai. 4 LLMs with Condensed Context synthesis.
 

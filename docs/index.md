@@ -54,7 +54,8 @@ Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML w
 
 ![Recurate Copier — ChatGPT conversation exported as styled HTML](assets/images/copier-hero.png)
 
-[Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest){ .md-button } v0.2.0 | Submitted to Chrome Web Store (pending review)
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg){ .md-button .md-button--primary }
+[v0.2.0 with ZIP export](https://github.com/nikhilsi/recurate/releases/latest){ .md-button }
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

@@ -73,7 +73,7 @@ Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML),
 - Timestamped filenames in your local timezone
 - Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
 
-**Status:** v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest) | Submitted to Chrome Web Store (pending review)
+**Status:** Published — [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) | v0.2.0 with ZIP export: [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

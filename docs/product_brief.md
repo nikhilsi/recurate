@@ -73,7 +73,7 @@ Copy or download your full AI conversation — both your messages and the AI's r
 
 - Works on **claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot** (consumer + enterprise), **Google AI Mode** — 7 platforms
 - Three buttons on Claude.ai: Copy (markdown), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads + progress modal)
-- v0.2.0 — [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest). Submitted to Chrome Web Store (pending review).
+- Published on [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) (v0.1.0). v0.2.0 with ZIP export on [GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest).
 
 ### Recurate Connect — Connect the Conversations
 

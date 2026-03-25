@@ -85,7 +85,7 @@ jobs:
             | **Annotator** (Chrome) | Curate AI responses: highlight, strikethrough, dig deeper, verify | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm) |
             | **Annotator** (VS Code) | Same UX for Claude Code terminal workflow | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode) |
             | **Composer** | Markdown formatting toolbar for AI chat inputs | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg) |
-            | **Copier** | Copy/download full AI conversations | Chrome Web Store (pending) |
+            | **Copier** | Copy/download full AI conversations | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) |
             | **Connect** | Share context between Claude and Copilot tabs | See install guide below |
 
             ## Install Connect (or Copier) from ZIP

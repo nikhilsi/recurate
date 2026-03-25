@@ -113,7 +113,7 @@
 ## Not Yet Published
 
 - Recurate Connect v0.2.0 — built and tested, not yet submitted to Chrome Web Store
-- Recurate Copier v0.2.0 — submitted to Chrome Web Store as v0.1.0 (Mar 20), pending review. v0.2.0 built locally.
+- Recurate Copier — v0.1.0 published on Chrome Web Store (Mar 25). v0.2.0 with ZIP export built locally, not yet uploaded.
 
 ## Planned
 
