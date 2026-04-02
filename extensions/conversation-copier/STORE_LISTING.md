@@ -8,11 +8,11 @@ Copy-paste these into the Chrome Web Store developer dashboard.
 
 ### Short Description (132 chars max)
 
-Export your full AI conversation with one click. On Claude, includes all artifacts and uploads as a ZIP. Clean markdown or HTML.
+Export your full AI conversation with one click. Captures thinking blocks on Claude. Includes artifacts as ZIP. Markdown or HTML.
 
 ### Manifest Description (132 chars max)
 
-Export your full AI conversation — messages, artifacts, and uploads. One click for markdown, or download as a complete ZIP archive.
+Export your full AI conversation with thinking blocks, artifacts, and uploads. One click for markdown, HTML, or complete ZIP archive.
 
 ### Detailed Description
 
@@ -32,6 +32,10 @@ Download — saves a quick HTML snapshot of the conversation. Instant, no API ca
 
 Export (Claude.ai only) — downloads a complete ZIP archive: your conversation HTML plus all artifacts Claude generated (documents, code, presentations) and all files you uploaded. Inline links in the HTML connect each artifact to the point in the conversation where it was created.
 
+THINKING BLOCKS
+
+On Claude.ai, extended thinking is fully captured. The Copier automatically expands all thinking blocks, extracts the full reasoning text, and includes it in your export. In HTML downloads, thinking appears as collapsible sections you can expand and collapse. In markdown, thinking is rendered as blockquotes. Nothing is lost.
+
 HOW IT WORKS
 
 1. Have a conversation on any supported AI chat platform
@@ -39,7 +43,8 @@ HOW IT WORKS
    - Copy: markdown to clipboard
    - Download: quick HTML file
    - Export: full ZIP with artifacts (Claude.ai only)
-3. The Export button shows a progress modal while downloading artifacts. You can cancel anytime.
+3. Thinking blocks are automatically expanded and captured (Claude.ai)
+4. The Export button shows a progress modal while downloading artifacts. You can cancel anytime.
 
 Filenames include the platform name, conversation title, date, and time in your timezone.
 
@@ -72,7 +77,7 @@ Free forever. Install and your AI conversations are yours to keep.
 
 ### Single Purpose Description
 
-Exports full AI conversations as markdown, HTML, or ZIP archive (with artifacts and uploads on Claude.ai). Auto-backs up conversations periodically.
+Exports full AI conversations as markdown, HTML, or ZIP archive (with artifacts, uploads, and thinking blocks on Claude.ai).
 
 ### Permission Justifications
 
@@ -92,9 +97,9 @@ Check the compliance checkbox. The extension collects no user data, transmits no
 # The extension is plain JS — no build step needed.
 # ZIP the extension directory (icons must be pre-generated):
 cd extensions/conversation-copier
-zip -r recurate-copier-0.2.0.zip manifest.json content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
+zip -r recurate-copier-0.3.0.zip manifest.json extractor.js content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
-# Upload recurate-copier-0.2.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-copier-0.3.0.zip to Chrome Web Store Developer Dashboard
 ```
 
 ---
@@ -112,7 +117,10 @@ Show a downloaded HTML export opened in a browser tab. The styled output with th
 **Screenshot 3: Multi-platform collage**
 2-3 platforms side by side (e.g., ChatGPT with floating buttons, Grok with action bar buttons) showing the extension works across platforms. Keep it clean — no need to show all 7.
 
-**Screenshot 4 (optional): Markdown in a notes app**
+**Screenshot 4: Thinking blocks in HTML export**
+Show a downloaded HTML export with a thinking block expanded (collapsible `<details>` element). Demonstrates that extended thinking is captured and accessible.
+
+**Screenshot 5 (optional): Markdown in a notes app**
 Show the clipboard markdown pasted into a notes app or doc, demonstrating the clean portable output.
 
 Sizing: capture at 2560x1600 (Retina) and resize to 1280x800 for upload.
