@@ -196,7 +196,8 @@
       case 'claude': {
         // Claude interleaves user and AI messages in DOM order
         // User: [data-testid="user-message"]
-        // AI: [data-is-streaming="false"] with content inside .font-claude-message or .prose
+        // AI: [data-is-streaming="false"] with content inside .standard-markdown (response body)
+        // Thinking blocks: button.group/status inside the AI block contains the thinking summary
         const allElements = document.querySelectorAll(
           '[data-testid="user-message"], [data-is-streaming="false"]'
         );
@@ -206,12 +207,26 @@
             sanitizeHTML(clone);
             messages.push({ role: 'user', text: el.textContent?.trim() || '', html: clone.innerHTML });
           } else {
-            const content = el.querySelector('.font-claude-message') ||
+            // Extract thinking summaries before cloning response content
+            const thinkingSummaries = [];
+            el.querySelectorAll('button[class*="group/status"]').forEach(btn => {
+              const summary = btn.textContent?.trim();
+              if (summary) thinkingSummaries.push(summary);
+            });
+
+            // Target the response body (standard-markdown), falling back to broader selectors
+            const content = el.querySelector('.standard-markdown') ||
+                            el.querySelector('.font-claude-message') ||
                             el.querySelector('[data-testid*="message"]') ||
                             el.querySelector('.prose') || el;
             const clone = content.cloneNode(true);
             sanitizeHTML(clone);
-            messages.push({ role: 'assistant', text: content.textContent?.trim() || '', html: clone.innerHTML });
+            messages.push({
+              role: 'assistant',
+              text: content.textContent?.trim() || '',
+              html: clone.innerHTML,
+              thinking: thinkingSummaries.length > 0 ? thinkingSummaries : undefined,
+            });
           }
         });
         break;
@@ -392,7 +407,11 @@
 
     for (const msg of messages) {
       const label = msg.role === 'user' ? '## You' : `## ${platform}`;
-      md += `${label}\n\n${msg.text}\n\n---\n\n`;
+      let thinking = '';
+      if (msg.thinking && msg.thinking.length > 0) {
+        thinking = msg.thinking.map(s => `> *Thinking: ${s}*`).join('\n>\n') + '\n\n';
+      }
+      md += `${label}\n\n${thinking}${msg.text}\n\n---\n\n`;
     }
 
     md += `*Exported with Recurate Copier — recurate.ai*\n`;
@@ -425,8 +444,15 @@
           replaceArtifactBlocksInHTML(temp, outputFiles);
           msgHtml = temp.innerHTML;
         }
+        let thinkingHtml = '';
+        if (msg.thinking && msg.thinking.length > 0) {
+          thinkingHtml = msg.thinking.map(s =>
+            `<div class="thinking-summary">${escapeHtml(s)}</div>`
+          ).join('');
+        }
         body += `<div class="message assistant">
           <div class="label">${platform}</div>
+          ${thinkingHtml}
           <div class="content">${msgHtml}</div>
         </div>`;
       }
@@ -466,6 +492,11 @@
   }
   .message.assistant .content {
     padding: 0.5rem 0;
+  }
+  .thinking-summary {
+    font-size: 0.85rem; color: #6b7280; font-style: italic;
+    padding: 0.4rem 0.75rem; margin-bottom: 0.5rem;
+    background: #f9fafb; border-radius: 6px; border-left: 3px solid #9ca3af;
   }
   .message.assistant .content h1,
   .message.assistant .content h2,
