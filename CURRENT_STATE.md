@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: March 23, 2026
+**Last Updated**: April 2, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -71,16 +71,19 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier — Conversation Export (Working — v0.2.0, 7 platforms)
+### Recurate Copier — Conversation Export (Working — v0.3.0, 7 platforms)
 - Vanilla JS Chrome extension + JSZip (bundled, 97KB)
-- Version 0.2.0
+- Version 0.3.0
+- **Architecture:** `extractor.js` (reusable extraction + formatting, `window.RecurateExtractor`) + `content.js` (extension plumbing)
 - **Three buttons on Claude.ai:** Copy (markdown to clipboard), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads + progress modal + cancel button)
 - **Two buttons on other platforms:** Copy + Download
-- **Claude.ai full export:** conversation + all artifacts + all uploads as ZIP with inline artifact links and manifest
+- **Claude.ai thinking blocks:** automatically expands all thinking toggles, extracts full reasoning text, collapses back. Rendered as collapsible `<details>` in HTML, blockquotes in markdown.
+- **Claude.ai full export:** conversation + thinking blocks + all artifacts + all uploads as ZIP with inline artifact links and manifest
 - **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
 - **Tested on 7 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer, Copilot enterprise
 - Claude: three buttons in native action bar. Grok: two buttons in action bar. Other platforms: floating buttons.
 - Filenames include timestamp in user's local timezone
+- Export headers show full date/time with timezone
 - HTML sanitization: strips class/style/dir attributes, Google's js* and data-* attributes, empty wrappers, buttons, icons, UI chrome, HTML comments
 - No background service worker, no auto-backup, no extra permissions
 - Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
@@ -113,12 +116,13 @@
 ## Not Yet Published
 
 - Recurate Connect v0.2.0 — built and tested, not yet submitted to Chrome Web Store
-- Recurate Copier — v0.1.0 published on Chrome Web Store (Mar 25). v0.2.0 with ZIP export built locally, not yet uploaded.
+- Recurate Copier — v0.1.0 published on Chrome Web Store (Mar 25). v0.3.0 with thinking blocks + ZIP export built locally, ready to upload.
 
 ## Planned
 
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Copier: periodic auto-export for non-technical users
+- Copier: full thinking content in ZIP export (currently HTML/markdown only)
 - Connect V0.3: edit/pin/delete/search in sidebar, additional platforms
 
 ---
@@ -139,6 +143,7 @@
 | **Composer content script** | `extensions/markdown-toolbar/content.js` |
 | **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
 | **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
+| **Copier extractor (reusable)** | `extensions/conversation-copier/extractor.js` |
 | **Copier content script** | `extensions/conversation-copier/content.js` |
 | **Copier manifest** | `extensions/conversation-copier/manifest.json` |
 | **Connect config** | `extensions/connect/wxt.config.ts` |

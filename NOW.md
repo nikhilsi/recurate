@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: March 23, 2026
+**Last Updated**: April 2, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -27,7 +27,12 @@
 - [x] **Timestamps** in filenames (user's local timezone) (v0.2.0)
 - [x] Version bumped to 0.2.0
 - [x] v0.1.0 published on Chrome Web Store (Mar 25)
-- [ ] Upload v0.2.0 to Chrome Web Store (update listing text, new screenshots showing three buttons + ZIP export, upload ZIP with JSZip)
+- [x] **Thinking block capture** -- fix broken selector, extract summaries + full thinking content via expand/extract/collapse (v0.2.1-v0.2.3)
+- [x] **Architecture split** -- `extractor.js` (reusable, `window.RecurateExtractor`) separated from `content.js` (v0.3.0)
+- [x] **Full datetime+TZ** in export headers (v0.2.3)
+- [x] Version bumped to 0.3.0
+- [x] Store listing updated, screenshot captured (1280x800), ZIP built
+- [ ] Upload v0.3.0 to Chrome Web Store (update listing text, new screenshot showing thinking blocks, upload ZIP)
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

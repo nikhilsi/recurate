@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.6.0] - 2026-04-02
+
+### Added
+- **Copier v0.3.0: Full thinking block capture** on Claude.ai. Automatically expands all thinking blocks before extraction, captures full reasoning text, and collapses them back. Thinking blocks rendered as collapsible `<details>` elements in HTML exports and blockquotes in markdown.
+- **Copier: Thinking summaries** preserved as visually distinct elements in exports. Previously stripped by sanitization or merged into response text.
+- **Copier: Fixed broken Claude selector** -- `.font-claude-message` no longer exists in Claude's DOM, replaced with `.standard-markdown` (with fallbacks).
+- **Copier: Full datetime with timezone** in export headers. Both markdown and HTML now show "April 2, 2026 at 8:09 AM PDT" instead of just the date.
+
+### Changed
+- **Copier: Architecture split** -- extraction logic separated into `extractor.js` (reusable, no extension dependencies) from `content.js` (extension plumbing). Exposes `window.RecurateExtractor` for use by other extensions.
+- Manifest loads three scripts: `jszip.min.js` -> `extractor.js` -> `content.js`
+- Copier version bumped to 0.3.0
+- Store listing updated for thinking block feature
+
+### Technical Notes
+- Claude.ai thinking blocks use `button[class*="group/status"]` toggles with `aria-expanded` state. Content is lazy-loaded: empty DOM when collapsed (`grid-template-rows: 0fr`), populated on expand (`1fr`).
+- Thinking text lives in `p.font-claude-response-body` paragraphs inside a transition grid. "Show more"/"Show less" buttons are for "Relevant chats" references, not thinking truncation.
+- Extraction: expand all collapsed toggles, wait 300-800ms for DOM, extract paragraphs, strip UI (buttons, links, SVGs), collapse back.
+
+---
+
 ## [1.5.0] - 2026-03-23
 
 ### Added
