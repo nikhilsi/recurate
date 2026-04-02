@@ -184,9 +184,65 @@
     return clone;
   }
 
+  // --- Thinking block expansion (Claude.ai) ---
+
+  async function expandThinkingBlocks() {
+    const collapsed = document.querySelectorAll('button[class*="group/status"][aria-expanded="false"]');
+    if (collapsed.length === 0) return;
+
+    // Click each collapsed thinking toggle
+    collapsed.forEach(btn => btn.click());
+
+    // Wait for content to load into DOM (lazy-loaded on expand)
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Verify at least some content appeared; if not, wait a bit longer
+    const grids = document.querySelectorAll('[class*="transition-[grid-template-rows]"]');
+    const anyEmpty = Array.from(grids).some(g => g.getAttribute('style')?.includes('1fr') && !g.textContent?.trim());
+    if (anyEmpty) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  function collapseThinkingBlocks() {
+    const expanded = document.querySelectorAll('button[class*="group/status"][aria-expanded="true"]');
+    expanded.forEach(btn => btn.click());
+  }
+
+  function extractThinkingContent(aiBlock) {
+    const thinkingBlocks = [];
+    aiBlock.querySelectorAll('button[class*="group/status"]').forEach(btn => {
+      const summary = btn.textContent?.trim() || '';
+      // Find the thinking content area (sibling transition grid)
+      const wrapper = btn.parentElement?.parentElement;
+      const transGrid = wrapper?.querySelector('[class*="transition-[grid-template-rows]"]');
+      let fullText = '';
+      let fullHtml = '';
+      if (transGrid && transGrid.textContent?.trim()) {
+        const clone = transGrid.cloneNode(true);
+        // Strip UI elements: buttons, links, "Relevant chats" controls
+        clone.querySelectorAll('button, a, svg, [class*="h-[8px]"]').forEach(el => el.remove());
+        // Extract the thinking paragraphs
+        const paras = clone.querySelectorAll('p.font-claude-response-body');
+        if (paras.length > 0) {
+          fullText = Array.from(paras).map(p => p.textContent?.trim()).filter(Boolean).join('\n\n');
+          fullHtml = Array.from(paras).map(p => `<p>${p.innerHTML}</p>`).join('');
+        } else {
+          // Fallback: use all remaining text
+          fullText = clone.textContent?.trim() || '';
+          fullHtml = `<p>${escapeHtml(fullText)}</p>`;
+        }
+      }
+      if (summary || fullText) {
+        thinkingBlocks.push({ summary, text: fullText, html: fullHtml });
+      }
+    });
+    return thinkingBlocks.length > 0 ? thinkingBlocks : undefined;
+  }
+
   // --- Conversation extraction ---
 
-  function extractConversation() {
+  async function extractConversation() {
     const platform = getPlatform();
     if (!platform) return [];
 
@@ -194,10 +250,13 @@
 
     switch (platform) {
       case 'claude': {
+        // Expand all thinking blocks so their content loads into DOM
+        await expandThinkingBlocks();
+
         // Claude interleaves user and AI messages in DOM order
         // User: [data-testid="user-message"]
         // AI: [data-is-streaming="false"] with content inside .standard-markdown (response body)
-        // Thinking blocks: button.group/status inside the AI block contains the thinking summary
+        // Thinking blocks: button.group/status inside the AI block contains the thinking summary + full content
         const allElements = document.querySelectorAll(
           '[data-testid="user-message"], [data-is-streaming="false"]'
         );
@@ -207,12 +266,8 @@
             sanitizeHTML(clone);
             messages.push({ role: 'user', text: el.textContent?.trim() || '', html: clone.innerHTML });
           } else {
-            // Extract thinking summaries before cloning response content
-            const thinkingSummaries = [];
-            el.querySelectorAll('button[class*="group/status"]').forEach(btn => {
-              const summary = btn.textContent?.trim();
-              if (summary) thinkingSummaries.push(summary);
-            });
+            // Extract full thinking content (summaries + expanded text)
+            const thinking = extractThinkingContent(el);
 
             // Target the response body (standard-markdown), falling back to broader selectors
             const content = el.querySelector('.standard-markdown') ||
@@ -225,10 +280,13 @@
               role: 'assistant',
               text: content.textContent?.trim() || '',
               html: clone.innerHTML,
-              thinking: thinkingSummaries.length > 0 ? thinkingSummaries : undefined,
+              thinking,
             });
           }
         });
+
+        // Collapse thinking blocks back to original state
+        collapseThinkingBlocks();
         break;
       }
 
@@ -403,13 +461,17 @@
     const title = getConversationTitle();
     const heading = title ? `# ${title}` : `# Conversation with ${platform}`;
     let md = `${heading}\n\n`;
-    md += `*Exported on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*\n\n---\n\n`;
+    md += `*Exported on ${new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}*\n\n---\n\n`;
 
     for (const msg of messages) {
       const label = msg.role === 'user' ? '## You' : `## ${platform}`;
       let thinking = '';
       if (msg.thinking && msg.thinking.length > 0) {
-        thinking = msg.thinking.map(s => `> *Thinking: ${s}*`).join('\n>\n') + '\n\n';
+        thinking = msg.thinking.map(t => {
+          const header = `> **Thinking: ${t.summary}**`;
+          if (t.text) return `${header}\n>\n> ${t.text.split('\n').join('\n> ')}`;
+          return header;
+        }).join('\n>\n') + '\n\n';
       }
       md += `${label}\n\n${thinking}${msg.text}\n\n---\n\n`;
     }
@@ -423,8 +485,9 @@
   function toHTML(messages, outputFiles, uploadFiles) {
     const platform = getPlatformDisplayName();
     const title = getConversationTitle();
-    const date = new Date().toLocaleDateString('en-US', {
+    const date = new Date().toLocaleString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
     });
 
     // For Claude with artifacts: process message HTML to replace artifact blocks with links
@@ -446,9 +509,13 @@
         }
         let thinkingHtml = '';
         if (msg.thinking && msg.thinking.length > 0) {
-          thinkingHtml = msg.thinking.map(s =>
-            `<div class="thinking-summary">${escapeHtml(s)}</div>`
-          ).join('');
+          thinkingHtml = msg.thinking.map(t => {
+            const body = t.html || (t.text ? `<p>${escapeHtml(t.text)}</p>` : '');
+            if (body) {
+              return `<details class="thinking-block"><summary class="thinking-summary">${escapeHtml(t.summary)}</summary><div class="thinking-content">${body}</div></details>`;
+            }
+            return `<div class="thinking-summary">${escapeHtml(t.summary)}</div>`;
+          }).join('');
         }
         body += `<div class="message assistant">
           <div class="label">${platform}</div>
@@ -493,11 +560,19 @@
   .message.assistant .content {
     padding: 0.5rem 0;
   }
+  .thinking-block { margin-bottom: 0.75rem; }
   .thinking-summary {
     font-size: 0.85rem; color: #6b7280; font-style: italic;
     padding: 0.4rem 0.75rem; margin-bottom: 0.5rem;
     background: #f9fafb; border-radius: 6px; border-left: 3px solid #9ca3af;
+    cursor: pointer;
   }
+  .thinking-content {
+    font-size: 0.85rem; color: #4b5563; line-height: 1.6;
+    padding: 0.5rem 0.75rem; margin-top: 0.25rem;
+    background: #f9fafb; border-radius: 0 0 6px 6px; border-left: 3px solid #9ca3af;
+  }
+  .thinking-content p { margin-bottom: 0.5rem; }
   .message.assistant .content h1,
   .message.assistant .content h2,
   .message.assistant .content h3 {
@@ -704,8 +779,8 @@ ${manifestHTML}
 
   // --- Actions ---
 
-  function copyToClipboard() {
-    const messages = extractConversation();
+  async function copyToClipboard() {
+    const messages = await extractConversation();
     if (messages.length === 0) {
       showToast('No conversation found on this page');
       return;
@@ -725,8 +800,8 @@ ${manifestHTML}
     return { date, time, dateTime: `${date}-${time}` };
   }
 
-  function downloadHTML() {
-    const messages = extractConversation();
+  async function downloadHTML() {
+    const messages = await extractConversation();
     if (messages.length === 0) {
       showToast('No conversation found on this page');
       return;
@@ -738,8 +813,8 @@ ${manifestHTML}
     downloadSimpleHTML(messages, title, platformName, dateTime, slug);
   }
 
-  function exportFullZIP() {
-    const messages = extractConversation();
+  async function exportFullZIP() {
+    const messages = await extractConversation();
     if (messages.length === 0) {
       showToast('No conversation found on this page');
       return;
