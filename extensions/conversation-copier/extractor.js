@@ -245,7 +245,16 @@
             messages.push({ role: 'user', text: el.textContent?.trim() || '', html: clone.innerHTML });
           } else {
             const thinking = extractThinkingContent(el);
-            const content = el.querySelector('.standard-markdown') ||
+            // When thinking blocks are expanded, .standard-markdown appears
+            // inside thinking grids AND in the actual response. Use the LAST
+            // .standard-markdown that is NOT inside a thinking block grid.
+            const allMarkdown = el.querySelectorAll('.standard-markdown');
+            const nonThinkingMarkdown = Array.from(allMarkdown).filter(md =>
+              !md.closest('[class*="transition-[grid-template-rows]"]')
+            );
+            const content = (nonThinkingMarkdown.length > 0
+              ? nonThinkingMarkdown[nonThinkingMarkdown.length - 1]
+              : null) ||
                             el.querySelector('.font-claude-message') ||
                             el.querySelector('[data-testid*="message"]') ||
                             el.querySelector('.prose') || el;
