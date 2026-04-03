@@ -97,9 +97,9 @@ Check the compliance checkbox. The extension collects no user data, transmits no
 # The extension is plain JS — no build step needed.
 # ZIP the extension directory (icons must be pre-generated):
 cd extensions/conversation-copier
-zip -r recurate-copier-0.3.0.zip manifest.json extractor.js content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
+zip -r recurate-copier-0.3.1.zip manifest.json extractor.js content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
-# Upload recurate-copier-0.3.0.zip to Chrome Web Store Developer Dashboard
+# Upload recurate-copier-0.3.1.zip to Chrome Web Store Developer Dashboard
 ```
 
 ---

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.6.1] - 2026-04-03
+
+### Fixed
+- **Copier v0.3.1: Thinking block content no longer replaces actual response.** When thinking blocks were expanded for extraction, `.standard-markdown` inside thinking grids was being selected instead of the actual response content. Now filters out thinking-grid markdown and uses the last non-thinking `.standard-markdown` element.
+
+### Changed
+- Copier version bumped to 0.3.1
+- Copier v0.3.1 submitted to Chrome Web Store (Apr 3)
+
+---
+
 ## [1.6.0] - 2026-04-02
 
 ### Added

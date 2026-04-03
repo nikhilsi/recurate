@@ -55,7 +55,7 @@ jobs:
       - name: Package Copier
         run: |
           cd extensions/conversation-copier
-          zip -r ../../recurate-copier.zip manifest.json content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
+          zip -r ../../recurate-copier.zip manifest.json extractor.js content.js jszip.min.js icon-16.png icon-32.png icon-48.png icon-128.png
 
       # --- Annotator (VS Code) ---
       - name: Build Annotator VS Code
@@ -85,15 +85,13 @@ jobs:
             | **Annotator** (Chrome) | Curate AI responses: highlight, strikethrough, dig deeper, verify | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-annotator/nfkfbokpmmcdnhdpnhcbkppapnkcdphm) |
             | **Annotator** (VS Code) | Same UX for Claude Code terminal workflow | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=recurate.recurate-annotator-vscode) |
             | **Composer** | Markdown formatting toolbar for AI chat inputs | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg) |
-            | **Copier** | Copy/download full AI conversations | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) |
-            | **Connect** | Share context between Claude and Copilot tabs | See install guide below |
+            | **Copier** | Copy/download full AI conversations with thinking blocks | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) |
+            | **Connect** | Share context between Claude and Copilot tabs | [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-connect/TODO) or install from ZIP below |
 
-            ## Install Connect (or Copier) from ZIP
-
-            These extensions are not yet on the Chrome Web Store. To install from this release:
+            ## Install from ZIP
 
             **Chrome:**
-            1. Download `recurate-connect.zip` (or `recurate-copier.zip`) from the assets below
+            1. Download `recurate-connect.zip` from the assets below
             2. Unzip it to a folder on your computer
             3. Open `chrome://extensions` in Chrome
             4. Turn on **Developer mode** (toggle in the top-right corner)

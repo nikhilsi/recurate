@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: April 2, 2026
+**Last Updated**: April 3, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -32,7 +32,8 @@
 - [x] **Full datetime+TZ** in export headers (v0.2.3)
 - [x] Version bumped to 0.3.0
 - [x] Store listing updated, screenshot captured (1280x800), ZIP built
-- [ ] Upload v0.3.0 to Chrome Web Store (update listing text, new screenshot showing thinking blocks, upload ZIP)
+- [x] Upload v0.3.1 to Chrome Web Store (updated listing text, thinking block screenshot, ZIP uploaded Apr 3)
+- [x] v0.3.1 fix: thinking block content no longer replaces actual response (found in Ops workstream)
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

@@ -1,12 +1,12 @@
 # Current State
 
 ---
-**Last Updated**: April 2, 2026
+**Last Updated**: April 3, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
 
-**Phase**: Published & Building | **Status**: 3 extensions published, 1 submitted, 1 built | **5 extensions**: Annotator (Chrome + VS Code), Composer, Copier, Connect
+**Phase**: Published & Building | **Status**: 4 extensions published, 1 built | **5 extensions**: Annotator (Chrome + VS Code), Composer, Copier, Connect
 
 ---
 
@@ -71,9 +71,9 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier — Conversation Export (Working — v0.3.0, 7 platforms)
+### Recurate Copier — Conversation Export (Working — v0.3.1, 7 platforms)
 - Vanilla JS Chrome extension + JSZip (bundled, 97KB)
-- Version 0.3.0
+- Version 0.3.1
 - **Architecture:** `extractor.js` (reusable extraction + formatting, `window.RecurateExtractor`) + `content.js` (extension plumbing)
 - **Three buttons on Claude.ai:** Copy (markdown to clipboard), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads + progress modal + cancel button)
 - **Two buttons on other platforms:** Copy + Download
@@ -116,7 +116,6 @@
 ## Not Yet Published
 
 - Recurate Connect v0.2.0 — built and tested, not yet submitted to Chrome Web Store
-- Recurate Copier — v0.1.0 published on Chrome Web Store (Mar 25). v0.3.0 with thinking blocks + ZIP export built locally, ready to upload.
 
 ## Planned
 
