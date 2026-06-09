@@ -1,14 +1,156 @@
 {% extends "base.html" %}
 
 {% block extrahead %}
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="{{ page.canonical_url }}" />
-  <meta property="og:title" content="{{ page.title }} - Recurate" />
-  <meta property="og:description" content="{{ config.site_description }}" />
-  <meta property="og:image" content="https://recurate.ai/assets/images/recurate-social-card.png" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://recurate.ai/assets/images/recurate-social-card.png" />
+  {% set og_title = page.meta.title if page and page.meta and page.meta.title else (page.title if page and page.title else config.site_name) %}
+  {% set og_desc = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+
+  {# Blog post detection: mkdocs-material's blog plugin sets page.meta.date only on actual posts, not aggregation pages #}
+  {% set is_blog_post = page and page.meta and page.meta.date %}
+  {% set og_type = 'article' if is_blog_post else 'website' %}
+
+  {# Per-post hero image where set in frontmatter, otherwise the default social card #}
+  {% set default_image = config.site_url ~ '/assets/images/recurate-social-card.png' %}
+  {% if page and page.meta and page.meta.image %}
+    {% if page.meta.image.startswith('http') %}
+      {% set og_image = page.meta.image %}
+    {% else %}
+      {% set og_image = config.site_url ~ '/' ~ page.meta.image %}
+    {% endif %}
+  {% else %}
+    {% set og_image = default_image %}
+  {% endif %}
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="{{ og_type }}">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+  <meta property="og:title" content="{{ og_title }} - Recurate">
+  <meta property="og:description" content="{{ og_desc }}">
+  {% if page and page.canonical_url %}
+  <meta property="og:url" content="{{ page.canonical_url }}">
+  {% endif %}
+  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ og_title }} - Recurate">
+  <meta name="twitter:description" content="{{ og_desc }}">
+  <meta name="twitter:image" content="{{ og_image }}">
+  <meta name="twitter:site" content="@nikhilsinghal">
+
+  <!-- Additional SEO -->
+  <meta name="author" content="Nikhil Singhal">
+  <meta name="keywords" content="Recurate, AI conversations, Chrome extension, annotation tools, highlight, strikethrough, Claude, ChatGPT, Copilot, VS Code">
+
+  <!-- Structured Data: identity graph (SoftwareApplication + Person + WebSite). Person uses the same @id as the canonical hub at nikhilsinghal.com so search engines treat both surfaces as one entity. SoftwareApplication.url points at app.recurate.ai per the umbrella decision. -->
+  {% raw %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://recurate.ai/#software",
+        "name": "Recurate",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome, VS Code, Web",
+        "url": "https://app.recurate.ai",
+        "image": "https://recurate.ai/assets/images/recurate-social-card.png",
+        "description": "Recurate: annotation tools for AI conversations. Highlight, strikethrough, dig deeper, verify. A suite of Chrome and VS Code extensions for working with Claude, ChatGPT, Copilot, and Gemini.",
+        "featureList": [
+          "Annotator: highlight, strikethrough, dig deeper, verify on AI responses",
+          "Composer: structured input format for AI prompts",
+          "Copier: capture AI conversations as clean markdown or styled HTML",
+          "Connect: coordinate between parallel AI chats with one-click context sharing",
+          "Platform: compare responses across Claude, GPT, Gemini, and Grok side by side"
+        ],
+        "creator": {"@id": "https://nikhilsinghal.com/#person"}
+      },
+      {
+        "@type": "Person",
+        "@id": "https://nikhilsinghal.com/#person",
+        "name": "Nikhil Singhal",
+        "givenName": "Nikhil",
+        "familyName": "Singhal",
+        "jobTitle": "CTO | VP Engineering | AI Practitioner & Governance Strategist",
+        "url": "https://nikhilsinghal.com",
+        "image": "https://nikhilsinghal.com/img/nikhil-singhal-portrait-1200.jpg",
+        "email": "mailto:nikhil@omspark.com",
+        "telephone": "+1-206-226-2722",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Seattle",
+          "addressRegion": "WA",
+          "addressCountry": "US"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/nikhilsinghal/",
+          "https://github.com/nikhilsi",
+          "https://orcid.org/0009-0003-5449-6830",
+          "https://nikhilsinghal-ai-trust-commons.medium.com/",
+          "https://about.me/nikhil.singhal",
+          "https://x.com/nikhilsinghal",
+          "https://www.youtube.com/@nikhilsinghal",
+          "https://aitrustcommons.org",
+          "https://hipcharter.com",
+          "https://omspark.com"
+        ],
+        "knowsAbout": [
+          "Artificial Intelligence",
+          "AI Governance",
+          "Human-AI Interaction",
+          "Engineering Leadership",
+          "AI Trust Commons",
+          "Human Intelligence Partnership Charter",
+          "Intent Layer",
+          "Model Context Protocol",
+          "Large Language Models",
+          "AI Agents",
+          "AI Memory"
+        ],
+        "alumniOf": [
+          {"@type": "EducationalOrganization", "name": "Harvard University"},
+          {"@type": "EducationalOrganization", "name": "Bangalore University"}
+        ],
+        "worksFor": {
+          "@type": "Organization",
+          "name": "OmSpark LLC",
+          "url": "https://omspark.com"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://recurate.ai/#website",
+        "url": "https://recurate.ai",
+        "name": "Recurate",
+        "about": {"@id": "https://recurate.ai/#software"},
+        "inLanguage": "en"
+      }
+    ]
+  }
+  </script>
+  {% endraw %}
+
+  {% if is_blog_post %}
+  {# BlogPosting schema for blog posts. Author + publisher reference the identity graph by @id. #}
+  {% set post_date = page.meta.date.created if page.meta.date.created is defined else page.meta.date %}
+  {% set post_updated = page.meta.date.updated if page.meta.date.updated is defined else post_date %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": {{ og_title | tojson }},
+    "description": {{ og_desc | tojson }},
+    "image": {{ og_image | tojson }},
+    "datePublished": "{{ post_date }}",
+    "dateModified": "{{ post_updated }}",
+    "author": {"@id": "https://nikhilsinghal.com/#person"},
+    "publisher": {"@id": "https://nikhilsinghal.com/#person"},
+    "mainEntityOfPage": {{ page.canonical_url | tojson }},
+    "inLanguage": "en"
+  }
+  </script>
+  {% endif %}
 {% endblock %}

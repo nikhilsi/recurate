@@ -1,6 +1,6 @@
 site_name: Recurate
 site_url: https://recurate.ai
-site_description: "Don't just chat, recurate. Annotation tools for AI conversations."
+site_description: "Recurate: annotation tools for AI conversations. Highlight, strikethrough, dig deeper, verify. Chrome and VS Code extensions. By Nikhil Singhal."
 site_author: Nikhil Singhal
 repo_url: https://github.com/nikhilsi/recurate
 repo_name: nikhilsi/recurate
@@ -71,7 +71,13 @@ plugins:
       categories: false
 
 extra:
+  analytics:
+    provider: google
+    property: G-YB6PP1GEQP
   social:
+    - icon: fontawesome/solid/globe
+      link: https://nikhilsinghal.com
+      name: nikhilsinghal.com
     - icon: fontawesome/brands/github
       link: https://github.com/nikhilsi/recurate
     - icon: fontawesome/brands/linkedin
