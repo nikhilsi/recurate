@@ -54,10 +54,17 @@
 
     switch (platform) {
       case 'claude': {
-        const titleEl = document.querySelector('[data-testid="chat-title-button"] .truncate');
+        const titleEl = document.querySelector('[data-testid="chat-title-split"]') ||
+                        document.querySelector('[data-testid="chat-title-button"] .truncate');
         if (titleEl) {
           const text = titleEl.textContent?.trim();
           if (text && text.length > 2 && text.length < 200) return text;
+        }
+        // Fallback: document title minus the " - Claude" suffix.
+        const docTitle = document.title?.trim();
+        if (docTitle) {
+          const cleaned = docTitle.replace(/\s*[-–—]\s*Claude\s*$/i, '').trim();
+          if (cleaned && cleaned.length > 2 && cleaned !== 'Claude') return cleaned;
         }
         return null;
       }
@@ -223,6 +230,83 @@
     return thinkingBlocks.length > 0 ? thinkingBlocks : undefined;
   }
 
+  // --- Claude conversation via API ---
+  // Claude virtualizes the message list: only ~9 turns are ever in the DOM.
+  // DOM scraping therefore caps at whatever is rendered. The conversation API
+  // returns the complete thread. The tree branches on edits/retries, so we walk
+  // the parent chain from current_leaf_message_uuid to get the active thread.
+
+  async function getClaudeOrgId() {
+    try {
+      const resp = await fetch('/api/organizations');
+      const data = await resp.json();
+      return Array.isArray(data) && data.length > 0 ? data[0].uuid : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function extractClaudeViaApi() {
+    const orgId = await getClaudeOrgId();
+    const chatId = window.location.pathname.split('/')[2];
+    if (!orgId || !chatId) return null;
+
+    let conv;
+    try {
+      const resp = await fetch(
+        `/api/organizations/${orgId}/chat_conversations/${chatId}?tree=True&rendering_mode=messages`
+      );
+      if (!resp.ok) return null;
+      conv = await resp.json();
+    } catch (e) {
+      return null;
+    }
+
+    const all = conv.chat_messages;
+    if (!Array.isArray(all) || all.length === 0) return null;
+
+    // Walk the active thread: leaf -> root via parent_message_uuid, then reverse.
+    const byId = {};
+    all.forEach(m => { byId[m.uuid] = m; });
+    const chain = [];
+    let cur = conv.current_leaf_message_uuid;
+    let guard = 0;
+    while (cur && byId[cur] && guard++ < 10000) {
+      chain.push(byId[cur]);
+      cur = byId[cur].parent_message_uuid;
+    }
+    // Fallback if the leaf pointer is missing: use documented order.
+    const ordered = chain.length > 0
+      ? chain.reverse()
+      : all.slice().sort((a, b) => (a.index || 0) - (b.index || 0));
+
+    const messages = [];
+    for (const m of ordered) {
+      const role = m.sender === 'human' ? 'user' : 'assistant';
+      const blocks = Array.isArray(m.content) ? m.content : [];
+      const textParts = [];
+      const thinking = [];
+      for (const c of blocks) {
+        if (c.type === 'text' && c.text) {
+          textParts.push(c.text);
+        } else if (c.type === 'thinking') {
+          const summary = Array.isArray(c.summaries) && c.summaries.length > 0
+            ? (c.summaries[c.summaries.length - 1].summary || '')
+            : '';
+          const text = c.thinking || '';
+          if (summary || text) {
+            thinking.push({ summary, text, html: text ? `<p>${escapeHtml(text)}</p>` : '' });
+          }
+        }
+      }
+      const text = textParts.join('\n\n').trim();
+      const msg = { role, text, html: escapeHtml(text) };
+      if (role === 'assistant' && thinking.length > 0) msg.thinking = thinking;
+      messages.push(msg);
+    }
+    return messages;
+  }
+
   // --- Conversation extraction ---
 
   async function extractConversation() {
@@ -233,6 +317,14 @@
 
     switch (platform) {
       case 'claude': {
+        // Preferred: complete conversation via API (DOM is virtualized/capped).
+        const apiMessages = await extractClaudeViaApi();
+        if (apiMessages && apiMessages.length > 0) {
+          messages.push(...apiMessages);
+          break;
+        }
+
+        // Fallback: DOM scraping (only sees the rendered window).
         await expandThinkingBlocks();
 
         const allElements = document.querySelectorAll(

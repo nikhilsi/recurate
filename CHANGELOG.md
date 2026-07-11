@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.7.0] - 2026-07-11
+
+### Fixed
+- **Copier v0.4.0: Claude conversation cap.** Claude now virtualizes the message list (only ~9 turns exist in the DOM at any time), so DOM scraping silently truncated every export to 8-9 messages. Extraction now reads Claude's conversation API (`/api/organizations/{org}/chat_conversations/{id}?tree=True&rendering_mode=messages`) and returns the complete thread. Verified on a live 152-message chat: full 143-message export vs 9 before.
+- **Copier v0.4.0: Claude action bar.** Claude changed the message action bar from `role="group"` to `role="toolbar"`, so button injection failed and fell back to floating buttons bottom-right (which also dropped the Export/ZIP button). Injection now targets the toolbar and clones a live toolbar button for styling, so it survives future class-name churn.
+- **Copier v0.4.0: Claude title selector.** `chat-title-button` is now `chat-title-split`; added a `document.title` fallback.
+
+### Changed
+- **Copier v0.4.0: Claude exports are Markdown.** Download produces a `.md` file and Export produces a ZIP with `conversation.md` (plus `artifacts/` and `uploads/`) instead of HTML. Markdown is what actually gets fed into Claude Code for analysis. Other platforms keep HTML.
+- **Copier: branch-aware extraction.** Walks the active thread from `current_leaf_message_uuid` up the `parent_message_uuid` chain, so edited/retried branches are excluded (144-node chain resolves to the 143 real messages, dropping one empty stopped turn).
+- Copier version bumped to 0.4.0.
+
+### Notes
+- **Google AI Mode is currently unreachable by any extension on Chrome dev (150).** Chrome now routes AI Mode queries (`udm=50`) to a Chrome-native WebUI surface at `chrome://contextual-tasks/`, where content scripts cannot run. That surface is an "ask about this tab" assistant that renders an error state (no answer content in its DOM), not the AI Mode conversation. Disabling the omnibox AI flags does not stop the redirect on this build. AI Overview on `https://google.com/search` is still reachable but is a single shallow turn. Google AI Mode support is shelved until the surface stabilizes; stable-channel Chrome may still render AI Mode on https.
+
+---
+
 ## [1.6.1] - 2026-04-03
 
 ### Fixed

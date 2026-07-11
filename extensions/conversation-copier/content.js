@@ -81,6 +81,64 @@
     downloadSimpleHTML(messages, title, platformName, dateTime, slug);
   }
 
+  async function downloadMarkdown() {
+    const messages = await E.extractConversation();
+    if (messages.length === 0) {
+      showToast('No conversation found on this page');
+      return;
+    }
+    const title = E.getConversationTitle();
+    const platformName = E.getPlatformDisplayName().toLowerCase().replace(/\s+/g, '-');
+    const { dateTime } = getDateTimeStamp();
+    const slug = title ? E.slugify(title) : 'conversation';
+    saveMarkdown(messages, platformName, dateTime, slug);
+  }
+
+  function saveMarkdown(messages, platformName, date, slug) {
+    const md = E.toMarkdown(messages);
+    const filename = `recurate-${platformName}-${slug}-${date}.md`;
+    triggerDownload(md, 'text/markdown', filename, `Downloaded ${messages.length} messages as markdown`);
+  }
+
+  function buildArtifactManifestMarkdown(outputFiles, uploadFiles) {
+    let md = '';
+    if (outputFiles.length > 0) {
+      md += `\n## Artifacts\n\n`;
+      outputFiles.forEach(f => { md += `- [${f.filename}](artifacts/${f.filename})\n`; });
+    }
+    if (uploadFiles.length > 0) {
+      md += `\n## Uploaded Files\n\n`;
+      uploadFiles.forEach(f => { md += `- [${f.filename}](uploads/${f.filename})\n`; });
+    }
+    return md;
+  }
+
+  // Claude exports markdown (fed to Claude Code); other platforms keep HTML.
+  function downloadForPlatform() {
+    return E.getPlatform() === 'claude' ? downloadMarkdown() : downloadHTML();
+  }
+
+  function triggerDownload(content, mimeType, filename, toastMsg) {
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      document.documentElement.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 100);
+      if (toastMsg) showToast(toastMsg);
+    } catch (err) {
+      showToast('Download failed');
+      console.error('Recurate Copier download error:', err);
+    }
+  }
+
   async function exportFullZIP() {
     const messages = await E.extractConversation();
     if (messages.length === 0) {
@@ -121,13 +179,13 @@
   async function downloadWithArtifacts(messages, title, platformName, date, slug) {
     const chatId = getChatId();
     if (!chatId) {
-      downloadSimpleHTML(messages, title, platformName, date, slug);
+      saveMarkdown(messages, platformName, date, slug);
       return;
     }
 
     const orgId = await getOrgId();
     if (!orgId) {
-      downloadSimpleHTML(messages, title, platformName, date, slug);
+      saveMarkdown(messages, platformName, date, slug);
       return;
     }
 
@@ -136,7 +194,7 @@
     const uploadPaths = allFiles.filter(f => f.includes('/uploads/'));
 
     if (outputPaths.length === 0 && uploadPaths.length === 0) {
-      downloadSimpleHTML(messages, title, platformName, date, slug);
+      saveMarkdown(messages, platformName, date, slug);
       return;
     }
 
@@ -146,12 +204,12 @@
     const outputFiles = E.deduplicateFilenames(outputPaths);
     const uploadFiles = E.deduplicateFilenames(uploadPaths);
 
-    const html = E.toHTML(messages, outputFiles, uploadFiles);
+    const md = E.toMarkdown(messages) + buildArtifactManifestMarkdown(outputFiles, uploadFiles);
 
     const zip = new JSZip();
     const folderName = `recurate-${platformName}-${slug}-${date}`;
 
-    zip.file(folderName + '/conversation.html', html);
+    zip.file(folderName + '/conversation.md', md);
 
     let downloaded = 0;
     let failed = 0;
@@ -194,7 +252,7 @@
       console.error('Recurate Copier ZIP error:', err);
       failExportModal('ZIP creation failed');
       setTimeout(() => {
-        downloadSimpleHTML(messages, title, platformName, date, slug);
+        saveMarkdown(messages, platformName, date, slug);
       }, 2000);
     }
   }
@@ -331,7 +389,8 @@
 
     switch (platform) {
       case 'claude': {
-        const bars = document.querySelectorAll('div[role="group"][aria-label="Message actions"]');
+        // Claude changed the action bar from role="group" to role="toolbar".
+        const bars = document.querySelectorAll('div[role="toolbar"][aria-label="Message actions"]');
         return bars.length > 0 ? bars[bars.length - 1] : null;
       }
       case 'chatgpt': {
@@ -363,32 +422,33 @@
     }
   }
 
-  function createActionButton(svgIcon, title, onClick) {
+  function createActionButton(svgIcon, title, onClick, template) {
     const platform = E.getPlatform();
 
-    if (platform === 'claude') {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'w-fit';
-      wrapper.setAttribute('data-state', 'closed');
-
-      const btn = document.createElement('button');
-      btn.className = 'inline-flex items-center justify-center relative isolate shrink-0 can-focus select-none border-transparent transition font-base duration-300 h-8 w-8 rounded-md group/btn _fill_56vq7_9 _ghost_56vq7_96';
-      btn.type = 'button';
+    if (platform === 'claude' && template) {
+      // Clone a live toolbar button so styling always matches Claude's current
+      // design (hashed class names change; cloning is future-proof).
+      const btn = template.cloneNode(true);
+      btn.removeAttribute('data-testid');
+      btn.removeAttribute('data-state');
+      btn.setAttribute('type', 'button');
       btn.setAttribute('aria-label', title);
-      btn.title = title;
+      btn.setAttribute('title', title);
 
-      const iconDiv = document.createElement('div');
-      iconDiv.className = 'text-text-500 group-hover/btn:text-text-100';
-      iconDiv.style.cssText = 'width:20px;height:20px;display:flex;align-items:center;justify-content:center;';
-      iconDiv.innerHTML = svgIcon;
-
-      btn.appendChild(iconDiv);
-      wrapper.appendChild(btn);
+      const existingSvg = btn.querySelector('svg');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = svgIcon;
+      const newSvg = tmp.firstElementChild;
+      if (existingSvg && newSvg) {
+        existingSvg.replaceWith(newSvg);
+      } else {
+        btn.innerHTML = svgIcon;
+      }
 
       btn.addEventListener('mousedown', e => e.preventDefault());
-      btn.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+      btn.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); onClick(); });
 
-      return wrapper;
+      return btn;
     }
 
     const btn = document.createElement('button');
@@ -404,12 +464,23 @@
     document.querySelectorAll('.rc-copier-injected').forEach(el => el.remove());
 
     const bar = findLastActionBar();
+    const platform = E.getPlatform();
 
     if (bar) {
-      const copyBtn = createActionButton(COPY_ALL_SVG, 'Copy full conversation (markdown)', copyToClipboard);
+      // On Claude, clone a real toolbar button as the styling template.
+      const template = platform === 'claude' ? bar.querySelector('button') : null;
+      if (platform === 'claude' && !template) {
+        showFloatingButtons();
+        return;
+      }
+
+      const isClaude = platform === 'claude';
+      const dlLabel = isClaude ? 'Download full conversation (Markdown)' : 'Download full conversation (HTML)';
+
+      const copyBtn = createActionButton(COPY_ALL_SVG, 'Copy full conversation (markdown)', copyToClipboard, template);
       copyBtn.classList.add('rc-copier-injected');
 
-      const dlBtn = createActionButton(DOWNLOAD_SVG, 'Download full conversation (HTML)', downloadHTML);
+      const dlBtn = createActionButton(DOWNLOAD_SVG, dlLabel, downloadForPlatform, template);
       dlBtn.classList.add('rc-copier-injected');
 
       const sep = document.createElement('div');
@@ -420,8 +491,8 @@
       bar.appendChild(copyBtn);
       bar.appendChild(dlBtn);
 
-      if (E.getPlatform() === 'claude') {
-        const exportBtn = createActionButton(EXPORT_ZIP_SVG, 'Export conversation + artifacts (ZIP)', exportFullZIP);
+      if (isClaude) {
+        const exportBtn = createActionButton(EXPORT_ZIP_SVG, 'Export conversation + artifacts (ZIP)', exportFullZIP, template);
         exportBtn.classList.add('rc-copier-injected');
         bar.appendChild(exportBtn);
       }
@@ -482,10 +553,12 @@
 
     const dlBtn = document.createElement('button');
     dlBtn.innerHTML = DOWNLOAD_SVG;
-    dlBtn.title = 'Download full conversation (HTML)';
+    dlBtn.title = E.getPlatform() === 'claude'
+      ? 'Download full conversation (Markdown)'
+      : 'Download full conversation (HTML)';
     dlBtn.className = 'rc-copier-float-btn';
     dlBtn.addEventListener('mousedown', e => e.preventDefault());
-    dlBtn.onclick = e => { e.stopPropagation(); downloadHTML(); };
+    dlBtn.onclick = e => { e.stopPropagation(); downloadForPlatform(); };
 
     cluster.appendChild(copyBtn);
     cluster.appendChild(dlBtn);
@@ -545,7 +618,7 @@
       if (e.shiftKey) { e.preventDefault(); copyToClipboard(); }
     }
     if (e.key === 'D' || e.key === 'd') {
-      if (e.shiftKey) { e.preventDefault(); downloadHTML(); }
+      if (e.shiftKey) { e.preventDefault(); downloadForPlatform(); }
     }
   });
 

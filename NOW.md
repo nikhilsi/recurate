@@ -34,6 +34,12 @@
 - [x] Store listing updated, screenshot captured (1280x800), ZIP built
 - [x] Upload v0.3.1 to Chrome Web Store (updated listing text, thinking block screenshot, ZIP uploaded Apr 3)
 - [x] v0.3.1 fix: thinking block content no longer replaces actual response (found in Ops workstream)
+- [x] **v0.4.0: Claude extraction via conversation API** — fixes virtualization cap (was ~9 messages, now full thread). Branch-aware walk from current_leaf.
+- [x] **v0.4.0: Claude action bar fix** — role="group" changed to role="toolbar"; buttons clone a live toolbar button. Restores Export/ZIP button.
+- [x] **v0.4.0: Claude exports are Markdown** — Download produces `.md`, ZIP produces `conversation.md`. Fed to Claude Code.
+- [x] **v0.4.0: title selector fix** — chat-title-button changed to chat-title-split, document.title fallback.
+- [ ] Build v0.4.0 ZIP and upload to Chrome Web Store
+- [~] **Google AI Mode: SHELVED.** Chrome dev routes AI Mode to `chrome://contextual-tasks/` (WebUI, no content-script access, error-only DOM). Not reachable by any extension. See CHANGELOG 1.7.0.
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)

@@ -71,14 +71,16 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier — Conversation Export (Working — v0.3.1, 7 platforms)
+### Recurate Copier — Conversation Export (Working — v0.4.0, 7 platforms)
 - Vanilla JS Chrome extension + JSZip (bundled, 97KB)
-- Version 0.3.1
+- Version 0.4.0
 - **Architecture:** `extractor.js` (reusable extraction + formatting, `window.RecurateExtractor`) + `content.js` (extension plumbing)
-- **Three buttons on Claude.ai:** Copy (markdown to clipboard), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads + progress modal + cancel button)
+- **Claude extraction uses the conversation API** (`chat_conversations` endpoint), not DOM scraping. Claude virtualizes the message list, so DOM scraping capped exports at ~9 messages. The API returns the full thread; extraction walks the active branch from `current_leaf_message_uuid` via `parent_message_uuid`. Falls back to DOM scraping if the API is unavailable.
+- **Three buttons on Claude.ai:** Copy (markdown to clipboard), Download (Markdown `.md` file), Export (full ZIP with `conversation.md` + artifacts + uploads + progress modal + cancel button). Claude exports are Markdown (fed to Claude Code); other platforms keep HTML.
 - **Two buttons on other platforms:** Copy + Download
-- **Claude.ai thinking blocks:** automatically expands all thinking toggles, extracts full reasoning text, collapses back. Rendered as collapsible `<details>` in HTML, blockquotes in markdown.
-- **Claude.ai full export:** conversation + thinking blocks + all artifacts + all uploads as ZIP with inline artifact links and manifest
+- **Injection:** clones a live action-bar button so styling matches Claude's current design (Claude moved the action bar from `role="group"` to `role="toolbar"` in mid-2026).
+- **Claude.ai thinking blocks:** full reasoning text + summaries come straight from the API content blocks (`type: thinking`), rendered as blockquotes in markdown. No more DOM expand/collapse dance.
+- **Claude.ai full export:** conversation + thinking + all artifacts + all uploads as ZIP with a Markdown file manifest
 - **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
 - **Tested on 7 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer, Copilot enterprise
 - Claude: three buttons in native action bar. Grok: two buttons in action bar. Other platforms: floating buttons.
@@ -121,8 +123,11 @@
 
 - Additional Annotator platforms — grok.com, gemini.google.com
 - Copier: periodic auto-export for non-technical users
-- Copier: full thinking content in ZIP export (currently HTML/markdown only)
 - Connect V0.3: edit/pin/delete/search in sidebar, additional platforms
+
+## Blocked / Shelved
+
+- **Copier Google AI Mode.** Chrome (150 dev) routes AI Mode (`udm=50`) to a Chrome-native WebUI at `chrome://contextual-tasks/` where content scripts cannot run, and that surface renders an error state with no answer content. Not reachable by any extension. Shelved until the surface stabilizes. See CHANGELOG 1.7.0.
 
 ---
 
