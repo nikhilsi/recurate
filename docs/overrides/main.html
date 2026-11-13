@@ -2,6 +2,8 @@
 
 {% block extrahead %}
   {% set og_title = page.meta.title if page and page.meta and page.meta.title else (page.title if page and page.title else config.site_name) %}
+  {# The home page is just the site name (as in its <title>); other pages get "Page - Recurate" #}
+  {% set og_full_title = config.site_name if page and page.is_homepage else og_title ~ ' - Recurate' %}
   {% set og_desc = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
 
   {# Blog post detection: mkdocs-material's blog plugin sets page.meta.date only on actual posts, not aggregation pages #}
@@ -23,7 +25,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="{{ og_type }}">
   <meta property="og:site_name" content="{{ config.site_name }}">
-  <meta property="og:title" content="{{ og_title }} - Recurate">
+  <meta property="og:title" content="{{ og_full_title }}">
   <meta property="og:description" content="{{ og_desc }}">
   {% if page and page.canonical_url %}
   <meta property="og:url" content="{{ page.canonical_url }}">
@@ -35,7 +37,7 @@
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ og_title }} - Recurate">
+  <meta name="twitter:title" content="{{ og_full_title }}">
   <meta name="twitter:description" content="{{ og_desc }}">
   <meta name="twitter:image" content="{{ og_image }}">
   <meta name="twitter:site" content="@nikhilsinghal">
