@@ -102,8 +102,8 @@ test('fetch: token from the session, 404 stops with a reason', async () => {
 
 test('source markers inside raw tool output become readable, never invisible', () => {
   const data = fixture();
-  data.mapping.t1.message.content.text = 'see citeturn0search3 for times';
+  data.mapping.t1.message.content.text = 'see \uE200cite\uE202turn0search3\uE201 for times';
   const out = md(G.parse(data, { exportedAt: at }));
   assert.match(out, /```text\nsee \[cite turn0search3\] for times\n```/);
-  assert.ok(!/[-]/.test(out));
+  assert.ok(!/[\uE200-\uE2FF]/.test(out));
 });

@@ -294,8 +294,15 @@ Each adapter has three parts:
 - **Conversation:** `response-node?includeThreads=true` gives the nodes.
 - **Active branch:** from `rid`; without it, the newest leaf by `createTime`, with a note. Walk parents to the root.
 - **Content:** `load-responses` with `{ responseIds }`, in batches (the accepted batch size is checked at build).
-- **Mapping:** `message` as text; `webSearchResults`, `citedWebSearchResults` and `xposts` as sources; `generatedImageUrls`, `imageAttachments` and `fileAttachments` as files; `steps` and `toolResponses` as tool blocks; `model` and `createTime` per response.
-- **Thinking:** `steps` text and the thinking start and end times (seen in the sample). File downloads from the storage key are confirmed at build; until then files are listed in `notIncluded`.
+- **Mapping:**
+  - `message` as text. Inline `<grok:render>` tags are removed: image-card tags quietly (the image is its own step), citation and other tags counted in `notes`.
+  - Image generation: each `cardAttachmentsJson` card with an `image_chunk` becomes a tool step (prompt and model in, image out). `fileAttachmentAssetMetadata` gives the size and dedupes by storage key.
+  - Uploads from `fileAttachmentsMetadata` and `fileAttachmentAssetMetadata`; `generatedImageUrls` as images.
+  - `webSearchResults` (with `query`) and `xposts` as tool steps with link lists; `citedWebSearchResults` and `citedXposts` as the reply's sources.
+  - `steps` tool cards and results, and any other filled list Copier does not map yet (`ragResults`, `toolResponses` and similar), kept as labeled tool steps.
+  - `model` and `createTime` per reply.
+- **Thinking:** `steps` text (header tags in the sample) under a "Thought for Ns" summary from the start and end times.
+- **Files:** `https://assets.grok.com/{key}`; the page's CORS allows it. Live: 3 of 3 generated images downloaded at their recorded byte counts.
 
 ### 4.4 Gemini
 

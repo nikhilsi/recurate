@@ -1,0 +1,32 @@
+{
+  "_about": "Synthetic Grok conversation shaped like test/skeletons/grok.json. No real chat content.",
+  "nodes": {
+    "responseNodes": [
+      { "responseId": "r1", "parentResponseId": "9d0c2c8e-0000-4000-8000-00000000abcd", "sender": "human" },
+      { "responseId": "r2", "parentResponseId": "r1", "sender": "assistant" },
+      { "responseId": "r3", "parentResponseId": "r2", "sender": "human" },
+      { "responseId": "r4", "parentResponseId": "r3", "sender": "assistant" },
+      { "responseId": "r4b", "parentResponseId": "r3", "sender": "assistant" }
+    ],
+    "inflightResponses": []
+  },
+  "responses": {
+    "responses": [
+      { "responseId": "r1", "parentResponseId": "9d0c2c8e-0000-4000-8000-00000000abcd", "sender": "human", "createTime": "2026-11-15T14:00:00.000Z", "message": "Design a flat logo.", "steps": [] },
+      { "responseId": "r2", "parentResponseId": "r1", "sender": "assistant", "createTime": "2026-11-15T14:01:00.000Z", "model": "grok-4-7", "message": "Here is a first logo.",
+        "thinkingStartTime": "2026-11-15T14:00:10.000Z", "thinkingEndTime": "2026-11-15T14:00:22.000Z",
+        "steps": [ { "text": ["Sketching the mark"], "tags": ["header"] }, { "text": ["Choosing colors"], "tags": ["header"] } ],
+        "cardAttachmentsJson": [ "{\"id\":\"c1\",\"type\":\"render_generated_image\",\"cardType\":\"generated_image_card\",\"prompt\":\"flat shield logo\",\"image_chunk\":{\"imageUrl\":\"users/u1/generated/g1/image.jpg\",\"imageTitle\":\"Shield logo\",\"imageModel\":\"imagine-2\",\"mimeType\":\"image/jpeg\"}}" ],
+        "fileAttachmentAssetMetadata": [ { "key": "users/u1/generated/g1/image.jpg", "name": "image.jpg", "mimeType": "image/jpeg", "sizeBytes": 61764, "isModelGenerated": true } ] },
+      { "responseId": "r3", "parentResponseId": "r2", "sender": "human", "createTime": "2026-11-15T14:02:00.000Z", "message": "Use this brief.",
+        "fileAttachmentsMetadata": [ { "fileMetadataId": "fm1", "fileName": "brief.pdf", "fileMimeType": "application/pdf", "fileUri": "users/u1/uploads/fm1/content" } ] },
+      { "responseId": "r4", "parentResponseId": "r3", "sender": "assistant", "createTime": "2026-11-15T14:03:00.000Z", "model": "grok-4-7", "query": "logo trends",
+        "message": "Flat logos are common now.<grok:render card_id=\"x1\" type=\"render_inline_citation\"><argument name=\"citation_id\">1</argument></grok:render> Done.",
+        "webSearchResults": [ { "url": "https://a.example", "title": "Logo trends" }, { "url": "https://b.example", "title": "Flat design" } ],
+        "citedWebSearchResults": [ { "url": "https://a.example", "title": "Logo trends" } ],
+        "xposts": [ { "postId": "123", "username": "designer" } ],
+        "ragResults": [ { "doc": "internal" } ] },
+      { "responseId": "r4b", "parentResponseId": "r3", "sender": "assistant", "createTime": "2026-11-15T14:05:00.000Z", "message": "Abandoned branch reply." }
+    ]
+  }
+}
