@@ -205,6 +205,7 @@ Nothing is trimmed. Long tool outputs stay whole.
 - **Files on another host:** a content-script fetch to another origin follows the page's CORS rules. If it fails, the file is a failed file with that reason. Signed or download URLs are never written into an export. Remote images are plain links, never embeds.
 - **Compaction summaries:** a marked section holding the summary text.
 - **Claude in-chat artifacts (older style):** the final version of each, saved in `artifacts/` and linked where it was created.
+- **Other files:** files the chat holds that no message mentions (Claude's older file list) are listed in an "Other files" section after the last message.
 
 ### 3.6 Entry points
 

@@ -207,11 +207,29 @@
     return out.join('\n');
   }
 
+  function referencedKeys(conversation) {
+    const keys = new Set();
+    conversation.messages.forEach(m => m.blocks.forEach(b => {
+      if (b.file) keys.add(b.file.key);
+      if (b.type === 'tool') b.output.forEach(p => { if (p.kind === 'file') keys.add(p.file.key); });
+    }));
+    return keys;
+  }
+
+  // Files the chat holds that no message mentions (Claude's older file list).
+  function otherFiles(conversation, opts) {
+    const used = referencedKeys(conversation);
+    const rest = conversation.files.filter(f => !used.has(f.key));
+    if (!rest.length) return '';
+    const lines = rest.map(f => `- ${renderFile(f, conversation, opts, { image: (f.mime || '').startsWith('image/') })}`);
+    return `## Other files\n\n${lines.join('\n')}\n\n---\n\n`;
+  }
+
   // mode: 'copy' | 'download' | 'zip'. paths: file key to ZIP path (zip only).
   function toMarkdown(conversation, { mode = 'copy', paths = {}, timeZone } = {}) {
     const opts = { mode, paths, timeZone };
     const body = conversation.messages.map(m => renderMessage(m, conversation, opts)).join('\n');
-    return `${header(conversation, opts)}\n${body}\n*Exported with Recurate Copier, recurate.ai*\n`;
+    return `${header(conversation, opts)}\n${body}\n${otherFiles(conversation, opts)}*Exported with Recurate Copier, recurate.ai*\n`;
   }
 
   globalThis.Recurate = Object.assign(globalThis.Recurate || {}, {

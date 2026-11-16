@@ -7,8 +7,8 @@ import vm from 'node:vm';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-export function load(files) {
-  const sandbox = { console, TextEncoder, URL, URLSearchParams, Intl, Date };
+export function load(files, extra = {}) {
+  const sandbox = { console, TextEncoder, URL, URLSearchParams, Intl, Date, ...extra };
   vm.createContext(sandbox);
   for (const file of files) {
     vm.runInContext(readFileSync(path.join(root, file), 'utf8'), sandbox, { filename: file });
