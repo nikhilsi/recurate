@@ -45,10 +45,10 @@ Build steps (one task each, #531 to #541):
 
 Step 11 (Nov 16):
 - [x] Reruns after Nikhil's reload: Claude uploads 13 of 13 (was 13 of 15), Gemini "1 image" (was 3)
-- [x] Claude uploads exported twice under the sandbox's renamed spelling (about 30 uploads in 10 of 80 chats): fixed with tests, reviewed twice; live rerun on 78435e51 and 34d465b5 after the next reload
+- [x] Claude uploads exported twice under the sandbox's renamed spelling (about 30 uploads in 10 of 80 chats): fixed with tests, reviewed twice, rerun live (78435e51: 65 of 65 files, no duplicates, 98 MB instead of 135 MB)
 - [x] STORE_LISTING.md rewritten, with the 1.0 release notes and the untested list
 - [x] CHANGELOG, README, CLAUDE.md, CURRENT_STATE updated; release workflow ships the 1.0 files
-- [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered); Nikhil looks before upload
+- [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered), approved by Nikhil: `screenshot-1.0-1.jpg` to `-3.jpg`. The older screenshots (`screenshot-1.png`, `screenshot-2.png`, `screenshot-0.3.0.png`) can go when Nikhil says so
 - [x] Release ZIP `recurate-copier-1.0.0.zip` (git-ignored)
 - [ ] Extension Update Testing Tool: on a Mac it needs a Chrome policy profile installed in System Settings; Nikhil decides. Manifest comparison: 1.0 adds activeTab, scripting and commands (no install warnings) and its six https hosts are a subset of 0.4.0's eight
 - [ ] Store upload, Privacy tab update and screenshots, on Nikhil's go
