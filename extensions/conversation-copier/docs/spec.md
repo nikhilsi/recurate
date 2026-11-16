@@ -335,7 +335,7 @@ Hosts: `m365.cloud.microsoft` (content script, while Microsoft still serves it).
   4. Restore the scroll position.
 - **Keys:** `aria-posinset` for labeled messages. Unlabeled messages are keyed by role, normalized text and neighboring position.
 - **Set size:** the largest seen is kept; a change is noted.
-- **Content:** a parse step takes plain records `{ pos, setsize, role, html, text }`. User text via `innerText`. Answers from `[data-testid="markdown-reply"]` HTML, converted with Turndown (section 12).
+- **Content:** a parse step takes plain records `{ pos, setsize, role, text, markdown, citations }`. User text via `innerText`, with the visually hidden heading named by `aria-labelledby` ("You said:") stripped from the front in any language. Answers converted with Turndown 7.2.4 (pinned, vendored with its table plugin 1.0.2) straight from the live `[data-testid="markdown-reply"]` element, so no HTML string is parsed. Citation buttons and their 16px icons are removed in conversion.
 - **Sources:** each "Citation: <title>" button becomes a source with a title and no link. The 16px icons inside are dropped.
 - **Not included:** images and files, until probed. Listed in `notIncluded`.
 
