@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recurate Copier</title>
+<style>
+  :root { --fg: #1e1b4b; --muted: #6b7280; --accent: #4f46e5; --bg: #ffffff; --line: #e5e7eb; --soft: #eef2ff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #e0e7ff; --muted: #9ca3af; --accent: #818cf8; --bg: #1f2028; --line: #374151; --soft: #2a2b3a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 300px; padding: 14px; background: var(--bg); color: var(--fg); font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  h1 { font-size: 14px; margin: 0 0 10px; }
+  .actions { display: grid; gap: 6px; }
+  button { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--fg); font: inherit; text-align: left; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button .hint { display: block; color: var(--muted); font-size: 11px; }
+  #status { margin-top: 10px; min-height: 18px; color: var(--muted); white-space: pre-wrap; }
+  #cancel { display: none; margin-top: 8px; text-align: center; background: transparent; }
+</style>
+</head>
+<body>
+  <h1>Recurate Copier</h1>
+  <div class="actions">
+    <button id="copy" data-action="copy">Copy<span class="hint">The whole conversation as Markdown</span></button>
+    <button id="download" data-action="download">Download<span class="hint">A Markdown file</span></button>
+    <button id="export" data-action="export">Export<span class="hint">A ZIP with the conversation and its files</span></button>
+  </div>
+  <div id="status"></div>
+  <button id="cancel" type="button">Cancel</button>
+  <script src="popup.js"></script>
+</body>
+</html>

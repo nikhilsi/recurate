@@ -1,27 +1,53 @@
 {
   "manifest_version": 3,
   "name": "Recurate Copier",
-  "description": "Export your full AI conversation. Copy as markdown, download as HTML, or export as ZIP with artifacts and uploads.",
-  "version": "0.4.0",
+  "description": "Export complete AI conversations as Markdown with tool steps, sources and files. Claude, ChatGPT, Grok, Gemini, Copilot.",
+  "version": "1.0.0",
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
+  "action": {
+    "default_title": "Recurate Copier",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icon-16.png",
+      "32": "icon-32.png"
+    }
+  },
+  "permissions": ["activeTab", "scripting"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+C" },
+      "description": "Open Recurate Copier"
+    }
+  },
   "content_scripts": [
     {
       "matches": [
-        "*://claude.ai/*",
-        "*://chatgpt.com/*",
-        "*://chat.openai.com/*",
-        "*://grok.com/*",
-        "*://gemini.google.com/*",
-        "*://www.google.com/*",
-        "*://copilot.microsoft.com/*",
-        "*://m365.cloud.microsoft/*"
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://grok.com/*",
+        "https://gemini.google.com/*",
+        "https://m365.cloud.microsoft/*"
       ],
-      "js": ["jszip.min.js", "extractor.js", "content.js"],
+      "js": [
+        "lib/jszip.min.js",
+        "lib/turndown.js",
+        "lib/turndown-plugin-gfm.js",
+        "core/model.js",
+        "core/names.js",
+        "core/markdown.js",
+        "platforms/claude.js",
+        "platforms/chatgpt.js",
+        "platforms/grok.js",
+        "platforms/gemini.js",
+        "platforms/copilot.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

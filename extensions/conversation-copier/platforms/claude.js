@@ -289,9 +289,15 @@
       if (art.failed) notes.push(`Artifact "${art.title || art.id}": ${art.failed} edit${art.failed === 1 ? '' : 's'} could not be applied; the file holds the last version that could be rebuilt.`);
     });
 
-    // Files only the older file list knows about.
-    const named = new Set(conv.files.map(f => f.name.toLowerCase()));
-    wiggle.forEach(ref => { if (!named.has(ref.name.toLowerCase())) R.addFile(conv, ref); });
+    // Files only the older file list knows about. A message file that also
+    // appears there keeps that path as a fallback download (some uploads
+    // answer 404 at /files/{uuid}/contents but download from the list).
+    const byName = new Map(conv.files.filter(f => f.kind === 'claude-file').map(f => [f.name.toLowerCase(), f]));
+    wiggle.forEach(ref => {
+      const twin = byName.get(ref.name.toLowerCase());
+      if (twin) twin.altPath = ref.id;
+      else if (!conv.files.some(f => f.name.toLowerCase() === ref.name.toLowerCase())) R.addFile(conv, ref);
+    });
 
     if (hiddenThinking) {
       notes.push(`${hiddenThinking} thinking block${hiddenThinking === 1 ? ' is a summary' : 's are summaries'} only (Claude does not send the full text).`);
@@ -351,11 +357,13 @@
   // Resolves a FileRef to a Blob. Throws FetchError with the reason.
   async function fetchFile(file, ctx) {
     if (file.text !== undefined) return new Blob([file.text], { type: 'text/plain;charset=utf-8' });
+    const wigglePath = p => `/api/organizations/${ctx.org}/conversations/${ctx.id}/wiggle/download-file?path=${encodeURIComponent(p)}`;
     let path;
     if (file.kind === 'claude-file') path = `/api/organizations/${ctx.org}/files/${file.id}/contents`;
-    else if (file.kind === 'claude-wiggle') path = `/api/organizations/${ctx.org}/conversations/${ctx.id}/wiggle/download-file?path=${encodeURIComponent(file.id)}`;
+    else if (file.kind === 'claude-wiggle') path = wigglePath(file.id);
     else throw new R.FetchError(PLATFORM, 0, `unknown file kind ${file.kind}`);
-    const r = await fetch(path, { credentials: 'include' });
+    let r = await fetch(path, { credentials: 'include' });
+    if (!r.ok && file.altPath) r = await fetch(wigglePath(file.altPath), { credentials: 'include' });
     if (!r.ok) throw new R.FetchError(PLATFORM, r.status, `HTTP ${r.status}`);
     return r.blob();
   }

@@ -151,3 +151,15 @@ test('fetch: a 401 stops with a clear reason and nothing is exported', async () 
     e => e.name === 'FetchError' && /HTTP 401/.test(e.message),
   );
 });
+
+test('a message file also in the older list falls back to it when its own address fails', async () => {
+  const conv = C.parse(fixture(), { exportedAt: at, wiggleFiles: ['/mnt/user-data/uploads/map.png'] });
+  const map = conv.files.find(f => f.name === 'map.png');
+  assert.equal(map.altPath, '/mnt/user-data/uploads/map.png');
+  const calls = [];
+  const fetch = async path => { calls.push(path); return path.includes('/files/') ? { ok: false, status: 404 } : { ok: true, blob: async () => ({ size: 1234 }) }; };
+  const S = load([...CORE, 'platforms/claude.js'], { fetch, Blob });
+  const blob = await S.platforms.claude.fetchFile(map, { org: 'o', id: 'c' });
+  assert.equal(blob.size, 1234);
+  assert.ok(calls[1].includes('wiggle/download-file?path=%2Fmnt%2Fuser-data%2Fuploads%2Fmap.png'));
+});

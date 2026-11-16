@@ -256,7 +256,7 @@ Each adapter has three parts:
   - `files` on each message: `GET /api/organizations/{org}/files/{file_uuid}/contents`.
   - `attachments` with `extracted_content`: inline text plus a file in `uploads/`.
   - `wiggle/list-files` for older chats.
-  - Merge: on uuid where both sides have one, else name plus size, else keep both with a note.
+  - Merge: a message file and an older-list entry with the same name are one file; the older path is kept as a fallback download, since some uploads answer 404 at `/files/{uuid}/contents` but download from the list (found live: 1 of 72 files in one chat).
   - Older `artifacts` tool calls, active branch only: `create` and `rewrite` replace the content; `update` applies `old_str` to `new_str` once, with a note when it cannot. The final version per `id` goes in `artifacts/`.
   - Newer `Artifact` tool results with a claude.ai artifact link: kept as a link.
 - **Model:** none per message. The header gets "Model setting at export".

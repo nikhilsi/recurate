@@ -228,3 +228,16 @@ test('link labels escape brackets', () => {
   const md = R.toMarkdown(R.finish(c, { complete: true }), opts);
   assert.match(md, /2\. \[Title \\\[with\\\] brackets\]\(<https:\/\/x\.y\/\(a b\)>\)/);
 });
+
+test('ensureExtension: keeps an existing one, else uses the MIME type, else the first bytes', () => {
+  assert.equal(R.ensureExtension('report.pdf', 'application/octet-stream'), 'report.pdf');
+  assert.equal(R.ensureExtension('image-1a2b3c4d', 'image/png'), 'image-1a2b3c4d.png');
+  assert.equal(R.ensureExtension('image-1a2b3c4d', null, [0xff, 0xd8, 0xff, 0xe0]), 'image-1a2b3c4d.jpg');
+  assert.equal(R.ensureExtension('doc', '', [0x25, 0x50, 0x44, 0x46]), 'doc.pdf');
+  assert.equal(R.ensureExtension('blob', 'application/octet-stream', [1, 2, 3]), 'blob');
+});
+
+test('exportBaseName: platform, slug and local date-time', () => {
+  assert.equal(R.exportBaseName('claude', 'Trip planning: Lausanne!', new Date('2026-11-15T22:02:00Z'), 'UTC'), 'recurate-claude-trip-planning-lausanne-2026-11-15-2202');
+  assert.equal(R.exportBaseName('gemini', null, new Date('2026-01-02T03:04:00Z'), 'UTC'), 'recurate-gemini-conversation-2026-01-02-0304');
+});
