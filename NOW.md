@@ -34,7 +34,7 @@ Build steps (one task each, #531 to #541):
 1. [x] Core model, Markdown writer, safeName (#531)
 2. [x] Probe script and fixture skeletons (#532)
 3. [x] Claude adapter (#533)
-4. [ ] ChatGPT adapter (#534)
+4. [x] ChatGPT adapter (#534)
 5. [ ] Grok adapter (#535)
 6. [ ] Gemini adapter (#536)
 7. [ ] Copilot adapter, work and personal (#537)
