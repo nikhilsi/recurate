@@ -36,7 +36,7 @@ Build steps (one task each, #531 to #541):
 3. [x] Claude adapter (#533)
 4. [x] ChatGPT adapter (#534)
 5. [x] Grok adapter (#535)
-6. [ ] Gemini adapter (#536)
+6. [x] Gemini adapter (#536)
 7. [ ] Copilot adapter, work and personal (#537)
 8. [ ] UI, popup, ZIP, screen check (#538)
 9. [ ] Live test matrix and proof (#539)
