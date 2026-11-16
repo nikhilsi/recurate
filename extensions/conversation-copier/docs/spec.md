@@ -374,7 +374,7 @@ No build step. Each file ends with `globalThis.Recurate = Object.assign(globalTh
 - **Permissions added:** `activeTab` and `scripting`, for popup injection. Neither shows a warning. Injection happens only after the user clicks the icon, and only on a supported conversation page. Supported pages include the content-script hosts plus `copilot.cloud.microsoft`, `copilot.com` and `copilot.microsoft.com`.
 - **Trade-off:** adding the new Copilot addresses to the content script would give them in-page buttons, at the cost of every existing user re-approving Copier. 1.0 keeps them popup-only.
 - **Keys added:** `action` (the popup) and `commands` (`_execute_action`).
-- **Existing users:** no re-approval expected. Chrome's Extension Update Testing Tool confirms the update does not disable the extension before upload.
+- **Existing users:** no re-approval expected. Chrome disables an updated extension only when the update adds a permission that shows a warning; Chrome's permission list shows none for activeTab or scripting, and the host list only shrinks (ruling 4).
 - **Store listing:** rewritten for 1.0. The host justification names each site and states that requests go only to that site with the user's own session, and nothing leaves the browser. Screenshots replace the HTML ones.
 
 ---
@@ -421,7 +421,7 @@ Untested on these accounts, named in the release notes: ChatGPT workspace, proje
 
 - Nikhil loads the unpacked build once, with the store version turned off. Every entry point on every site is checked in the installed extension. Injected test code runs in the page's world; this pass proves the content-script world works.
 - Old versus new on the same Claude chats (0.4.0 is broken on the other platforms), counts recorded.
-- The Extension Update Testing Tool on the final manifest.
+- ~~The Extension Update Testing Tool on the final manifest.~~ Replaced by the manifest comparison against Chrome's permission list (ruling 4).
 
 ### 8.4 Probe script
 
@@ -464,6 +464,7 @@ Each becomes a CenterEye task.
 1. **Markdown only:** yes ("MD only is fine"). The styled HTML export goes. Windows users lose a double-click file; accepted.
 2. **Branch tests:** use existing chats, create none ("use existing chats? no need to create new ones. there is nothing sensitive really man. I authorize and approve"). Switching branches in existing chats with the site's arrows is covered.
 3. **Consumer Copilot:** in 1.0. Nikhil pointed out his personal account is consumer Copilot. Microsoft's 2026 merge confirms it (2.5). The spec's earlier claim that consumer Copilot is a separate app was wrong.
+4. **Update testing tool skipped (November 16):** on macOS the tool needs a system Chrome policy profile that marks Chrome as managed and is flagged against normal removal. Chrome's permission list shows no warning for activeTab or scripting, `commands` is not a permission, and the six https hosts are a subset of 0.4.0's eight. Nikhil approved release on that comparison ("yes I APPROVE (GO)").
 
 ---
 

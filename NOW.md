@@ -48,12 +48,12 @@ Step 11 (Nov 16):
 - [x] Claude uploads exported twice under the sandbox's renamed spelling (about 30 uploads in 10 of 80 chats): fixed with tests, reviewed twice, rerun live (78435e51: 65 of 65 files, no duplicates, 98 MB instead of 135 MB)
 - [x] STORE_LISTING.md rewritten, with the 1.0 release notes and the untested list
 - [x] CHANGELOG, README, CLAUDE.md, CURRENT_STATE updated; release workflow ships the 1.0 files
-- [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered), approved by Nikhil: `screenshot-1.0-1.jpg` to `-3.jpg`. The older screenshots (`screenshot-1.png`, `screenshot-2.png`, `screenshot-0.3.0.png`) can go when Nikhil says so
+- [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered), approved by Nikhil: `screenshot-1.0-1.jpg` to `-3.jpg`. The three older screenshots are removed (Nikhil, Nov 16)
 - [x] Release ZIP `recurate-copier-1.0.0.zip` (git-ignored)
-- [ ] Extension Update Testing Tool: on a Mac it needs a Chrome policy profile installed in System Settings; Nikhil decides. Manifest comparison: 1.0 adds activeTab, scripting and commands (no install warnings) and its six https hosts are a subset of 0.4.0's eight
+- [x] Extension Update Testing Tool skipped by Nikhil's ruling (spec ruling 4): on a Mac it needs a system Chrome policy profile. Chrome's permission list shows no warning for activeTab or scripting, and the six https hosts are a subset of 0.4.0's eight
 - [ ] Store upload, Privacy tab update and screenshots, on Nikhil's go
 - [ ] With the upload: recurate.ai Copier pages (`docs/index.md`, `docs/product_brief.md`, `docs/design.md`; a push to main publishes the site), tag and GitHub release
-- [ ] The Nov 15 and 16 test exports in ~/Downloads go when Nikhil says so
+- [x] The 29 test exports from Nov 15 and 16 in ~/Downloads moved to the Trash (Nikhil, Nov 16)
 
 Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).
 
