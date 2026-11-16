@@ -39,7 +39,7 @@ Build steps (one task each, #531 to #541):
 6. [x] Gemini adapter (#536)
 7. [x] Copilot adapter, work and personal (#537)
 8. [x] UI, popup, ZIP, screen check (#538)
-9. [ ] Live test matrix and proof (#539)
+9. [x] Live test matrix and proof (#539)
 10. [ ] Breaker pass (#540)
 11. [ ] Release prep; store upload on Nikhil's go (#541)
 
