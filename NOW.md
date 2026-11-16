@@ -40,8 +40,13 @@ Build steps (one task each, #531 to #541):
 7. [x] Copilot adapter, work and personal (#537)
 8. [x] UI, popup, ZIP, screen check (#538)
 9. [x] Live test matrix and proof (#539)
-10. [ ] Breaker pass (#540)
+10. [x] Breaker pass (#540): 17 findings, then two independent reviews of the fixes (all findings fixed or answered), live rerun on all five sites; records in `extensions/conversation-copier/docs/reviews/`
 11. [ ] Release prep; store upload on Nikhil's go (#541)
+
+Start of step 11 (next session):
+- Nikhil reloads the unpacked build once; rerun the two fixes made after the evening live run (Claude uploads by their own path on chat 34d465b5, expecting all files and no duplicates; the Gemini image count on chat f20bf9329f50, expecting 1 image).
+- Then the release list in #541. README and CLAUDE.md still describe 0.4.0 and are updated with the store listing.
+- The test exports from Nov 15 in ~/Downloads (recurate-*.zip and .md) can go when Nikhil says so.
 
 Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).
 

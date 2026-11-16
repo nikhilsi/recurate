@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: April 3, 2026
+**Last Updated**: November 15, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -71,25 +71,18 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier — Conversation Export (Working — v0.4.0, 7 platforms)
-- Vanilla JS Chrome extension + JSZip (bundled, 97KB)
-- Version 0.4.0
-- **Architecture:** `extractor.js` (reusable extraction + formatting, `window.RecurateExtractor`) + `content.js` (extension plumbing)
-- **Claude extraction uses the conversation API** (`chat_conversations` endpoint), not DOM scraping. Claude virtualizes the message list, so DOM scraping capped exports at ~9 messages. The API returns the full thread; extraction walks the active branch from `current_leaf_message_uuid` via `parent_message_uuid`. Falls back to DOM scraping if the API is unavailable.
-- **Three buttons on Claude.ai:** Copy (markdown to clipboard), Download (Markdown `.md` file), Export (full ZIP with `conversation.md` + artifacts + uploads + progress modal + cancel button). Claude exports are Markdown (fed to Claude Code); other platforms keep HTML.
-- **Two buttons on other platforms:** Copy + Download
-- **Injection:** clones a live action-bar button so styling matches Claude's current design (Claude moved the action bar from `role="group"` to `role="toolbar"` in mid-2026).
-- **Claude.ai thinking blocks:** full reasoning text + summaries come straight from the API content blocks (`type: thinking`), rendered as blockquotes in markdown. No more DOM expand/collapse dance.
-- **Claude.ai full export:** conversation + thinking + all artifacts + all uploads as ZIP with a Markdown file manifest
-- **Supported platforms:** claude.ai, ChatGPT (chatgpt.com), Grok (grok.com), Gemini (gemini.google.com), Copilot consumer (copilot.microsoft.com), Copilot enterprise (m365.cloud.microsoft), Google AI Mode (google.com/search)
-- **Tested on 7 platforms:** Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer, Copilot enterprise
-- Claude: three buttons in native action bar. Grok: two buttons in action bar. Other platforms: floating buttons.
-- Filenames include timestamp in user's local timezone
-- Export headers show full date/time with timezone
-- HTML sanitization: strips class/style/dir attributes, Google's js* and data-* attributes, empty wrappers, buttons, icons, UI chrome, HTML comments
-- No background service worker, no auto-backup, no extra permissions
-- Keyboard shortcuts: Cmd/Ctrl+Shift+C (copy), Cmd/Ctrl+Shift+D (download)
-- Icon: indigo gradient with clipboard + green export arrow
+### Recurate Copier: Conversation Export (1.0 built and tested in the repo; the store still has 0.4.0)
+- Vanilla JS, Chrome Manifest V3, no build step. JSZip and Turndown (with its GFM plugin) vendored in `lib/`.
+- **Reads each site's own conversation data** (Claude, ChatGPT, Grok, Gemini). Copilot has none reachable from the page, so it is collected by scrolling and checked against the message total the page reports.
+- **Structure:** one conversation model (`core/model.js`), one Markdown writer (`core/markdown.js`), safe file names (`core/names.js`), one adapter per site (`platforms/`), and `content.js` for buttons, the progress window and the ZIP.
+- **Copy, Download (Markdown) and Export (ZIP with `uploads/` and `artifacts/`) on every site:** in Claude's message toolbar, a floating cluster elsewhere, and a toolbar popup (Alt+Shift+C) that injects into tabs opened before an update and works on copilot.cloud.microsoft.
+- **Every export starts with a completeness line:** complete, or may be partial with the reason; files downloaded and failed, each failure with its reason; notes; what is not included.
+- Exports the branch shown on screen (Claude and ChatGPT by comparing the screen with the data; Grok by the page address). Cancel works at every stage; one run per page.
+- **Sites:** claude.ai, chatgpt.com, grok.com, gemini.google.com, m365.cloud.microsoft (Copilot work and personal), copilot.cloud.microsoft through the popup. Google AI Mode removed.
+- **Permissions:** activeTab and scripting. No background worker, no backend.
+- **Tests:** node tests in `test/` (`node --test test/` from the Copier folder). `probe/` holds the live probe that produced the value-free skeletons the fixtures follow.
+- **Docs:** spec `docs/spec.md` (v2.1); `docs/reviews/` holds the spec review, the live test record and the breaker pass.
+- **Status:** build steps 1 to 10 done (tasks #531 to #540). Step 11, release prep, is next (#541); the store upload waits on Nikhil's go.
 
 ### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai + Copilot)
 - WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)
@@ -147,7 +140,9 @@
 | **Composer content script** | `extensions/markdown-toolbar/content.js` |
 | **Composer manifest** | `extensions/markdown-toolbar/manifest.json` |
 | **Composer store listing** | `extensions/markdown-toolbar/STORE_LISTING.md` |
-| **Copier extractor (reusable)** | `extensions/conversation-copier/extractor.js` |
+| **Copier spec** | `extensions/conversation-copier/docs/spec.md` |
+| **Copier core (model, Markdown, names)** | `extensions/conversation-copier/core/` |
+| **Copier site adapters** | `extensions/conversation-copier/platforms/` |
 | **Copier content script** | `extensions/conversation-copier/content.js` |
 | **Copier manifest** | `extensions/conversation-copier/manifest.json` |
 | **Connect config** | `extensions/connect/wxt.config.ts` |
