@@ -313,7 +313,13 @@ Each adapter has three parts:
 - **Positions:** user text `turn[2][0][0]`, answer text = every string in `turn[3][0][0][1]` joined, time `turn[4][0]`.
 - **Guard:** `turn[0][0]` starts `c_`, `turn[0][1]` starts `r_`, the candidate's first element starts `rc_`, and the time is a number in a sane range. Any failure is a structural error.
 - **Parent links:** each turn's `turn[1]` must match the next-older turn's ids; the oldest turn has no parent or a blank one. A break makes the export "may be partial".
-- **To confirm at build:** thinking (candidate slot 37), sources (slot 2), images and uploads. Listed in `notIncluded` until confirmed.
+- **Decoded at build (live, 7 chats):**
+  - Model label: `turn[3][21]` ("3 Flash", "3.1 Pro", "3 Flash Thinking").
+  - Thinking: `cand[37][0][0]`. Pages read while thinking: `cand[37][1][*][7]`, entries `[favicon, url, title]`, added as sources.
+  - Inline citations: `cand[2][1]`, entries `[[cited text, start, end], [...], [[url, title, ...], ...]]`. The marker goes after the cited text, found by search (33 of 33 placed). Source list: `cand[2][0]`, entries `[null, null, [url, ..., title at 21], n]`.
+  - Uploads: image entries under `turn[2][0][4]` (a googleusercontent URL with name and type).
+- **Images:** Gemini's image server sends no CORS header to the page, so downloads fail from a content script, and a new host permission would force every user to re-approve. Images are listed by name with that reason; their access links are never written.
+- **Empty answers:** two first turns had no answer on the page either. They export as empty messages with a note.
 - **Auth errors:** tell the user to reload the page.
 
 ### 4.5 Microsoft Copilot (work and personal accounts)
