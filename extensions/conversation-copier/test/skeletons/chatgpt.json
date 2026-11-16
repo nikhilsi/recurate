@@ -1,0 +1,106 @@
+{
+  "_about": "ChatGPT conversation data, merged from 22 of Nikhil's chats on 2026-11-15 with probe/probe.js. Key paths and types only; '<also>' records a second type. Endpoint: GET /backend-api/conversation/{id} with a Bearer token from GET /api/auth/session. Only the parts Copier reads are expanded; the full list of metadata field names is kept.",
+  "conversation_id": "string",
+  "title": "string",
+  "create_time": "number",
+  "update_time": "number",
+  "current_node": "string",
+  "default_model_slug": "string",
+  "gizmo_id": "null|string",
+  "is_archived": "boolean",
+  "is_temporary_chat": "boolean",
+  "safe_urls": ["string"],
+  "blocked_urls": [],
+  "mapping": {
+    "<id>": {
+      "id": "string",
+      "parent": "null|string",
+      "children": ["string"],
+      "message": {
+        "<also>": "null",
+        "id": "string",
+        "author": { "role": "string", "name": "null|string", "metadata": "object" },
+        "create_time": "null|number",
+        "update_time": "null|number",
+        "status": "string",
+        "end_turn": "null|boolean",
+        "weight": "number",
+        "recipient": "string",
+        "channel": "null|string",
+        "content": {
+          "content_type": "string",
+          "parts": [
+            "string",
+            {
+              "_note": "image_asset_pointer part",
+              "content_type": "string",
+              "asset_pointer": "string (sediment:// or file-service://)",
+              "size_bytes": "number",
+              "width": "number",
+              "height": "number",
+              "fovea": "null|number",
+              "mime_type": "string",
+              "metadata": "null|object (dalle, generation, sanitized and others)"
+            }
+          ],
+          "language": "string",
+          "response_format_name": "null",
+          "text": "string",
+          "content": "string",
+          "result": "string",
+          "summary": "string",
+          "assets": "null",
+          "tether_id": "null",
+          "source_analysis_msg_id": "string",
+          "thoughts": [ { "summary": "string", "content": "string", "chunks": [], "finished": "boolean" } ]
+        },
+        "metadata": {
+          "_fieldNames": "aggregate_result, async_source, attachments, branching_from_conversation_id, branching_from_conversation_owner, branching_from_conversation_title, can_save, chatgpt_sdk, chime_version, citation_metadata, citations, classifier_response, code_blocks, command, connector_tool_payload, content_references, conversation_context_citation_metadata_status, conversation_followup_suggestions_eligible, cot_version, dalle, debug_sonic_thread_id, default_model_slug, dictation, dictation_auto_submitted, dictation_original_text, disable_turn_actions, finish_details, finished_duration_sec, ghostrider, gizmo_id, hide_inline_actions, image_gen_inline_upsell, image_gen_title, inline_cot_expandable_content, invoked_plugin, invoked_resource, is_complete, is_thinking_preamble_message, is_visually_hidden_from_conversation, jit_plugin_data, message_source, message_type, model_dil_v2, model_slug, model_switcher_deny, paragen_ui_treatment, paragen_variants_info, parent_id, permissions, personal_sources, reasoning_end_time, reasoning_group_id, reasoning_recap_type, and about 35 more",
+          "model_slug": "string",
+          "is_visually_hidden_from_conversation": "boolean",
+          "reasoning_recap_type": "string",
+          "attachments": [
+            { "id": "string", "name": "string", "size": "number", "mime_type": "string", "library_file_id": "string", "source": "string", "is_big_paste": "boolean", "width": "number", "height": "number" }
+          ],
+          "content_references": [
+            {
+              "_note": "merged over reference types: grouped_webpages, url, sources_footnote, entity, entity_metadata, image_group, alt_text, file, hidden, client_defined_widget, dil, followup_a",
+              "type": "string",
+              "matched_text": "string",
+              "start_idx": "number (code points)",
+              "end_idx": "number (code points)",
+              "alt": "null|string",
+              "prefix": "null|string",
+              "safe_urls": "array",
+              "refs": "array",
+              "prompt_text": "null|string",
+              "title": "string",
+              "name": "string",
+              "id": "string",
+              "source": "string",
+              "items": [
+                {
+                  "title": "string", "url": "string", "attribution": "string", "snippet": "null|string", "pub_date": "null|number", "thumbnail_url": "string",
+                  "refs": [ { "turn_index": "number", "ref_type": "string", "ref_index": "number" } ],
+                  "supporting_websites": [ { "title": "string", "url": "string", "attribution": "string", "snippet": "null|string", "pub_date": "null", "thumbnail_url": "string" }, "<also> null" ]
+                }
+              ],
+              "sources": [ { "title": "string", "url": "string", "attribution": "string" } ],
+              "fallback_items": "array",
+              "images": "array",
+              "item": "object",
+              "category": "string",
+              "data": "object",
+              "entity_data": "object",
+              "entity_type": "string",
+              "library_file_id": "string",
+              "page_range_start": "null|number",
+              "page_range_end": "null|number",
+              "status": "string"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

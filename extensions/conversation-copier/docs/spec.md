@@ -85,13 +85,17 @@ Copilot labels each message with `aria-posinset` (its position) and `aria-setsiz
 **Grok**
 - The first node's parent id is a UUID that is not in the node set.
 - After load, the page URL carries `rid`, which names the leaf of the branch on screen.
+- Replies carry `thinkingStartTime` and `thinkingEndTime`, `steps` with text and tags, a `model`, and files with a storage key, name, type and size (`fileAttachmentAssetMetadata`).
 
 **Gemini**
 - Request parameters (`SNlM0e`, `cfb2h`, `FdrFJe`) sit in an inline script. A content script can read them from the DOM.
-- Turns arrive newest first as positional arrays. `turn[0]` holds `c_` and `r_` ids, `turn[1]` holds `c_`, `r_` and `rc_`, and the answer candidate starts with an `rc_` id.
+- Turns arrive newest first as positional arrays. `turn[0]` holds the `c_` and `r_` ids, and the answer candidate starts with an `rc_` id.
+- `turn[1]` is the parent turn's `[c_, r_, rc_]`. In all 7 chats (21 turns) every turn pointed at the next-older turn (17 links, none broken). The first turn has no parent, or a blank one.
+- Two first turns had no answer text. What the page shows for them is checked in the Gemini build step.
 
 **Copilot**
 - One chat had a first message with no position label: setsize said 7, there were 8 messages.
+- Sources in answers are buttons labeled "Citation: <title>" with a 16px site icon. They carry a title but no URL.
 - Microsoft merged the consumer Copilot app into the Microsoft 365 Copilot app, rolling out from mid-August 2026. Personal and work accounts sign into one app with their chats kept separate, and personal users on the web are redirected to it ([Microsoft support](https://support.microsoft.com/en-us/microsoft-365-copilot/learning/changes-microsoft-copilot-app), [Office Watch](https://office-watch.com/2026/copilot-apps-merge/)).
 - Nikhil's personal account at m365.cloud.microsoft (badge "Personal") is that merged consumer Copilot. 0.4.0's separate consumer selectors belong to the retired app.
 - Microsoft is moving m365.cloud.microsoft to copilot.cloud.microsoft. On November 15 both addresses served the same app.
@@ -153,7 +157,7 @@ Two error classes:
 | Claude | The walk from the leaf reached a parent id beginning `00000000` that is not in the list, with no missing parent on the way. |
 | ChatGPT | The walk reached the node with a null parent and a null message. |
 | Grok | The walk ended at the one node whose parent is absent from the node set. |
-| Gemini | The last page came back with no cursor. Gemini gives no total. |
+| Gemini | The last page came back with no cursor, and the parent links run unbroken from the newest turn to a first turn with no parent. Gemini gives no total. |
 | Copilot | Positions 1 to setsize were all collected. Unlabeled messages are counted on top and noted. |
 
 The header and toast print the result:
@@ -290,7 +294,7 @@ Each adapter has three parts:
 - **Active branch:** from `rid`; without it, the newest leaf by `createTime`, with a note. Walk parents to the root.
 - **Content:** `load-responses` with `{ responseIds }`, in batches (the accepted batch size is checked at build).
 - **Mapping:** `message` as text; `webSearchResults`, `citedWebSearchResults` and `xposts` as sources; `generatedImageUrls`, `imageAttachments` and `fileAttachments` as files; `steps` and `toolResponses` as tool blocks; `model` and `createTime` per response.
-- **To confirm at build:** thinking fields and file routes. Until confirmed, they are listed in `notIncluded`.
+- **Thinking:** `steps` text and the thinking start and end times (seen in the sample). File downloads from the storage key are confirmed at build; until then files are listed in `notIncluded`.
 
 ### 4.4 Gemini
 
@@ -299,7 +303,8 @@ Each adapter has three parts:
 - **Request:** `rpcids=hNvQHb`, `f.req = [[["hNvQHb", JSON.stringify(["c_" + id, 100, cursor, 1, [0], [4, 12], null, 1]), null, "generic"]]]`.
 - **Paging:** the cursor is `data[1]`. Stop on no cursor, a repeated cursor, an empty page or a page cap. Dedupe by response id, join, then reverse once.
 - **Positions:** user text `turn[2][0][0]`, answer text = every string in `turn[3][0][0][1]` joined, time `turn[4][0]`.
-- **Guard:** `turn[0][0]` starts `c_`, `turn[0][1]` starts `r_`, `turn[1][2]` and the candidate's first element start `rc_`, and the time is a number in a sane range. Any failure is a structural error.
+- **Guard:** `turn[0][0]` starts `c_`, `turn[0][1]` starts `r_`, the candidate's first element starts `rc_`, and the time is a number in a sane range. Any failure is a structural error.
+- **Parent links:** each turn's `turn[1]` must match the next-older turn's ids; the oldest turn has no parent or a blank one. A break makes the export "may be partial".
 - **To confirm at build:** thinking (candidate slot 37), sources (slot 2), images and uploads. Listed in `notIncluded` until confirmed.
 - **Auth errors:** tell the user to reload the page.
 
@@ -317,7 +322,8 @@ Hosts: `m365.cloud.microsoft` (content script, while Microsoft still serves it).
 - **Keys:** `aria-posinset` for labeled messages. Unlabeled messages are keyed by role, normalized text and neighboring position.
 - **Set size:** the largest seen is kept; a change is noted.
 - **Content:** a parse step takes plain records `{ pos, setsize, role, html, text }`. User text via `innerText`. Answers from `[data-testid="markdown-reply"]` HTML, converted with Turndown (section 12).
-- **Not included:** sources, images and files, until probed. Listed in `notIncluded`.
+- **Sources:** each "Citation: <title>" button becomes a source with a title and no link. The 16px icons inside are dropped.
+- **Not included:** images and files, until probed. Listed in `notIncluded`.
 
 ---
 

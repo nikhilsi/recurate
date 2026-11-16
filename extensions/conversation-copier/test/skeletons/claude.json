@@ -1,0 +1,110 @@
+{
+  "_about": "Claude conversation data, merged from 6 of Nikhil's chats on 2026-11-15 with probe/probe.js. Key paths and types only. Endpoint: GET /api/organizations/{org}/chat_conversations/{id}?tree=True&rendering_mode=messages&render_all_tools=true. '<tool data>' marks payloads the probe does not open. 'settings' is not used by Copier and is summarized.",
+  "uuid": "string",
+  "name": "string",
+  "summary": "string",
+  "model": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "settings": "object (14 keys, includes enabled_mcp_tools map; not used by Copier)",
+  "is_starred": "boolean",
+  "is_archived": "boolean",
+  "is_temporary": "boolean",
+  "is_wiggle_enabled": "boolean",
+  "is_multiplayer": "boolean",
+  "has_assistant_outputs": "boolean",
+  "workspace_upgraded": "boolean",
+  "effective_thinking_mode": "string",
+  "project_uuid": "string",
+  "platform": "string",
+  "current_leaf_message_uuid": "string",
+  "chat_messages": [
+    {
+      "uuid": "string",
+      "parent_message_uuid": "string",
+      "index": "number",
+      "sender": "string",
+      "text": "string",
+      "created_at": "string",
+      "updated_at": "string",
+      "input_mode": "string",
+      "stop_reason": "string",
+      "truncated": "boolean",
+      "sync_sources": [],
+      "attachments": [
+        { "id": "string", "file_name": "string", "file_size": "number", "file_type": "string", "extracted_content": "string", "created_at": "string" }
+      ],
+      "files": [
+        {
+          "uuid": "string", "file_uuid": "string", "file_name": "string", "file_kind": "string", "media_type": "string",
+          "size_bytes": "number", "success": "boolean", "created_at": "string", "download_source": "string", "path": "string",
+          "preview_url": "string", "thumbnail_url": "string",
+          "preview_asset": { "file_variant": "string", "image_height": "number", "image_width": "number", "primary_color": "string", "url": "string" },
+          "thumbnail_asset": { "file_variant": "string", "image_height": "number", "image_width": "number", "primary_color": "string", "url": "string" },
+          "original_asset": { "file_variant": "string", "image_height": "number", "image_width": "number", "primary_color": "string", "url": "string" },
+          "document_asset": { "file_variant": "string", "page_count": "number", "token_count": "number", "url": "string" }
+        }
+      ],
+      "compaction_summary": [
+        { "type": "string", "text": "string", "citations": [], "flags": "null", "start_timestamp": "string", "stop_timestamp": "string" }
+      ],
+      "content": [
+        {
+          "_note": "one merged record over every block type: text, thinking, tool_use, tool_result, image",
+          "type": "string",
+          "start_timestamp": "string",
+          "stop_timestamp": "string",
+          "text": "string",
+          "citations": [
+            {
+              "uuid": "string", "title": "string", "url": "string", "start_index": "number", "end_index": "number", "origin_tool_name": "string",
+              "metadata": { "type": "string", "source": "string", "site_domain": "string", "site_name": "string", "favicon_url": "string", "preview_title": "string", "uuid": "string" },
+              "sources": [ { "title": "string", "url": "string", "source": "string", "icon_url": "string", "uuid": "string" } ]
+            }
+          ],
+          "citations_grouping_mode": "string",
+          "collapsible": "boolean",
+          "thinking": "string",
+          "thinking_hidden": "boolean",
+          "summaries": [ { "summary": "string" } ],
+          "cut_off": "boolean",
+          "hidden": "boolean",
+          "truncated": "boolean",
+          "id": "string",
+          "name": "string",
+          "input": "<tool data>",
+          "message": "string",
+          "integration_name": "string",
+          "integration_icon_url": "string",
+          "mcp_server_url": "string",
+          "tool_identifier": "string",
+          "tool_origin": "string",
+          "icon_name": "string",
+          "is_mcp_app": "boolean",
+          "hidden_in_chat": "boolean",
+          "approval_key": "string",
+          "approval_key_legacy": "string",
+          "approval_options": "array",
+          "context": { "tools": "array" },
+          "tool_use_id": "string",
+          "is_error": "boolean",
+          "content": [
+            {
+              "_note": "tool_result parts merged: text, image, knowledge, local_resource, image_gallery",
+              "type": "string", "text": "string", "title": "string", "url": "string", "uuid": "string",
+              "file_uuid": "string", "preview_url": "string", "thumbnail_url": "string",
+              "file_path": "string", "name": "string", "mime_type": "string", "artifact_publishable": "boolean",
+              "is_missing": "boolean",
+              "metadata": { "type": "string", "site_domain": "string", "site_name": "string", "favicon_url": "string" }
+            }
+          ],
+          "structured_content": "<tool data>",
+          "display_content": "<tool data>",
+          "meta": "<tool data>",
+          "file_deliveries": [ { "file_uuid": "string", "path": "string" } ],
+          "file_uuid": "string"
+        }
+      ]
+    }
+  ]
+}

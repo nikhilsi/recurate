@@ -1,0 +1,73 @@
+{
+  "_about": "Grok conversation data from Nikhil's one Grok chat (6 responses) on 2026-11-15 with probe/probe.js. Key paths and types only. Endpoints: GET /rest/app-chat/conversations/{id}/response-node?includeThreads=true, then POST /rest/app-chat/conversations/{id}/load-responses with { responseIds }. List: GET /rest/app-chat/conversations?pageSize=60.",
+  "responseNode": {
+    "responseNodes": [ { "responseId": "string", "parentResponseId": "string", "sender": "string" } ],
+    "inflightResponses": []
+  },
+  "loadResponses": {
+    "responses": [
+      {
+        "responseId": "string",
+        "parentResponseId": "string",
+        "sender": "string",
+        "message": "string",
+        "createTime": "string",
+        "model": "string",
+        "thinkingStartTime": "string",
+        "thinkingEndTime": "string",
+        "manual": "boolean",
+        "partial": "boolean",
+        "shared": "boolean",
+        "isControl": "boolean",
+        "query": "string",
+        "queryType": "string",
+        "steps": [
+          {
+            "text": ["string"],
+            "tags": ["string"],
+            "webSearchResults": "array (empty in sample)",
+            "xposts": "array (empty in sample)",
+            "xpostIds": "array (empty in sample)",
+            "toolUsageCards": "array (empty in sample)",
+            "toolUsageResults": "array (empty in sample)",
+            "ragResults": "array (empty in sample)",
+            "connectorSearchResults": "array (empty in sample)",
+            "collectionSearchResults": "array (empty in sample)"
+          }
+        ],
+        "fileAttachments": ["string"],
+        "fileUris": ["string"],
+        "fileAttachmentsMetadata": [
+          { "fileMetadataId": "string", "fileName": "string", "fileMimeType": "string", "fileSource": "string", "fileUri": "string", "parsedFileUri": "string", "createTime": "string" }
+        ],
+        "fileAttachmentAssetMetadata": [
+          {
+            "assetId": "string", "key": "string", "name": "string", "mimeType": "string", "sizeBytes": "number", "width": "number", "height": "number",
+            "previewImageKey": "string", "thumbhash": "string", "auxKeys": { "original-image": "string", "thumbhash": "string" },
+            "fileSource": "string", "inlineStatus": "string", "summary": "string", "isModelGenerated": "boolean", "isRootAssetCreatedByModel": "boolean",
+            "isDeleted": "boolean", "isLatest": "boolean", "rRated": "boolean", "sharedWithTeam": "boolean", "sharedWithUserIds": [],
+            "ownerUserId": "string", "currentConversationId": "string", "sourceConversationId": "string", "rootAssetSourceConversationId": "string",
+            "createTime": "string", "updateTime": "string", "lastUseTime": "string"
+          }
+        ],
+        "cardAttachmentsJson": ["string"],
+        "metadata": {
+          "request_metadata": { "effort": "string", "model": "string", "source": "string" },
+          "ui_layout": { "effort": "null", "reasoning_ui_layout": "string", "rollout_ids": [], "steer_model_id": "null", "will_think_long": "boolean" }
+        },
+        "requestMetadata": { "effort": "string", "model": "string" },
+        "uiLayout": { "reasoningUiLayout": "string", "rolloutIds": [], "willThinkLong": "boolean" },
+        "_emptyInSample": "webSearchResults, citedWebSearchResults, xposts, citedXposts, xpostIds, generatedImageUrls, imageAttachments, imageEditUris, toolResponses, webpageUrls, ragResults, citedRagResults, connectorSearchResults, citedConnectorSearchResults, collectionSearchResults, citedCollectionSearchResults, searchProductResults, fileIds, mediaTypes, inputChunks, outputChunks, streamErrors"
+      }
+    ]
+  },
+  "conversationList": {
+    "conversations": [
+      {
+        "conversationId": "string", "title": "string", "createTime": "string", "modifyTime": "string", "starred": "boolean", "temporary": "boolean",
+        "systemPromptName": "string", "kind": "string", "mediaTypes": [], "workspaces": [], "taskResult": {}, "latestAssetMetadata": "null", "hasUnreadCheckin": "boolean"
+      }
+    ],
+    "textSearchMatches": []
+  }
+}
