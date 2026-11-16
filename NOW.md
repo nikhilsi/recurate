@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: April 3, 2026
+**Last Updated**: November 15, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -12,34 +12,25 @@
 - [x] Extension built and tested on 8 platforms
 - [x] Published on Chrome Web Store (Mar 15)
 
-### Recurate Copier
-- [x] Extension built, tested on Claude + Google AI Mode
-- [x] **#4** — HTML sanitization: strips class/style/dir, Google js*/data-* attributes, empty wrappers, buttons, icons, HTML comments
-- [x] Fix ChatGPT selectors (article→section, use data-message-author-role)
-- [x] Add Grok action bar injection and conversation title extraction
-- [x] Tested on 6 platforms: Claude, ChatGPT, Grok, Gemini, Google AI Mode, Copilot consumer
-- [x] Test Copilot enterprise
-- [x] Store listing, screenshots
-- [x] Submitted to Chrome Web Store (Mar 20)
-- [x] **Full Claude Chat Export** — ZIP with conversation + artifacts + uploads (v0.2.0)
-- [x] **Three-button UX** — Copy (markdown), Download (quick HTML), Export (ZIP). Export only on Claude.ai (v0.2.0)
-- [x] **Cancel button** in export modal (v0.2.0)
-- [x] **Timestamps** in filenames (user's local timezone) (v0.2.0)
-- [x] Version bumped to 0.2.0
-- [x] v0.1.0 published on Chrome Web Store (Mar 25)
-- [x] **Thinking block capture** -- fix broken selector, extract summaries + full thinking content via expand/extract/collapse (v0.2.1-v0.2.3)
-- [x] **Architecture split** -- `extractor.js` (reusable, `window.RecurateExtractor`) separated from `content.js` (v0.3.0)
-- [x] **Full datetime+TZ** in export headers (v0.2.3)
-- [x] Version bumped to 0.3.0
-- [x] Store listing updated, screenshot captured (1280x800), ZIP built
-- [x] Upload v0.3.1 to Chrome Web Store (updated listing text, thinking block screenshot, ZIP uploaded Apr 3)
-- [x] v0.3.1 fix: thinking block content no longer replaces actual response (found in Ops workstream)
-- [x] **v0.4.0: Claude extraction via conversation API** — fixes virtualization cap (was ~9 messages, now full thread). Branch-aware walk from current_leaf.
-- [x] **v0.4.0: Claude action bar fix** — role="group" changed to role="toolbar"; buttons clone a live toolbar button. Restores Export/ZIP button.
-- [x] **v0.4.0: Claude exports are Markdown** — Download produces `.md`, ZIP produces `conversation.md`. Fed to Claude Code.
-- [x] **v0.4.0: title selector fix** — chat-title-button changed to chat-title-split, document.title fallback.
-- [x] Build v0.4.0 ZIP and upload to Chrome Web Store (Jul 11)
-- [~] **Google AI Mode: SHELVED.** Chrome dev routes AI Mode to `chrome://contextual-tasks/` (WebUI, no content-script access, error-only DOM). Not reachable by any extension. See CHANGELOG 1.7.0.
+### Recurate Copier 1.0 (active, task #530)
+
+Copier 0.4.0 (live in the store since Jul 11) is broken or partial on every platform. A live check on Nov 15 found:
+
+- ChatGPT exports 0 messages.
+- Grok drops your messages.
+- Gemini mislabels roles and stops at the latest 10 turns.
+- Copilot gets only the part of the chat on screen. Consumer Copilot moved to copilot.com.
+- Claude exports carry tool placeholders and drop tools, sources, images and files.
+
+The fix reads each site's own conversation data instead of the page. Copilot is collected by scrolling and checked against the total the page reports.
+
+- [x] Live check on all sites (Nov 15)
+- [x] Spec draft: `extensions/conversation-copier/docs/spec.md`
+- [ ] Independent review, findings answered in `extensions/conversation-copier/docs/reviews/`
+- [ ] Nikhil's rulings on the short spec
+- [ ] Build steps (become tasks after the rulings)
+
+Google AI Mode stays shelved (see CHANGELOG 1.7.0). The spec proposes dropping it.
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
