@@ -65,15 +65,16 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer levels
 
 **Status:** Published — [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg)
 
-### Recurate Copier — Conversation Export
+### Recurate Copier: Conversation Export
 
-Three buttons on Claude.ai: Copy (markdown to clipboard), Download (quick HTML), Export (full ZIP with artifacts + uploads). Two buttons on other platforms.
+Saves a whole AI conversation as Markdown on **Claude**, **ChatGPT**, **Grok**, **Gemini** and **Microsoft Copilot** (work and personal accounts). Copy puts it on the clipboard. Download saves a `.md` file. Export saves a ZIP with the chat's uploads and generated files.
 
-- **Export on Claude.ai:** ZIP with conversation HTML, artifacts folder, uploads folder, inline artifact links, and manifest. Progress modal with cancel button.
-- Timestamped filenames in your local timezone
-- Works on **claude.ai**, **ChatGPT**, **Grok**, **Gemini**, **Microsoft Copilot** (consumer + enterprise), and **Google AI Mode**
+- Reads each site's own conversation data, so long chats come out whole. Copilot is collected by scrolling and checked against the total the page shows.
+- Every export starts with a completeness header: messages, files downloaded and failed (with the reason), and anything the site does not provide.
+- Thinking, tool steps, sources, images and files, as far as each site provides them. The branch on screen is the one exported.
+- Buttons in Claude's message toolbar, a floating cluster on the other sites, and a toolbar popup (Alt+Shift+C).
 
-**Status:** Published — [Install from Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) | v0.2.0 with ZIP export: [Download from GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest)
+**Status:** 1.0.0 is built and tested in this repo (spec and test records in `extensions/conversation-copier/docs/`). The Chrome Web Store still has 0.4.0 until the 1.0 upload: [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 
@@ -95,7 +96,7 @@ Four Chrome extensions that cover the full AI conversation lifecycle:
 |-----------|-------------|-----------|
 | **Composer** | Shape the input | Claude, ChatGPT, Grok, Gemini, Copilot, Google Search |
 | **Annotator** | Curate the output | Claude, ChatGPT, Copilot |
-| **Copier** | Capture the conversation | Claude, ChatGPT, Grok, Gemini, Copilot, Google AI Mode |
+| **Copier** | Capture the conversation | Claude, ChatGPT, Grok, Gemini, Copilot |
 | **Connect** | Connect the conversations | Claude, Copilot (Chrome + Edge) |
 
 Plus a **VS Code extension** for annotating Claude Code responses in the terminal workflow.
@@ -138,7 +139,7 @@ recurate/
 │   ├── chrome/              # Recurate Annotator (Claude, ChatGPT, Copilot)
 │   ├── vscode/              # Recurate Annotator (Claude Code)
 │   ├── markdown-toolbar/    # Recurate Composer (8 platforms)
-│   ├── conversation-copier/ # Recurate Copier (7 platforms)
+│   ├── conversation-copier/ # Recurate Copier (5 sites)
 │   └── connect/             # Recurate Connect (Claude + Copilot, 2-tab)
 ├── docs/                # MkDocs site (recurate.ai)
 └── scripts/             # Icon and social card generation

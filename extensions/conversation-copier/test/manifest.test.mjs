@@ -23,3 +23,12 @@ test('no host is added beyond 0.4.0, and no permission beyond activeTab and scri
   assert.equal(manifest.host_permissions, undefined);
   assert.ok(manifest.description.length <= 132);
 });
+
+test('the release workflow ships every file the manifest and the popup load', () => {
+  const wf = readFileSync(new URL('../../.github/workflows/build-extensions.yml', root), 'utf8');
+  const words = wf.split('\n').find(l => l.includes('recurate-copier.zip')).trim().split(/\s+/);
+  const shipped = words.slice(words.indexOf('../../recurate-copier.zip') + 1);
+  const needed = ['manifest.json', ...manifest.content_scripts[0].js, manifest.action.default_popup, 'popup/popup.js', ...Object.values(manifest.icons)];
+  needed.forEach(f => assert.ok(shipped.some(a => f === a || f.startsWith(`${a}/`)), f));
+  shipped.forEach(a => assert.ok(existsSync(new URL(a, root)), a));
+});

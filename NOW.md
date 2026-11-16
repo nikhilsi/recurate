@@ -1,7 +1,7 @@
 # NOW - What's Next
 
 ---
-**Last Updated**: November 15, 2026
+**Last Updated**: November 16, 2026
 **Purpose**: What to work on next
 **Context**: See CURRENT_STATE.md for what's built, CHANGELOG.md for history
 ---
@@ -43,10 +43,17 @@ Build steps (one task each, #531 to #541):
 10. [x] Breaker pass (#540): 17 findings, then two independent reviews of the fixes (all findings fixed or answered), live rerun on all five sites; records in `extensions/conversation-copier/docs/reviews/`
 11. [ ] Release prep; store upload on Nikhil's go (#541)
 
-Start of step 11 (next session):
-- Nikhil reloads the unpacked build once; rerun the two fixes made after the evening live run (Claude uploads by their own path on chat 34d465b5, expecting all files and no duplicates; the Gemini image count on chat f20bf9329f50, expecting 1 image).
-- Then the release list in #541. README and CLAUDE.md still describe 0.4.0 and are updated with the store listing.
-- The test exports from Nov 15 in ~/Downloads (recurate-*.zip and .md) can go when Nikhil says so.
+Step 11 (Nov 16):
+- [x] Reruns after Nikhil's reload: Claude uploads 13 of 13 (was 13 of 15), Gemini "1 image" (was 3)
+- [x] Claude uploads exported twice under the sandbox's renamed spelling (about 30 uploads in 10 of 80 chats): fixed with tests, reviewed twice; live rerun on 78435e51 and 34d465b5 after the next reload
+- [x] STORE_LISTING.md rewritten, with the 1.0 release notes and the untested list
+- [x] CHANGELOG, README, CLAUDE.md, CURRENT_STATE updated; release workflow ships the 1.0 files
+- [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered); Nikhil looks before upload
+- [x] Release ZIP `recurate-copier-1.0.0.zip` (git-ignored)
+- [ ] Extension Update Testing Tool: on a Mac it needs a Chrome policy profile installed in System Settings; Nikhil decides. Manifest comparison: 1.0 adds activeTab, scripting and commands (no install warnings) and its six https hosts are a subset of 0.4.0's eight
+- [ ] Store upload, Privacy tab update and screenshots, on Nikhil's go
+- [ ] With the upload: recurate.ai Copier pages (`docs/index.md`, `docs/product_brief.md`, `docs/design.md`; a push to main publishes the site), tag and GitHub release
+- [ ] The Nov 15 and 16 test exports in ~/Downloads go when Nikhil says so
 
 Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).
 

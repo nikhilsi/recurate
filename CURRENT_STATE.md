@@ -1,7 +1,7 @@
 # Current State
 
 ---
-**Last Updated**: November 15, 2026
+**Last Updated**: November 16, 2026
 **Purpose**: Project context for new Claude Code sessions
 **What's Next**: See NOW.md
 ---
@@ -82,7 +82,7 @@
 - **Permissions:** activeTab and scripting. No background worker, no backend.
 - **Tests:** node tests in `test/` (`node --test test/` from the Copier folder). `probe/` holds the live probe that produced the value-free skeletons the fixtures follow.
 - **Docs:** spec `docs/spec.md` (v2.1); `docs/reviews/` holds the spec review, the live test record and the breaker pass.
-- **Status:** build steps 1 to 10 done (tasks #531 to #540). Step 11, release prep, is next (#541); the store upload waits on Nikhil's go.
+- **Status:** build steps 1 to 10 done (tasks #531 to #540). Step 11, release prep (#541), is in progress: store listing, release notes, screenshots, docs and the release workflow are done. Open: the Extension Update Testing Tool (needs a Chrome policy profile on this Mac), Nikhil's look at the screenshots, and the store upload on his go. The recurate.ai pages for Copier still describe 0.4.0 on purpose: a push to main publishes the site, so they change with the upload.
 
 ### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai + Copilot)
 - WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)

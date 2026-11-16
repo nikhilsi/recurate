@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.8.0] - 2026-11-16
+
+Copier 1.0.0, a rebuild. Built and tested in the repo; the Chrome Web Store upload waits for Nikhil's go. Full release notes, including the untested list, are in `extensions/conversation-copier/STORE_LISTING.md`. Spec and test records are in `extensions/conversation-copier/docs/`.
+
+### Changed
+- **Copier reads each site's own conversation data** on Claude, ChatGPT, Grok and Gemini instead of copying the page. Copier 0.4.0 was broken or partial on every site (live check, Nov 15): ChatGPT exported 0 messages, Grok dropped the user's messages, Gemini stopped at the latest 10 turns, Copilot got only the visible part, and Claude exports dropped tools, sources and files.
+- **Copilot** (work and personal accounts on m365.cloud.microsoft) is collected by scrolling and checked against the message total the page shows.
+- **Markdown is the one format.** Copy, Download (`.md`) and Export (ZIP with `conversation.md`, `uploads/`, `artifacts/`) on all five sites.
+- **Permissions:** adds activeTab and scripting (no install warning), removes www.google.com and copilot.microsoft.com. No host added.
+
+### Added
+- **Completeness header** on every export: messages, files downloaded and failed with the reason, notes, and what is not included.
+- **Thinking, tool steps, sources, images and files**, as far as each site provides them; the branch on screen is the one exported.
+- **Toolbar popup** with the same three actions (Alt+Shift+C). It works on tabs opened before an update and on copilot.cloud.microsoft.
+- **Progress window with Cancel**; one export at a time per page.
+- **Tests:** 133 node tests (`node --test test/` in the Copier folder), plus a probe script for live checks.
+
+### Removed
+- Copier's HTML download, Google AI Mode, and the in-page keyboard shortcuts (Control+Shift+D was ChatGPT's dictation key).
+
+### Fixed (found on Nov 16, before release)
+- **Claude uploads exported twice.** Claude's sandbox renames uploads (spaces, brackets and extra dots become underscores), so the same file appeared under two names. Across 80 chats, about 30 uploads in 10 chats were affected; one 135 MB export carried 7 duplicates (37 MB). Pairing now uses the sandbox spelling and the sizes Claude's file list returns.
+- **Release workflow:** the Copier package step still listed the 0.4.0 files. It now ships the 1.0 folders, and a test fails if it misses a file the manifest or popup loads.
+
+---
+
 ## [1.7.0] - 2026-07-11
 
 ### Fixed
