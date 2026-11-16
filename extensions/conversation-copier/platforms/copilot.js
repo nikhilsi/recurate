@@ -88,14 +88,19 @@
   }
 
   // Each message names a visually hidden heading ("You said:") through
-  // aria-labelledby. Its text is stripped from the front, in any language.
+  // aria-labelledby, alongside the message text itself. A label is stripped
+  // from the front only when text remains after it, in any language.
+  function stripLabels(text, labels) {
+    let out = text;
+    labels.forEach(l => { if (l && out.startsWith(l) && out.length > l.length) out = out.slice(l.length).trim(); });
+    return out;
+  }
+
   function withoutLabel(el, text) {
     const labels = (el.getAttribute('aria-labelledby') || '').split(/\s+/)
       .map(id => id && document.getElementById(id)).filter(Boolean)
-      .map(n => (n.textContent || '').trim()).filter(Boolean);
-    let out = text;
-    labels.forEach(l => { if (out.startsWith(l)) out = out.slice(l.length).trim(); });
-    return out;
+      .map(n => (n.textContent || '').trim());
+    return stripLabels(text, labels);
   }
 
   function readMessage(el, convert) {
@@ -209,7 +214,7 @@
 
   globalThis.Recurate = Object.assign(globalThis.Recurate || {}, {
     platforms: Object.assign((globalThis.Recurate && globalThis.Recurate.platforms) || {}, {
-      copilot: { id: PLATFORM, matches, conversationRef, parse, extract, fetchFile, collect },
+      copilot: { id: PLATFORM, matches, conversationRef, parse, extract, fetchFile, collect, stripLabels },
     }),
   });
 })();

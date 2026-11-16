@@ -69,3 +69,10 @@ test('markdown converted at collection time is used as is', () => {
   const collected = { records: [rec(1, 'user', 'q'), rec(2, 'assistant', 'raw', { markdown: '## Plan\n\n- one' }), rec(3, 'user', 'q2'), rec(4, 'assistant', 'a2')], setsize: 4, sizesSeen: [4] };
   assert.match(md(C.parse(collected, { exportedAt: at })), /## 2\. Copilot\n\n## Plan\n\n- one/);
 });
+
+test('stripLabels removes the hidden heading but never the message itself', () => {
+  assert.equal(C.stripLabels('You said: Plan the party', ['You said:', 'Plan the party']), 'Plan the party');
+  assert.equal(C.stripLabels('Vous avez dit : Bonjour', ['Vous avez dit :']), 'Bonjour');
+  assert.equal(C.stripLabels('Only text', ['Only text']), 'Only text');
+  assert.equal(C.stripLabels('No label here', []), 'No label here');
+});

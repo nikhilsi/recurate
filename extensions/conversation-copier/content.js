@@ -154,7 +154,12 @@
       const f = conv.files[i];
       ui.update(`Downloading files: ${i + 1} of ${conv.files.length}`, (i / conv.files.length) * 100);
       try {
-        const blob = await a.fetchFile(f, ctx);
+        // One retry for a network blip; a refusal from the site (HTTP 4xx) is final.
+        const blob = await a.fetchFile(f, ctx).catch(async e => {
+          if (e && e.status >= 400 && e.status < 500) throw e;
+          await new Promise(r => setTimeout(r, 1000));
+          return a.fetchFile(f, ctx);
+        });
         const head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
         const sub = f.from === 'user' ? 'uploads' : 'artifacts';
         const name = R.safeName(R.ensureExtension(f.name, blob.type || f.mime, head), used[sub]);
