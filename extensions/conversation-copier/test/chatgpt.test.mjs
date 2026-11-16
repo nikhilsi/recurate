@@ -107,3 +107,13 @@ test('source markers inside raw tool output become readable, never invisible', (
   assert.match(out, /```text\nsee \[cite turn0search3\] for times\n```/);
   assert.ok(!/[\uE200-\uE2FF]/.test(out));
 });
+
+test('screen text: the version shown on screen is exported, with a note', () => {
+  const conv = G.parse(fixture(), { exportedAt: at, screen: R.letters('ChatGPT said: Other branch answer.') });
+  assert.match(md(conv), /Other branch answer/);
+  assert.ok(!md(conv).includes('You are welcome'));
+  assert.match(conv.completeness.notes.join(' '), /branch shown on screen/);
+  const same = G.parse(fixture(), { exportedAt: at, screen: R.letters('You are welcome.') });
+  assert.match(md(same), /You are welcome/);
+  assert.ok(!same.completeness.notes.join(' ').includes('branch shown on screen'));
+});

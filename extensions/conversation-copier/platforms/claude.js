@@ -114,7 +114,24 @@
 
   // data: the chat_conversations response. opts.wiggleFiles: paths from the
   // older file list, if any. Returns a finished Conversation.
-  function parse(data, { url = null, wiggleFiles = [], exportedAt } = {}) {
+  const textOf = m => (Array.isArray(m && m.content) ? m.content : []).filter(b => b.type === 'text').map(b => b.text || '').join(' ');
+
+  // Claude's data can point at one reply while the page shows a sibling
+  // picked with the version arrows. When a screen text is given and the
+  // data's leaf does not match it, the leaf whose text matches is used.
+  function leafOnScreen(msgs, leaf, screen) {
+    if (!screen) return null;
+    const byId = new Map(msgs.map(m => [m.uuid, m]));
+    const current = textOf(byId.get(leaf));
+    // Only a leaf with enough text to compare can be shown not to match.
+    if (R.letters(current).length < 12 || R.matchesScreen(screen, current)) return null;
+    const parents = new Set(msgs.map(m => m.parent_message_uuid));
+    const leaves = msgs.filter(m => !parents.has(m.uuid) && m.uuid !== leaf);
+    const hit = leaves.find(m => R.matchesScreen(screen, textOf(m)));
+    return hit ? hit.uuid : null;
+  }
+
+  function parse(data, { url = null, wiggleFiles = [], screen = null, exportedAt } = {}) {
     if (!data || !Array.isArray(data.chat_messages)) {
       throw new R.StructuralError(PLATFORM, "Claude's data has no message list");
     }
@@ -132,6 +149,11 @@
       const newest = msgs.slice().sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
       leaf = newest && newest.uuid;
       if (leaf) notes.push("Claude's data named no current message; the newest message's branch was exported.");
+    }
+    const onScreen = leafOnScreen(msgs, leaf, screen);
+    if (onScreen) {
+      leaf = onScreen;
+      notes.push("Exported the branch shown on screen; Claude's data pointed at another version.");
     }
     const chain = [];
     const seen = new Set();
@@ -345,12 +367,12 @@
     }
   }
 
-  async function extract(location) {
+  async function extract(location, { screen = null } = {}) {
     const ref = conversationRef(location);
     if (!ref) throw new R.FetchError(PLATFORM, 0, 'This page is not a Claude conversation.');
     const { org, data } = await fetchConversation(ref.id);
     const wiggleFiles = await fetchWiggleFiles(org, ref.id);
-    const conversation = parse(data, { url: `https://claude.ai/chat/${ref.id}`, wiggleFiles });
+    const conversation = parse(data, { url: `https://claude.ai/chat/${ref.id}`, wiggleFiles, screen });
     return { conversation, ctx: { org, id: ref.id } };
   }
 

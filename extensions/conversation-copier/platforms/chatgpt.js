@@ -121,7 +121,19 @@
     return ((content && content.parts) || []).filter(p => typeof p === 'string').join('');
   }
 
-  function parse(data, { url = null, exportedAt } = {}) {
+  const nodeText = n => ((n && n.message && n.message.content && n.message.content.parts) || []).filter(p => typeof p === 'string').join(' ');
+
+  // The page can show a sibling picked with the version arrows while
+  // current_node points elsewhere; the leaf matching the screen is used.
+  function leafOnScreen(map, leaf, screen) {
+    const current = nodeText(map[leaf]);
+    // Only a leaf with enough text to compare can be shown not to match.
+    if (!screen || R.letters(current).length < 12 || R.matchesScreen(screen, current)) return null;
+    const hit = Object.values(map).find(n => n.id !== leaf && !(n.children || []).length && n.message && R.matchesScreen(screen, nodeText(n)));
+    return hit ? hit.id : null;
+  }
+
+  function parse(data, { url = null, screen = null, exportedAt } = {}) {
     const map = data && data.mapping;
     if (!map || typeof map !== 'object' || Array.isArray(map)) {
       throw new R.StructuralError(PLATFORM, "ChatGPT's data has no message tree");
@@ -134,6 +146,11 @@
       const newest = Object.values(map).filter(n => n.message).sort((a, b) => (b.message.create_time || 0) - (a.message.create_time || 0))[0];
       leaf = newest && newest.id;
       if (leaf) notes.push("ChatGPT's data named no current message; the newest message's branch was exported.");
+    }
+    const onScreen = leafOnScreen(map, leaf, screen);
+    if (onScreen) {
+      leaf = onScreen;
+      notes.push("Exported the branch shown on screen; ChatGPT's data pointed at another version.");
     }
     const chain = [];
     const seen = new Set();
@@ -310,13 +327,13 @@
     return { Authorization: `Bearer ${token}` };
   }
 
-  async function extract(location) {
+  async function extract(location, { screen = null } = {}) {
     const ref = conversationRef(location);
     if (!ref) throw new R.FetchError(PLATFORM, 0, 'This page is not a ChatGPT conversation.');
     token = null;
     const r = await fetch(`/backend-api/conversation/${ref.id}`, { headers: await authHeaders(), credentials: 'include' });
     if (!r.ok) throw new R.FetchError(PLATFORM, r.status, `Could not read ChatGPT's conversation data: HTTP ${r.status}.`);
-    const conversation = parse(await r.json(), { url: `https://chatgpt.com/c/${ref.id}` });
+    const conversation = parse(await r.json(), { url: `https://chatgpt.com/c/${ref.id}`, screen });
     return { conversation, ctx: { id: ref.id } };
   }
 

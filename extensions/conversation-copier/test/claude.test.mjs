@@ -163,3 +163,20 @@ test('a message file also in the older list falls back to it when its own addres
   assert.equal(blob.size, 1234);
   assert.ok(calls[1].includes('wiggle/download-file?path=%2Fmnt%2Fuser-data%2Fuploads%2Fmap.png'));
 });
+
+test('screen text: the version shown on screen is exported, with a note', () => {
+  const conv = C.parse(fixture(), { exportedAt: at, screen: R.letters('Claude said: Abandoned branch answer.') });
+  assert.match(md(conv), /Abandoned branch answer/);
+  assert.ok(!md(conv).includes('change in Basel'));
+  assert.match(conv.completeness.notes.join(' '), /branch shown on screen/);
+  assert.equal(conv.completeness.messages.complete, true);
+});
+
+test('screen text that matches the data, or matches nothing, changes nothing', () => {
+  const same = C.parse(fixture(), { exportedAt: at, screen: R.letters('Hourly trains, 7 hours, change in Basel.') });
+  const none = C.parse(fixture(), { exportedAt: at, screen: R.letters('Something else entirely on the page') });
+  [same, none].forEach(conv => {
+    assert.match(md(conv), /change in Basel/);
+    assert.ok(!conv.completeness.notes.join(' ').includes('branch shown on screen'));
+  });
+});

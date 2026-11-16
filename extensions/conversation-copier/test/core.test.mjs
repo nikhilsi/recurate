@@ -241,3 +241,14 @@ test('exportBaseName: platform, slug and local date-time', () => {
   assert.equal(R.exportBaseName('claude', 'Trip planning: Lausanne!', new Date('2026-11-15T22:02:00Z'), 'UTC'), 'recurate-claude-trip-planning-lausanne-2026-11-15-2202');
   assert.equal(R.exportBaseName('gemini', null, new Date('2026-01-02T03:04:00Z'), 'UTC'), 'recurate-gemini-conversation-2026-01-02-0304');
 });
+
+test('letters and matchesScreen compare page text with export text', () => {
+  assert.equal(R.letters('Hourly trains, 7 hours [1]. citeturn0'), 'hourlytrains7hours');
+  assert.equal(R.matchesScreen('saidhourlytrains7hourschangeinbasel', 'Hourly trains, 7 hours, change in Basel.'), true);
+  assert.equal(R.matchesScreen('abandonedbranchanswer', 'Hourly trains, 7 hours, change in Basel.'), false);
+  assert.equal(R.matchesScreen('ok', 'Ok.'), false);
+  assert.equal(R.matchesScreen(null, 'Hourly trains, 7 hours, change in Basel.'), false);
+  // The page shows a link's text only.
+  assert.equal(R.letters('See the [SBB timetable](<https://www.sbb.ch/en/timetable>) or https://example.com/x today'), 'seethesbbtimetableortoday');
+  assert.equal(R.matchesScreen(R.letters('Book on the SBB app before you travel.'), 'Book on the [SBB app](https://www.sbb.ch/app) before you travel.'), true);
+});

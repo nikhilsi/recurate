@@ -34,24 +34,28 @@
 
   const LAST_ON_SCREEN = {
     claude: '[data-testid="user-message"], .standard-markdown',
-    chatgpt: '[data-message-author-role]',
+    // ChatGPT moved from per-message role attributes to one element per
+    // turn (November 2026); either form is read.
+    chatgpt: '[data-message-author-role], [data-turn-key]',
     grok: '.message-bubble',
     gemini: 'user-query, model-response',
   };
-  const letters = s => String(s || '').replace(/\[\d+\]/g, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  // The last message on screen, reduced to letters and digits.
+  function screenText(platformId) {
+    const sel = LAST_ON_SCREEN[platformId];
+    if (!sel) return null;
+    const els = [...document.querySelectorAll(sel)].filter(e => !e.closest('[class*="transition-[grid-template-rows]"]'));
+    return els.length ? R.letters(els[els.length - 1].innerText) : null;
+  }
 
   // Compares the end of the last exported message with the last message
   // on screen. A mismatch means the export may hold a different branch.
-  function screenCheck(conv) {
-    const sel = LAST_ON_SCREEN[conv.platform];
-    if (!sel) return;
-    const els = [...document.querySelectorAll(sel)].filter(e => !e.closest('[class*="transition-[grid-template-rows]"]'));
+  function screenCheck(conv, screen) {
     const last = conv.messages[conv.messages.length - 1];
-    if (!els.length || !last) return;
-    const screen = letters(els[els.length - 1].innerText);
-    const exported = letters(last.blocks.filter(b => b.type === 'text').map(b => b.text).join(' '));
-    if (!screen || exported.length < 12) return;
-    if (!screen.includes(exported.slice(-40))) {
+    if (!screen || !last) return;
+    const text = last.blocks.filter(b => b.type === 'text').map(b => b.text).join(' ');
+    if (R.letters(text).length < 12) return;
+    if (!R.matchesScreen(screen, text)) {
       conv.completeness.notes.push('The exported branch may differ from the one on screen (the last message does not match).');
     }
   }
@@ -136,11 +140,13 @@
     const a = adapter();
     if (!a || !a.conversationRef(location)) throw new Error('Open a conversation first.');
     ui.update('Reading the conversation…');
+    const screen = screenText(a.id);
     const { conversation: conv, ctx } = await a.extract(location, {
+      screen,
       onProgress: p => ui.update(p.paused ? 'Paused while this tab is in the background' : `Collected ${p.got} of ${p.total || '?'} messages`, p.total ? (p.got / p.total) * 100 : undefined),
       isCancelled: () => ui.cancelled,
     });
-    screenCheck(conv);
+    screenCheck(conv, screen);
     const base = R.exportBaseName(conv.platform, conv.title);
     if (mode !== 'export') return { conv, base, markdown: R.toMarkdown(conv, { mode }) };
 

@@ -141,7 +141,28 @@
     return c;
   }
 
+  // Letters and digits only, lowercased, with citation markers, link
+  // targets and bare URLs removed: a form in which the page's text and an
+  // export's text can be compared (the page shows a link's text only).
+  function letters(text) {
+    return String(text || '')
+      .replace(/\uE200[^\uE201]*\uE201/g, '')
+      .replace(/\[\d+\]/g, '')
+      .replace(/\]\([^)]*\)/g, ']')
+      .replace(/https?:\/\/\S+/g, '')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '');
+  }
+
+  // True when the screen's last message holds the end of this text.
+  function matchesScreen(screen, text) {
+    const t = letters(text);
+    return Boolean(screen) && t.length >= 12 && screen.includes(t.slice(-40));
+  }
+
   globalThis.Recurate = Object.assign(globalThis.Recurate || {}, {
+    letters,
+    matchesScreen,
     PLATFORM_NAMES,
     StructuralError,
     FetchError,
