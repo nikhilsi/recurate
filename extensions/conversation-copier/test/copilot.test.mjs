@@ -76,3 +76,9 @@ test('stripLabels removes the hidden heading but never the message itself', () =
   assert.equal(C.stripLabels('Only text', ['Only text']), 'Only text');
   assert.equal(C.stripLabels('No label here', []), 'No label here');
 });
+
+test('a reply still being written during collection gets a note', () => {
+  const rec = (pos, role, text) => ({ pos, setsize: 2, role, text, markdown: text, citations: [] });
+  const conv = C.parse({ records: [rec(1, 'user', 'Hi'), rec(2, 'assistant', 'Hello')], setsize: 2, sizesSeen: [2], streaming: true }, {});
+  assert.match(conv.completeness.notes.join(' '), /still being written/);
+});

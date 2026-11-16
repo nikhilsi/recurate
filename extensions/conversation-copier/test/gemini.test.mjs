@@ -111,3 +111,31 @@ test('a citation whose text is not found keeps its source and is noted', () => {
   assert.match(conv.completeness.notes.join(' '), /1 citation could not be placed in the text; its source is still listed/);
   assert.ok(conv.messages[3].sources.some(s => s.url === 'https://src.example'));
 });
+
+test('the draft named in t[3][3] is exported; the first candidate is the fallback', () => {
+  const t = sample();
+  const other = t[0][3][0][0].slice();
+  other[0] = 'rc_2b';
+  other[1] = ['The chosen second draft.'];
+  t[0][3][0].push(other);
+  t[0][3][3] = 'rc_2b';
+  assert.match(md(G.parse(t, { exportedAt: at })), /The chosen second draft\./);
+  t[0][3][3] = 'rc_missing';
+  assert.match(md(G.parse(t, { exportedAt: at })), /Heat pumps cut bills/);
+});
+
+test('a blocked image download is final, so it is not retried', async () => {
+  const S = load([...CORE, 'platforms/gemini.js'], { fetch: async () => { throw new TypeError('Failed to fetch'); } });
+  await assert.rejects(S.platforms.gemini.fetchFile({ id: 'https://lh3.googleusercontent.com/x' }), e => e.final === true);
+});
+
+test('an image that appears in several turns counts once', () => {
+  const img = [{ name: 'photo.png', url: 'https://lh3.googleusercontent.com/abc', mime: 'image/png' }];
+  const t = [
+    turn({ r: 'r_2', parent: ['c_conv1', 'r_1', 'rc_1'], rc: 'rc_2', secs: 1794780300, question: 'Again', answer: 'Same photo.', userImages: img }),
+    turn({ r: 'r_1', parent: null, rc: 'rc_1', secs: 1794780200, question: 'First', answer: 'A photo.', userImages: img }),
+  ];
+  const conv = G.parse(t, { exportedAt: at });
+  assert.equal(conv.files.length, 1);
+  assert.match(conv.completeness.notIncluded.join(' '), /^1 image \(/);
+});

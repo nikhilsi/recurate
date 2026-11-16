@@ -117,3 +117,59 @@ test('screen text: the version shown on screen is exported, with a note', () => 
   assert.match(md(same), /You are welcome/);
   assert.ok(!same.completeness.notes.join(' ').includes('branch shown on screen'));
 });
+
+// --- breaker pass fixes ---
+
+test('a whitespace sources footnote removes no space and still lists its sources', () => {
+  const c = R.createConversation({ platform: 'chatgpt' });
+  const msg = R.createMessage('assistant');
+  c.messages.push(msg);
+  const counts = { unmatched: 0, placeholders: 0 };
+  const text = 'You can save money. Book early.';
+  const refs = [{ type: 'sources_footnote', matched_text: ' ', start_idx: text.length, end_idx: text.length, sources: [{ title: 'Rail site', url: 'https://rail.example' }] }];
+  assert.equal(G.replaceReferences(text, refs, msg, counts), text);
+  assert.equal(counts.unmatched, 0);
+  assert.equal(msg.sources.length, 1);
+});
+
+test('a last reply still being written or stopped gets a note', () => {
+  const data = fixture();
+  data.mapping.a8.message.status = 'in_progress';
+  assert.match(G.parse(data, { exportedAt: at }).completeness.notes.join(' '), /still being written/);
+  data.mapping.a8.message.status = 'finished_partial_completion';
+  assert.match(G.parse(data, { exportedAt: at }).completeness.notes.join(' '), /stopped before it finished/);
+  data.mapping.a8.message.status = 'finished_successfully';
+  assert.ok(!G.parse(data, { exportedAt: at }).completeness.notes.join(' ').includes('last reply'));
+});
+
+test('a code part holding a fence gets a longer fence', () => {
+  const data = fixture();
+  data.mapping.a8.message.content = { content_type: 'code', language: 'md', text: '```\ninner\n```' };
+  assert.match(md(G.parse(data, { exportedAt: at })), /````md\n```\ninner\n```\n````/);
+});
+
+test('screen text: a stopped first try is not swapped in (ChatGPT)', () => {
+  const data = fixture();
+  data.mapping.a8.message.content.parts = ['You are welcome.\n\n1. Keep the tickets\n2. Check the platform'];
+  data.mapping.a8b.message.content.parts = ['You are welcome.'];
+  const conv = G.parse(data, { exportedAt: at, screen: R.letters('ChatGPT said: You are welcome.\nKeep the tickets\nCheck the platform') });
+  assert.match(md(conv), /2\. Check the platform/);
+  assert.ok(!conv.completeness.notes.join(' ').includes('branch shown on screen'));
+});
+
+test('a whitespace reference at the same place as a real one loses neither', () => {
+  const c = R.createConversation({ platform: 'chatgpt' });
+  const msg = R.createMessage('assistant');
+  c.messages.push(msg);
+  const counts = { unmatched: 0, placeholders: 0 };
+  const text = 'Hello \uE200cite\uE202turn0search0\uE201world';
+  const at6 = 6;
+  const refs = [
+    { type: 'sources_footnote', matched_text: ' ', start_idx: at6, end_idx: at6, sources: [{ title: 'Foot', url: 'https://foot.example' }] },
+    { type: 'url', matched_text: '\uE200cite\uE202turn0search0\uE201', start_idx: at6, end_idx: at6 + 20, item: { url: 'https://a.example' }, title: 'A' },
+  ];
+  const out = G.replaceReferences(text, refs, msg, counts);
+  assert.ok(!/[\uE200-\uE202]/.test(out));
+  assert.match(out, /^Hello \[\d\]world$/);
+  assert.equal(msg.sources.length, 2);
+});

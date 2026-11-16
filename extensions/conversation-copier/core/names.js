@@ -24,19 +24,25 @@
   function capBytes(stem, ext) {
     const chars = Array.from(stem);
     while (chars.length > 1 && utf8Bytes(chars.join('') + ext) > MAX_BYTES) chars.pop();
-    return chars.join('') + ext;
+    let cut = chars.join('');
+    // Windows drops a trailing dot or space; with no extension the name would change.
+    if (!ext) cut = cut.replace(/[. ]+$/, '') || 'file';
+    return cut + ext;
   }
 
   function cleanName(raw) {
     let name = String(raw ?? '').normalize('NFC');
     name = name.replace(/[\u0000-\u001f\u007f]/g, '');
+    // Direction controls can make "photo\u202Egpj.exe" display as "photoexe.jpg".
+    name = name.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '');
     name = name.replace(/[\\/]/g, '_');
     name = name.replace(/[:*?"<>|]/g, '_');
     name = name.trim().replace(/[. ]+$/, '');
     name = name.replace(/^\.+/, m => '_'.repeat(m.length));
     if (!name) name = 'file';
-    let [stem, ext] = splitExt(name);
-    if (RESERVED.test(stem)) stem = '_' + stem;
+    // Windows reserves the part before the first dot: NUL.txt and NUL.tar.gz alike.
+    if (RESERVED.test(name.split('.')[0])) name = '_' + name;
+    const [stem, ext] = splitExt(name);
     return capBytes(stem, ext);
   }
 

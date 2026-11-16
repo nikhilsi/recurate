@@ -180,3 +180,119 @@ test('screen text that matches the data, or matches nothing, changes nothing', (
     assert.ok(!conv.completeness.notes.join(' ').includes('branch shown on screen'));
   });
 });
+
+// --- breaker pass fixes ---
+
+test('screen text: a stopped first try is not swapped in for the reply on screen', () => {
+  const ROOT = '00000000-0000-4000-8000-000000000000';
+  const FULL = 'Here are some options for your trip:\n\n1. Take the train\n2. Fly\n3. Drive';
+  const data = {
+    uuid: '22222222-2222-4222-8222-222222222222', name: 't', current_leaf_message_uuid: 'a2',
+    chat_messages: [
+      { uuid: 'u1', parent_message_uuid: ROOT, sender: 'human', created_at: '2026-11-15T10:00:00Z', content: [{ type: 'text', text: 'Give me trip options' }] },
+      { uuid: 'a1', parent_message_uuid: 'u1', sender: 'assistant', created_at: '2026-11-15T10:00:05Z', content: [{ type: 'text', text: 'Here are some options for your trip:' }] },
+      { uuid: 'a2', parent_message_uuid: 'u1', sender: 'assistant', created_at: '2026-11-15T10:01:00Z', content: [{ type: 'text', text: FULL }] },
+    ],
+  };
+  const conv = C.parse(data, { exportedAt: at, screen: R.letters('Here are some options for your trip:\nTake the train\nFly\nDrive') });
+  assert.match(md(conv), /3\. Drive/);
+  assert.ok(!conv.completeness.notes.join(' ').includes('branch shown on screen'));
+});
+
+test('older file list: same name in uploads and outputs are two files; a fallback is never overwritten', () => {
+  const conv = C.parse(fixture(), { exportedAt: at, wiggleFiles: ['/mnt/user-data/uploads/map.png', '/mnt/user-data/outputs/map.png'] });
+  const maps = conv.files.filter(f => f.name === 'map.png');
+  assert.equal(maps.length, 2);
+  assert.equal(maps.find(f => f.kind === 'claude-file').altPath, '/mnt/user-data/uploads/map.png');
+  assert.equal(maps.find(f => f.kind === 'claude-wiggle').id, '/mnt/user-data/outputs/map.png');
+});
+
+test('an attachment whose text was extracted from a binary file is saved with .txt', () => {
+  const data = fixture();
+  data.chat_messages[0].attachments.push({ id: 'att2', file_name: 'Q3 report.docx', file_size: 9, file_type: 'docx', extracted_content: 'Quarterly numbers.' });
+  const files = C.parse(data, { exportedAt: at }).files;
+  assert.equal(files.find(f => f.name === 'Q3 report.docx').saveName, 'Q3 report.docx.txt');
+  assert.equal(files.find(f => f.name === 'draft notes.txt').saveName, 'draft notes.txt');
+});
+
+test('a last reply that was stopped or failed gets a note', () => {
+  const data = fixture();
+  data.chat_messages.find(m => m.uuid === 'm6').stop_reason = 'user_canceled';
+  assert.match(C.parse(data, { exportedAt: at }).completeness.notes.join(' '), /last reply was stopped before it finished/);
+  data.chat_messages.find(m => m.uuid === 'm6').stop_reason = 'end_turn';
+  assert.ok(!C.parse(data, { exportedAt: at }).completeness.notes.join(' ').includes('last reply'));
+});
+
+test('a citation marker stays out of inline code on its line and out of fenced code', () => {
+  const R2 = load([...CORE, 'platforms/claude.js']);
+  const conv = R2.createConversation({ platform: 'claude' });
+  const msg = R2.createMessage('assistant');
+  conv.messages.push(msg);
+  const prose = 'A lone ` mark here.\nRun it:\n```bash\nls\n```\nDone.';
+  const out = R2.platforms.claude.insertCitations(prose, [{ end_index: Array.from('A lone ` mark here.\nRun').length, url: 'https://a.example', title: 'A' }], msg);
+  assert.match(out, /\nRun\[1\] it:\n```bash\nls\n```/);
+  // Inside a fenced block: to the end of the line before it, so no fence line changes.
+  const inFence = R2.platforms.claude.insertCitations(prose, [{ end_index: Array.from('A lone ` mark here.\nRun it:\n```bash\nl').length, url: 'https://b.example', title: 'B' }], msg);
+  assert.match(inFence, /\nRun it:\[\d\]\n```bash\nls\n```\nDone\./);
+});
+
+test('older file list: a 404 is no list; any other failure is noted', async () => {
+  for (const [status, noted] of [[404, false], [500, true]]) {
+    const data = fixture();
+    const fetch = async path => {
+      if (path === '/api/organizations') return { ok: true, json: async () => [{ uuid: 'org', capabilities: ['chat'] }] };
+      if (path.includes('/chat_conversations/')) return { ok: true, json: async () => data };
+      if (path.includes('/wiggle/list-files')) return { ok: false, status };
+      return { ok: false, status: 500 };
+    };
+    const S = load([...CORE, 'platforms/claude.js'], { fetch, document: { cookie: 'lastActiveOrg=org' } });
+    const { conversation } = await S.platforms.claude.extract({ hostname: 'claude.ai', pathname: `/chat/${data.uuid}` });
+    assert.equal(/older file list could not be read \(HTTP 500\)/.test(conversation.completeness.notes.join(' ')), noted);
+  }
+});
+
+test('markers: one-line inline code is not a fence; a marker at a closing fence goes after it', () => {
+  const R2 = load([...CORE, 'platforms/claude.js']);
+  const msg = R2.createMessage('assistant');
+  const ins = (text, before) => R2.platforms.claude.insertCitations(text, [{ end_index: Array.from(before).length, url: 'https://a.example', title: 'A' }], msg);
+  const t1 = '```x``` is shown.\nParis is the capital. More text follows here.';
+  assert.equal(ins(t1, '```x``` is shown.\nParis is the capital'), '```x``` is shown.\nParis is the capital[1]. More text follows here.');
+  const t2 = 'Intro\n```\ncode line\n```\nMore text\n```python\nx=1\n```';
+  assert.equal(ins(t2, 'Intro\n```\ncode line\n'), 'Intro[1]\n```\ncode line\n```\nMore text\n```python\nx=1\n```');
+  // A fence opened on a list-marker line, and a tilde block holding a backtick line.
+  const t3 = '1. ```bash\n   npm i\n   ```\n2. Paris is the capital. More.';
+  assert.equal(ins(t3, '1. ```bash\n   npm i\n   ```\n2. Paris is the capital'), '1. ```bash\n   npm i\n   ```\n2. Paris is the capital[1]. More.');
+  const t4 = '~~~\n```\n~~~\nParis is the capital. More.';
+  assert.equal(ins(t4, '~~~\n```\n~~~\nParis is the capital'), '~~~\n```\n~~~\nParis is the capital[1]. More.');
+  // A reply that is one code block: the marker goes on a new last line.
+  assert.equal(ins('```\nx = 1\n```', '```\nx'), '```\nx = 1\n```\n[1]');
+});
+
+test('an upload with its own sandbox path falls back to it, and the older list entry for that path is the same file', async () => {
+  const data = fixture();
+  const f = data.chat_messages[0].files[0];
+  f.file_name = 'Trip map v2.png';
+  f.path = '/mnt/user-data/uploads/Trip_map_v2.png';
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: ['/mnt/user-data/uploads/Trip_map_v2.png', '/mnt/user-data/outputs/route.pdf'] });
+  const map = conv.files.find(x => x.name === 'Trip map v2.png');
+  assert.equal(map.altPath, '/mnt/user-data/uploads/Trip_map_v2.png');
+  assert.ok(!conv.files.some(x => x.kind === 'claude-wiggle' && x.id.endsWith('Trip_map_v2.png')), 'not listed twice');
+  assert.ok(conv.files.some(x => x.name === 'route.pdf'));
+  const calls = [];
+  const fetch = async p => { calls.push(p); return p.includes('/files/') ? { ok: false, status: 404 } : { ok: true, blob: async () => ({ size: 1234 }) }; };
+  const S = load([...CORE, 'platforms/claude.js'], { fetch, Blob });
+  assert.equal((await S.platforms.claude.fetchFile(map, { org: 'o', id: 'c' })).size, 1234);
+  assert.ok(calls[1].includes('path=%2Fmnt%2Fuser-data%2Fuploads%2FTrip_map_v2.png'));
+});
+
+test('file fallback: used only when it works, and never a copy of another size', async () => {
+  const ref = { kind: 'claude-file', id: 'u1', name: 'notes.docx', size: 100, altPath: '/mnt/user-data/uploads/notes.docx' };
+  const run = async (first, alt, size = 100) => {
+    const fetch = async p => (p.includes('/files/') ? first : alt.status === 200 ? { ok: true, status: 200, blob: async () => ({ size }) } : { ok: false, status: alt.status });
+    const S = load([...CORE, 'platforms/claude.js'], { fetch, Blob });
+    return S.platforms.claude.fetchFile(ref, { org: 'o', id: 'c' });
+  };
+  await assert.rejects(run({ ok: false, status: 503 }, { status: 404 }), e => e.status === 503 && !e.final);
+  await assert.rejects(run({ ok: false, status: 404 }, { status: 200 }, 250), e => e.final === true && /different version/.test(e.message));
+  assert.equal((await run({ ok: false, status: 404 }, { status: 200 })).size, 100);
+});

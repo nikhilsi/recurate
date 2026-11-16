@@ -82,3 +82,10 @@ test('image card tags go quietly; the image stays as its generation step', () =>
   assert.ok(!/other inline|image/i.test(conv.completeness.notes.join(' ')));
   assert.match(md(conv), /<summary>Tool: image generation<\/summary>/);
 });
+
+test('a last reply still being written gets a note', () => {
+  const f = fixture();
+  assert.ok(!parse(f).completeness.notes.join(' ').includes('still being written'));
+  f.responses.responses.find(r => r.responseId === 'r4').partial = true;
+  assert.match(parse(f).completeness.notes.join(' '), /still being written/);
+});

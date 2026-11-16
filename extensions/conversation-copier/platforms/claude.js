@@ -22,6 +22,29 @@
 
   const isWordChar = ch => /[\p{L}\p{N}_]/u.test(ch || '');
 
+  // Moves a marker position out of a word, out of an inline code span on
+  // the same line, and out of a fenced code block (to after its closing line).
+  // A marker never goes inside a fenced code block: it moves to the end of
+  // the line before the block (or, for a block at the very start, to the
+  // start of the line after it, or onto a new last line). Inside a word or
+  // an inline code span on its line, it moves to the end of that.
+  const END_LINE = -1;
+  function markerSpot(cps, pos) {
+    while (pos < cps.length && isWordChar(cps[pos - 1]) && isWordChar(cps[pos])) pos++;
+    const lines = cps.join('').split('\n');
+    const before = cps.slice(0, pos).join('');
+    const li = before.split('\n').length - 1;
+    const block = R.fenceScan(lines).blocks.find(b => li >= b.start && li <= b.end);
+    const offset = n => Array.from(lines.slice(0, n).join('\n')).length;
+    if (block && block.start > 0) return offset(block.start);
+    if (block) return block.end < lines.length - 1 ? offset(block.end + 1) + 1 : END_LINE;
+    const line = before.slice(before.lastIndexOf('\n') + 1);
+    if ((line.match(/`/g) || []).length % 2 === 1) {
+      for (let i = pos; i < cps.length && cps[i] !== '\n'; i++) if (cps[i] === '`') return i + 1;
+    }
+    return pos;
+  }
+
   // Inserts [n] markers for citations. Indexes are read as code points
   // (spec risk 7). A marker that lands inside a word or an inline code span
   // moves to the end of it. Numbers follow reading order.
@@ -35,22 +58,22 @@
       .map(c => ({ c, n: R.addSource(message, c.title || (c.metadata && c.metadata.site_name), c.url) }));
     const byPos = new Map();
     numbered.forEach(({ c, n }) => {
-      let pos = Math.max(0, Math.min(c.end_index, cps.length));
-      while (pos < cps.length && isWordChar(cps[pos - 1]) && isWordChar(cps[pos])) pos++;
-      const ticks = cps.slice(0, pos).filter(ch => ch === '`').length;
-      if (ticks % 2 === 1) {
-        const close = cps.indexOf('`', pos);
-        pos = close === -1 ? cps.length : close + 1;
-      }
+      const pos = markerSpot(cps, Math.max(0, Math.min(c.end_index, cps.length)));
       if (!byPos.has(pos)) byPos.set(pos, []);
       if (!byPos.get(pos).includes(n)) byPos.get(pos).push(n);
     });
     [...byPos.keys()].sort((a, b) => b - a).forEach(pos => {
       const marker = byPos.get(pos).sort((a, b) => a - b).map(n => `[${n}]`).join('');
-      cps.splice(pos, 0, marker);
+      if (pos === END_LINE) cps.push(`\n${marker}`);
+      else cps.splice(pos, 0, marker);
     });
     return cps.join('');
   }
+
+  // Claude keeps only the extracted text of an attachment. "report.docx"
+  // holding plain text would not open, so it is saved as "report.docx.txt".
+  const TEXT_EXT = /\.(txt|md|markdown|csv|tsv|json|jsonl|xml|html?|css|m?js|jsx|tsx?|py|rb|go|rs|java|c|h|cc|cpp|hpp|cs|php|sh|bash|zsh|ya?ml|toml|ini|cfg|conf|log|sql|r|swift|kt|scala|lua|pl|tex|rst|svg)$/i;
+  const textName = name => (TEXT_EXT.test(name) ? name : `${name}.txt`);
 
   const ARTIFACT_EXT = {
     'text/markdown': '.md',
@@ -73,10 +96,15 @@
 
   function fileFrom(f, sender) {
     const mime = f.media_type || (f.file_kind === 'image' ? 'image/*' : null);
-    return R.fileRef({
+    const ref = R.fileRef({
       kind: 'claude-file', id: f.file_uuid || f.uuid, name: f.file_name || 'file',
       mime, size: f.size_bytes ?? null, from: sender === 'human' ? 'user' : 'assistant',
     });
+    // Claude's own sandbox path for the file. Some uploads answer 404 at
+    // /files/{uuid}/contents but download by this path (checked live: 3 of 3
+    // .docx uploads in one chat, sizes matching the data).
+    if (typeof f.path === 'string' && f.path.startsWith('/mnt/')) ref.altPath = f.path;
+    return ref;
   }
 
   function toolOutput(result, conv, files, wiggle) {
@@ -121,14 +149,9 @@
   // data's leaf does not match it, the leaf whose text matches is used.
   function leafOnScreen(msgs, leaf, screen) {
     if (!screen) return null;
-    const byId = new Map(msgs.map(m => [m.uuid, m]));
-    const current = textOf(byId.get(leaf));
-    // Only a leaf with enough text to compare can be shown not to match.
-    if (R.letters(current).length < 12 || R.matchesScreen(screen, current)) return null;
     const parents = new Set(msgs.map(m => m.parent_message_uuid));
-    const leaves = msgs.filter(m => !parents.has(m.uuid) && m.uuid !== leaf);
-    const hit = leaves.find(m => R.matchesScreen(screen, textOf(m)));
-    return hit ? hit.uuid : null;
+    const others = msgs.filter(m => !parents.has(m.uuid) && m.uuid !== leaf).map(m => ({ id: m.uuid, text: textOf(m) }));
+    return R.pickOnScreen(screen, textOf(msgs.find(m => m.uuid === leaf)), others);
   }
 
   function parse(data, { url = null, wiggleFiles = [], screen = null, exportedAt } = {}) {
@@ -222,6 +245,7 @@
           size: a.file_size ?? null, from: 'user',
         }));
         ref.text = a.extracted_content || '';
+        ref.saveName = textName(ref.name);
         fileBlocks.push(R.block.file(ref, a.extracted_content || ''));
       });
       if (m.sender === 'human') msg.blocks.push(...fileBlocks);
@@ -314,12 +338,30 @@
     // Files only the older file list knows about. A message file that also
     // appears there keeps that path as a fallback download (some uploads
     // answer 404 at /files/{uuid}/contents but download from the list).
-    const byName = new Map(conv.files.filter(f => f.kind === 'claude-file').map(f => [f.name.toLowerCase(), f]));
-    wiggle.forEach(ref => {
-      const twin = byName.get(ref.name.toLowerCase());
-      if (twin) twin.altPath = ref.id;
-      else if (!conv.files.some(f => f.name.toLowerCase() === ref.name.toLowerCase())) R.addFile(conv, ref);
+    // Pairs need the same name and the same side (uploads or outputs), and
+    // each message file takes at most one fallback; every other entry is a
+    // file of its own (an edited "budget.xlsx" in outputs is not the upload).
+    // An entry whose path a message file already names is that same file.
+    const twins = new Map();
+    const known = new Set();
+    conv.files.filter(f => f.kind === 'claude-file').forEach(f => {
+      if (f.altPath) known.add(f.altPath);
+      const k = `${f.name.toLowerCase()}|${f.from}`;
+      if (!twins.has(k)) twins.set(k, f);
     });
+    wiggle.forEach(ref => {
+      if (known.has(ref.id)) return;
+      const twin = twins.get(`${ref.name.toLowerCase()}|${ref.from}`);
+      if (twin && !twin.altPath) twin.altPath = ref.id;
+      else R.addFile(conv, ref);
+    });
+
+    const lastMsg = chain[chain.length - 1];
+    if (lastMsg && lastMsg.sender === 'assistant') {
+      const stopped = { user_canceled: 'was stopped before it finished', error: 'ended with an error in Claude', max_tokens: 'was cut off at the length limit' }[lastMsg.stop_reason];
+      if (stopped) notes.push(`The last reply ${stopped}.`);
+      else if (lastMsg.truncated === true) notes.push('The last reply was cut off.');
+    }
 
     if (hiddenThinking) {
       notes.push(`${hiddenThinking} thinking block${hiddenThinking === 1 ? ' is a summary' : 's are summaries'} only (Claude does not send the full text).`);
@@ -356,14 +398,17 @@
     throw new R.FetchError(PLATFORM, last, `Could not read Claude's conversation data: HTTP ${last}.`);
   }
 
+  // The older file list. 404 means the chat has none (most chats, checked
+  // live: 22 of 40). Any other failure is returned so the export can say so.
   async function fetchWiggleFiles(org, id) {
     try {
       const r = await fetch(`/api/organizations/${org}/conversations/${id}/wiggle/list-files?prefix=`, { credentials: 'include' });
-      if (!r.ok) return [];
+      if (r.status === 404) return { files: [], failed: null };
+      if (!r.ok) return { files: [], failed: `HTTP ${r.status}` };
       const j = await r.json();
-      return j && j.success && Array.isArray(j.files) ? j.files : [];
+      return j && j.success && Array.isArray(j.files) ? { files: j.files, failed: null } : { files: [], failed: 'an unexpected reply' };
     } catch (e) {
-      return [];
+      return { files: [], failed: 'a network error' };
     }
   }
 
@@ -371,8 +416,9 @@
     const ref = conversationRef(location);
     if (!ref) throw new R.FetchError(PLATFORM, 0, 'This page is not a Claude conversation.');
     const { org, data } = await fetchConversation(ref.id);
-    const wiggleFiles = await fetchWiggleFiles(org, ref.id);
-    const conversation = parse(data, { url: `https://claude.ai/chat/${ref.id}`, wiggleFiles, screen });
+    const wiggle = await fetchWiggleFiles(org, ref.id);
+    const conversation = parse(data, { url: `https://claude.ai/chat/${ref.id}`, wiggleFiles: wiggle.files, screen });
+    if (wiggle.failed) conversation.completeness.notes.push(`Claude's older file list could not be read (${wiggle.failed}); files that only it lists are missing.`);
     return { conversation, ctx: { org, id: ref.id } };
   }
 
@@ -384,10 +430,23 @@
     if (file.kind === 'claude-file') path = `/api/organizations/${ctx.org}/files/${file.id}/contents`;
     else if (file.kind === 'claude-wiggle') path = wigglePath(file.id);
     else throw new R.FetchError(PLATFORM, 0, `unknown file kind ${file.kind}`);
-    let r = await fetch(path, { credentials: 'include' });
-    if (!r.ok && file.altPath) r = await fetch(wigglePath(file.altPath), { credentials: 'include' });
-    if (!r.ok) throw new R.FetchError(PLATFORM, r.status, `HTTP ${r.status}`);
-    return r.blob();
+    const r = await fetch(path, { credentials: 'include' });
+    if (r.ok) return r.blob();
+    if (file.altPath) {
+      // The fallback counts only when it works; otherwise the first answer
+      // stands (a 503 stays retryable, not a final 404).
+      const alt = await fetch(wigglePath(file.altPath), { credentials: 'include' });
+      if (alt.ok) {
+        const blob = await alt.blob();
+        // Two uploads with one name share a sandbox path: a copy of another
+        // size is another version of the file, not this one.
+        if (!(typeof file.size === 'number' && file.size > 0 && blob.size !== file.size)) return blob;
+        const err = new R.FetchError(PLATFORM, r.status, `HTTP ${r.status}; the copy at its sandbox path is a different version`);
+        err.final = true;
+        throw err;
+      }
+    }
+    throw new R.FetchError(PLATFORM, r.status, `HTTP ${r.status}`);
   }
 
   globalThis.Recurate = Object.assign(globalThis.Recurate || {}, {

@@ -188,6 +188,10 @@
     if (otherTags) notes.push(`${otherTags} other inline Grok tag${otherTags === 1 ? '' : 's'} removed from the text.`);
     const models = [...new Set(conv.messages.map(m => m.model).filter(Boolean))];
     if (models.length) conv.modelNote = `Models: ${models.join(', ')}`;
+    const lastReply = byId.get(chain[chain.length - 1].responseId);
+    if ((lastReply && lastReply.partial === true) || (nodesData.inflightResponses || []).length) {
+      notes.push('The last reply was still being written when this was exported.');
+    }
     return R.finish(conv, { complete, reason });
   }
 

@@ -44,6 +44,14 @@
 
     (refs || []).forEach(ref => {
       if (!ref || !ref.matched_text) return;
+      // Whitespace stands for sources with no place in the text (every
+      // sources_footnote seen live, 111 of 111). It is never searched for
+      // and removes nothing; the edit only keeps the sources in order.
+      if (!ref.matched_text.trim()) {
+        const at = typeof ref.start_idx === 'number' ? Math.max(0, Math.min(ref.start_idx, cps.length)) : cps.length;
+        edits.push({ start: at, end: at, ref });
+        return;
+      }
       const target = Array.from(ref.matched_text);
       let start = -1;
       if (typeof ref.start_idx === 'number' && cps.slice(ref.start_idx, ref.start_idx + target.length).join('') === ref.matched_text) {
@@ -67,7 +75,8 @@
 
     // Number sources in reading order, then splice from the end backwards.
     edits.sort((a, b) => a.start - b.start).forEach(e => { e.replacement = replacementFor(e.ref, message, counts); });
-    edits.sort((a, b) => b.start - a.start).forEach(e => { cps.splice(e.start, e.end - e.start, e.replacement); });
+    // At one position, the edit that removes text is spliced before a zero-width one.
+    edits.sort((a, b) => (b.start - a.start) || (b.end - a.end)).forEach(e => { cps.splice(e.start, e.end - e.start, e.replacement); });
 
     let out = cps.join('');
     out = out.replace(MARKER_SEQUENCE, () => { counts.unmatched++; return ''; });
@@ -126,11 +135,11 @@
   // The page can show a sibling picked with the version arrows while
   // current_node points elsewhere; the leaf matching the screen is used.
   function leafOnScreen(map, leaf, screen) {
-    const current = nodeText(map[leaf]);
-    // Only a leaf with enough text to compare can be shown not to match.
-    if (!screen || R.letters(current).length < 12 || R.matchesScreen(screen, current)) return null;
-    const hit = Object.values(map).find(n => n.id !== leaf && !(n.children || []).length && n.message && R.matchesScreen(screen, nodeText(n)));
-    return hit ? hit.id : null;
+    if (!screen) return null;
+    const others = Object.values(map)
+      .filter(n => n.id !== leaf && !(n.children || []).length && n.message)
+      .map(n => ({ id: n.id, text: nodeText(n) }));
+    return R.pickOnScreen(screen, nodeText(map[leaf]), others);
   }
 
   function parse(data, { url = null, screen = null, exportedAt } = {}) {
@@ -287,7 +296,8 @@
         } else if (ct === 'reasoning_recap') {
           if (content.content) t.blocks.push(R.block.thinking(content.content, ''));
         } else if (ct === 'code') {
-          t.blocks.push(R.block.text('```' + (content.language || '') + '\n' + (content.text || '') + '\n```'));
+          const fence = R.fenceFor(content.text || '');
+          t.blocks.push(R.block.text(fence + (content.language || '') + '\n' + (content.text || '') + '\n' + fence));
         } else {
           t.blocks.push(R.block.unsupported(ct || 'content', content));
         }
@@ -309,6 +319,10 @@
     if (counts.placeholders) notes.push(`${counts.placeholders} widget reference${counts.placeholders === 1 ? ' is' : 's are'} shown as a placeholder.`);
     if (counts.skippedContext) notes.push(`${counts.skippedContext} hidden context message${counts.skippedContext === 1 ? '' : 's'} (custom instructions or memory) skipped.`);
     if (!chain.some(n => n.message)) throw new R.StructuralError(PLATFORM, "ChatGPT's data has no messages on the active branch");
+    const lastReply = chain.slice().reverse().find(n => n.message && n.message.author && n.message.author.role === 'assistant');
+    const status = lastReply && lastReply.message.status;
+    if (status === 'in_progress') notes.push('The last reply was still being written when this was exported.');
+    if (status === 'finished_partial_completion') notes.push('The last reply was stopped before it finished.');
     return R.finish(conv, { complete, reason });
   }
 

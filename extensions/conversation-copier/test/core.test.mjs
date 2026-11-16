@@ -243,7 +243,7 @@ test('exportBaseName: platform, slug and local date-time', () => {
 });
 
 test('letters and matchesScreen compare page text with export text', () => {
-  assert.equal(R.letters('Hourly trains, 7 hours [1]. citeturn0'), 'hourlytrains7hours');
+  assert.equal(R.letters('Hourly trains, 7 hours [1]. \uE200cite\uE202turn0\uE201'), 'hourlytrains7hours');
   assert.equal(R.matchesScreen('saidhourlytrains7hourschangeinbasel', 'Hourly trains, 7 hours, change in Basel.'), true);
   assert.equal(R.matchesScreen('abandonedbranchanswer', 'Hourly trains, 7 hours, change in Basel.'), false);
   assert.equal(R.matchesScreen('ok', 'Ok.'), false);
@@ -251,4 +251,74 @@ test('letters and matchesScreen compare page text with export text', () => {
   // The page shows a link's text only.
   assert.equal(R.letters('See the [SBB timetable](<https://www.sbb.ch/en/timetable>) or https://example.com/x today'), 'seethesbbtimetableortoday');
   assert.equal(R.matchesScreen(R.letters('Book on the SBB app before you travel.'), 'Book on the [SBB app](https://www.sbb.ch/app) before you travel.'), true);
+});
+
+// --- breaker pass fixes ---
+
+test('letters drops list numbers and task boxes, which the page draws but innerText omits', () => {
+  const data = 'Here are some options for your trip:\n\n1. Take the train\n2. Fly\n- [x] Drive';
+  const screen = R.letters('Here are some options for your trip:\nTake the train\nFly\nDrive');
+  assert.equal(R.letters(data, { fromData: true }), screen);
+  assert.equal(R.matchesScreen(screen, data), true);
+  // Page text keeps a leading number: a heading or bold line can start with one.
+  assert.equal(R.matchesScreen(R.letters('3. Wrap up\nDone and dusted here'), '## 3. Wrap up\nDone and dusted here'), true);
+  assert.equal(R.matchesScreen(R.letters('2. Fly\nCheaper than the train'), '**2. Fly**\nCheaper than the train'), true);
+});
+
+test('pickOnScreen: a stopped first try or an ambiguous match never replaces the data leaf', () => {
+  const screen = R.letters('Here are some options for your trip:\nTake the train\nFly\nDrive');
+  const current = 'Here are some options for your trip, ranked by price. Fly first, then everything else in order.';
+  const fragment = { id: 'a1', text: 'Here are some options for your trip:' };
+  assert.equal(R.pickOnScreen(screen, current, [fragment]), null);
+  const shown = { id: 'a2', text: 'Here are some options for your trip:\n\n1. Take the train\n2. Fly\n3. Drive' };
+  assert.equal(R.pickOnScreen(screen, current, [shown]), 'a2');
+  assert.equal(R.pickOnScreen(screen, current, [shown, { ...shown, id: 'a3' }]), null);
+});
+
+test('unknown content keeps its strings, but a signed URL loses its query', () => {
+  const b = R.block.unsupported('x', { a: 'see https://cdn.example/f.png?X-Amz-Signature=abc&X-Amz-Expires=60', b: 'https://example.com/search?q=trains' });
+  assert.deepEqual(Array.from(b.strings), ['see https://cdn.example/f.png', 'https://example.com/search?q=trains']);
+  const c = R.block.unsupported('x', ['[file](https://x.example/f?sig=a) here', 'https://shop.example/p?design=1&keyword=chair']);
+  assert.deepEqual(Array.from(c.strings), ['[file](https://x.example/f) here', 'https://shop.example/p?design=1&keyword=chair']);
+});
+
+test('contain closes an unclosed fence and escapes a line that opens an HTML comment', () => {
+  assert.equal(R.contain('Start\n```js\nlet a = 1;'), 'Start\n```js\nlet a = 1;\n```');
+  assert.equal(R.contain('<!-- note\nrest'), '&lt;!-- note\nrest');
+  assert.equal(R.contain('```html\n<!-- kept in code -->\n```'), '```html\n<!-- kept in code -->\n```');
+  assert.equal(R.contain('Use `<!--` to start a comment.'), 'Use `<!--` to start a comment.');
+  assert.equal(R.contain('````\n```\nstill code\n````\nafter'), '````\n```\nstill code\n````\nafter');
+  // One-line inline code is not a fence.
+  assert.equal(R.contain('Run ```npm install``` first\n```npm install```'), 'Run ```npm install``` first\n```npm install```');
+});
+
+test('a ZIP link to a name with # or % is encoded so it does not become a fragment', () => {
+  const c = R.createConversation({ platform: 'claude', title: 't', exportedAt: new Date('2026-11-15T22:00:00Z') });
+  const m = R.createMessage('user');
+  const f = R.addFile(c, R.fileRef({ kind: 'x', id: '1', name: 'Invoice #12 100%.pdf', from: 'user' }));
+  m.blocks.push(R.block.file(f));
+  c.messages.push(m);
+  const out = R.toMarkdown(R.finish(c, { complete: true }), { ...opts, mode: 'zip', paths: { [f.key]: 'uploads/Invoice #12 100%.pdf' } });
+  assert.match(out, /\]\(<uploads\/Invoice %2312 100%25\.pdf>\)/);
+});
+
+test('safeName: no trailing dot or space after the cap, Windows reserved stems, direction controls', () => {
+  assert.ok(!/[ .]$/.test(R.safeName('a'.repeat(98) + ' b c')));
+  assert.equal(R.safeName('nul.tar.gz'), '_nul.tar.gz');
+  assert.equal(R.safeName('CON.txt'), '_CON.txt');
+  assert.equal(R.safeName('photo\u202Egpj.exe'), 'photogpj.exe');
+  assert.equal(R.safeName('Invoice #12.pdf'), 'Invoice #12.pdf');
+});
+
+test('contain closes a fence at the column it opened at, inside list items too', () => {
+  assert.equal(R.contain('1. Install:\n   ```bash\n   npm i'), '1. Install:\n   ```bash\n   npm i\n   ```');
+  assert.equal(R.contain('- ```js\n  let a = 1;'), '- ```js\n  let a = 1;\n  ```');
+  assert.equal(R.contain('1. ```bash\n   npm i\n   ```\nafter'), '1. ```bash\n   npm i\n   ```\nafter');
+  assert.equal(R.contain('~~~\n```\n~~~\nafter'), '~~~\n```\n~~~\nafter');
+  assert.equal(R.contain('```\nshort fence\n``\nstill code'), '```\nshort fence\n``\nstill code\n```');
+});
+
+test('list numbers inside code count on both sides of the screen comparison', () => {
+  const data = 'Output follows:\n```\n1. alpha step\n2. beta step\n3. gamma step\n```';
+  assert.equal(R.matchesScreen(R.letters('Output follows:\n1. alpha step\n2. beta step\n3. gamma step'), data), true);
 });

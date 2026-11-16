@@ -37,6 +37,22 @@
     return `[${label}](${target(url)})`;
   }
 
+  // A path inside the ZIP: "#" and "%" are encoded so a file named
+  // "Invoice #12.pdf" is not read as a link to "Invoice " plus a fragment.
+  const local = path => String(path).replace(/[%#]/g, c => encodeURIComponent(c));
+
+  // Keeps one message's text from spilling into the rest of the file: an
+  // unclosed code fence is closed, and a line that opens an HTML comment
+  // outside code is escaped (an unclosed one hides everything after it).
+  function contain(text) {
+    const lines = String(text).split('\n');
+    const { inside, open } = globalThis.Recurate.fenceScan(lines);
+    const out = lines.map((line, i) => (inside[i] ? line : line.replace(/^( {0,3})<!--/, '$1&lt;!--')));
+    // Closed at the column it opened at, so a block inside a list item ends there.
+    if (open) out.push(' '.repeat(open.col) + open.fence);
+    return out.join('\n');
+  }
+
   function parts(date, timeZone) {
     const fmt = new Intl.DateTimeFormat('en-US', {
       timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
@@ -113,7 +129,7 @@
   function renderFile(file, c, opts, { image = false } = {}) {
     const label = image ? 'Image' : 'File';
     const path = opts.paths && opts.paths[file.key];
-    if (path) return image ? `![${file.name.replace(/[[\]]/g, '')}](${target(path)})` : link(file.name, path);
+    if (path) return image ? `![${file.name.replace(/[[\]]/g, '')}](${target(local(path))})` : link(file.name, local(path));
     const reason = failureFor(file, c);
     if (reason) return `[${label}: ${file.name}, could not be downloaded: ${reason}]`;
     return `[${label}: ${file.name}]`;
@@ -156,7 +172,7 @@
   function renderBlock(b, c, opts) {
     switch (b.type) {
       case 'text':
-        return b.text.trim() ? b.text : null;
+        return b.text.trim() ? contain(b.text) : null;
       case 'thinking': {
         if (!b.summary && !b.text) return null;
         const label = b.hiddenInSite ? `Thinking (hidden in ${c.platformName})` : 'Thinking';
@@ -171,7 +187,7 @@
       case 'file': {
         if (b.inlineText === null || b.inlineText === undefined) return renderFile(b.file, c, opts);
         const lines = [`**Pasted text: ${b.file.name}**`, '', fenced(b.inlineText, 'text')];
-        if (opts.paths && opts.paths[b.file.key]) lines.push('', `Saved as ${link(b.file.name, opts.paths[b.file.key])}`);
+        if (opts.paths && opts.paths[b.file.key]) lines.push('', `Saved as ${link(b.file.name, local(opts.paths[b.file.key]))}`);
         return lines.join('\n');
       }
       case 'summary':
@@ -236,6 +252,7 @@
     toMarkdown,
     describeMessages,
     fenceFor,
+    contain,
     formatTime,
   });
 })();

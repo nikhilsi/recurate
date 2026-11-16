@@ -33,6 +33,7 @@ const PORT_NAME = 'recurate-copier';
 const $ = id => document.getElementById(id);
 const buttons = [...document.querySelectorAll('button[data-action]')];
 let port = null;
+let runToken = 0; // bumped by Cancel, so a run cancelled while connecting never starts
 
 function status(text) {
   $('status').textContent = text;
@@ -73,17 +74,26 @@ async function start(action) {
   }
   busy(true);
   status('Connecting…');
+  const token = ++runToken;
+  let p = null;
   try {
-    port = await ready(tab);
+    p = await ready(tab);
   } catch (e) {
-    port = null;
+    p = null;
   }
+  if (token !== runToken) {
+    if (p) p.disconnect();
+    return;
+  }
+  port = p;
   if (!port) {
     busy(false);
     status('Copier could not reach this page. Reload the tab and try again.');
     return;
   }
+  const mine = port;
   port.onMessage.addListener(async msg => {
+    if (port !== mine) return;
     if (msg.type === 'progress') status(msg.text);
     if (msg.type !== 'result') return;
     busy(false);
@@ -99,14 +109,22 @@ async function start(action) {
       status(`${action === 'export' ? 'Exported' : 'Downloaded'}: ${msg.summary}`);
     }
   });
-  port.onDisconnect.addListener(() => { busy(false); });
+  port.onDisconnect.addListener(() => { if (port === mine) busy(false); });
   status('Reading the conversation…');
   port.postMessage({ type: 'run', action });
 }
 
 buttons.forEach(b => b.addEventListener('click', () => start(b.dataset.action)));
+// After Cancel the run's port is forgotten, so a result already on its way
+// cannot overwrite the clipboard or the status line.
 $('cancel').addEventListener('click', () => {
-  if (port) port.postMessage({ type: 'cancel' });
+  runToken++;
+  try {
+    if (port) port.postMessage({ type: 'cancel' });
+  } catch (e) {
+    // The page already closed the connection.
+  }
+  port = null;
   busy(false);
   status('Cancelled.');
 });

@@ -54,7 +54,7 @@
     const last = conv.messages[conv.messages.length - 1];
     if (!screen || !last) return;
     const text = last.blocks.filter(b => b.type === 'text').map(b => b.text).join(' ');
-    if (R.letters(text).length < 12) return;
+    if (R.letters(text, { fromData: true }).length < 12) return;
     if (!R.matchesScreen(screen, text)) {
       conv.completeness.notes.push('The exported branch may differ from the one on screen (the last message does not match).');
     }
@@ -89,7 +89,10 @@
 
   function pageUi(title, { withModal }) {
     const ui = { cancelled: false, update() {}, done(text) { toast(text); }, fail(text) { toast(text); }, close() {} };
-    if (!withModal) { toast(`${title}…`, { sticky: true }); return ui; }
+    if (!withModal) {
+      toast(`${title}…`, { sticky: true, actionLabel: 'Cancel', onAction: () => { ui.cancelled = true; toast('Cancelled'); } });
+      return ui;
+    }
     document.getElementById('rc-copier-modal')?.remove();
     const overlay = document.createElement('div');
     overlay.id = 'rc-copier-modal';
@@ -136,16 +139,36 @@
     return parts.join('; ');
   }
 
+  const BUSY = 'Copier is already working on this page.';
+  let running = false;
+  let current = null; // the running run's ui, so a busy click can cancel it
+
+  // Settles with the promise, or rejects as soon as the user cancels, so a
+  // stalled request cannot hold the run open.
+  async function unlessCancelled(promise, ui) {
+    let timer;
+    const cancelled = new Promise((_, reject) => {
+      timer = setInterval(() => { if (ui.cancelled) reject(new Error('Cancelled.')); }, 250);
+    });
+    try {
+      return await Promise.race([promise, cancelled]);
+    } finally {
+      clearInterval(timer);
+    }
+  }
+
   async function build(mode, ui) {
     const a = adapter();
     if (!a || !a.conversationRef(location)) throw new Error('Open a conversation first.');
+    const stop = () => { if (ui.cancelled) throw new Error('Cancelled.'); };
     ui.update('Reading the conversation…');
     const screen = screenText(a.id);
-    const { conversation: conv, ctx } = await a.extract(location, {
+    const { conversation: conv, ctx } = await unlessCancelled(a.extract(location, {
       screen,
       onProgress: p => ui.update(p.paused ? 'Paused while this tab is in the background' : `Collected ${p.got} of ${p.total || '?'} messages`, p.total ? (p.got / p.total) * 100 : undefined),
       isCancelled: () => ui.cancelled,
-    });
+    }), ui);
+    stop();
     screenCheck(conv, screen);
     const base = R.exportBaseName(conv.platform, conv.title);
     if (mode !== 'export') return { conv, base, markdown: R.toMarkdown(conv, { mode }) };
@@ -156,31 +179,35 @@
     const paths = {};
     let got = 0;
     for (let i = 0; i < conv.files.length; i++) {
-      if (ui.cancelled) throw new Error('Cancelled.');
+      stop();
       const f = conv.files[i];
       ui.update(`Downloading files: ${i + 1} of ${conv.files.length}`, (i / conv.files.length) * 100);
       try {
-        // One retry for a network blip; a refusal from the site (HTTP 4xx) is final.
-        const blob = await a.fetchFile(f, ctx).catch(async e => {
-          if (e && e.status >= 400 && e.status < 500) throw e;
+        // One retry for a network blip; a refusal from the site (HTTP 4xx)
+        // or an error marked final is not retried.
+        const blob = await unlessCancelled(a.fetchFile(f, ctx).catch(async e => {
+          if (ui.cancelled || (e && (e.final || (e.status >= 400 && e.status < 500)))) throw e;
           await new Promise(r => setTimeout(r, 1000));
           return a.fetchFile(f, ctx);
-        });
+        }), ui);
         const head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
         const sub = f.from === 'user' ? 'uploads' : 'artifacts';
-        const name = R.safeName(R.ensureExtension(f.name, blob.type || f.mime, head), used[sub]);
+        const name = R.safeName(R.ensureExtension(f.saveName || f.name, blob.type || f.mime, head), used[sub]);
         folder.file(`${sub}/${name}`, blob);
         paths[f.key] = `${sub}/${name}`;
         got++;
       } catch (e) {
+        stop();
         conv.completeness.files.failed.push({ key: f.key, name: f.name, reason: (e && e.message) || 'download failed' });
       }
     }
+    stop();
     conv.completeness.files.got = got;
     const markdown = R.toMarkdown(conv, { mode: 'zip', paths });
     folder.file('conversation.md', markdown);
     ui.update('Building the ZIP…', 100);
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const zipBlob = await unlessCancelled(zip.generateAsync({ type: 'blob' }), ui);
+    stop();
     return { conv, base, markdown, zipBlob };
   }
 
@@ -211,7 +238,12 @@
     }
   }
 
+  // One run at a time per page: a second click, a reopened popup or a retry
+  // right after Cancel is turned away until the first run ends.
   async function run(mode, ui, { fromPopup = false } = {}) {
+    if (running) return { ok: false, error: BUSY };
+    running = true;
+    current = ui;
     try {
       const r = await build(mode, ui);
       const summary = summaryOf(r.conv, mode);
@@ -225,12 +257,34 @@
       return { ok: true, summary };
     } catch (e) {
       const error = (e && e.message) || String(e);
-      if (!ui.cancelled) ui.fail(error);
+      if (ui.cancelled) ui.close(); // also when cancelled from the busy note, not the window
+      else ui.fail(error);
       return { ok: false, error };
+    } finally {
+      current = null;
+      // After Cancel the reading code may still be finishing a step (Copilot
+      // scrolls back to where the reader was); a new run waits for that.
+      if (ui.cancelled) setTimeout(() => { running = false; }, 1000);
+      else running = false;
     }
   }
 
   function startFromPage(mode) {
+    if (running) {
+      // A run the page cannot show (the popup closed mid-run) can be stopped
+      // here: only the run that was going when this note appeared.
+      const target = current;
+      if (!target) { toast(BUSY); return; } // a cancelled run is finishing
+      toast(BUSY, {
+        actionLabel: 'Cancel it',
+        onAction: () => {
+          if (current !== target) { toast('That run already ended.'); return; }
+          target.cancelled = true;
+          toast('Cancelled');
+        },
+      });
+      return;
+    }
     const slow = mode === 'export' || (adapter() && adapter().id === 'copilot');
     const title = { copy: 'Copying', download: 'Downloading', export: 'Exporting' }[mode];
     run(mode, pageUi(title, { withModal: slow }));
@@ -255,8 +309,21 @@
         return;
       }
       if (msg.type === 'run') {
+        // A run already going keeps its state and the new one is turned away;
+        // otherwise the new run on this connection starts uncancelled.
+        if (running) { port.postMessage({ type: 'result', ok: false, error: BUSY }); return; }
+        ui.cancelled = false;
         const res = await run(msg.action, ui, { fromPopup: true });
-        if (open) { port.postMessage({ type: 'result', ...res }); return; }
+        if (ui.cancelled) return;
+        if (open) {
+          try {
+            port.postMessage({ type: 'result', ...res });
+          } catch (e) {
+            // Chrome caps one message at 64 MiB.
+            port.postMessage({ type: 'result', ok: false, error: 'This conversation is too large to copy from the toolbar. Use Download instead.' });
+          }
+          return;
+        }
         // The popup closed mid-run: finish on the page.
         if (res.ok && msg.action === 'copy') copyText(res.markdown, res.summary);
         else if (res.ok) toast(`Done: ${res.summary}`);

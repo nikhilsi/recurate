@@ -69,6 +69,7 @@
     if (sizes.length > 1) notes.push(`Copilot's message total changed during collection (${sizes.join(', ')}); the largest was used.`);
     if (unlabeled) notes.push(`${unlabeled} message${unlabeled === 1 ? '' : 's'} carried no position label and ${unlabeled === 1 ? 'was' : 'were'} placed by ${unlabeled === 1 ? 'its' : 'their'} neighbors, on top of Copilot's total.`);
     if (conv.messages.some(m => m.sources.length)) notes.push('Copilot gives source titles without links.');
+    if (collected.streaming) notes.push('The last reply was still being written when this was exported.');
     conv.completeness.notIncluded.push('Copilot images and files.');
 
     // Copilot's total counts labeled messages only; unlabeled ones are on top.
@@ -109,6 +110,7 @@
     const raw = ((role === 'user' ? el.innerText || el.textContent : reply.innerText || reply.textContent) || '').trim();
     return {
       role,
+      rawLength: (el.innerText || '').length,
       pos: parseInt(el.getAttribute('aria-posinset'), 10) || null,
       setsize: parseInt(el.getAttribute('aria-setsize'), 10) || null,
       html: reply ? reply.innerHTML : null,
@@ -139,9 +141,14 @@
     const grab = () => {
       const els = [...document.querySelectorAll(SELECTOR)];
       els.forEach((el, i) => {
+        const size = parseInt(el.getAttribute('aria-setsize'), 10) || 0;
+        if (size) { sizes.add(size); setsize = Math.max(setsize, size); }
+        // A position already held is read again only when its text grew
+        // (a reply still streaming when first seen); the longest one is kept.
+        const known = labeled.get(parseInt(el.getAttribute('aria-posinset'), 10));
+        if (known && (el.innerText || '').length <= known.rawLength) return;
         const r = readMessage(el, convert);
-        if (r.setsize) { sizes.add(r.setsize); setsize = Math.max(setsize, r.setsize); }
-        if (r.pos) { if (!labeled.has(r.pos)) labeled.set(r.pos, r); return; }
+        if (r.pos) { labeled.set(r.pos, r); return; }
         let after = 0;
         for (let k = i - 1; k >= 0; k--) { const p = parseInt(els[k].getAttribute('aria-posinset'), 10); if (p) { after = p; break; } }
         const key = `${r.role}|${norm(r.text).slice(0, 200)}|${after}`;
@@ -154,31 +161,42 @@
       scroller.scrollBy({ top: dir * Math.max(200, scroller.clientHeight * 0.8), behavior: 'instant' });
     };
 
-    grab();
     const deadline = Date.now() + TIME_CAP_MS;
     let steps = 0;
     let stopReason = null;
-    for (const dir of [-1, 1]) {
-      let still = 0;
-      while (!done() && steps < STEP_CAP) {
-        if (isCancelled()) throw new R.FetchError(PLATFORM, 0, 'Cancelled.');
-        while (document.hidden) { onProgress({ paused: true, got: labeled.size, total: setsize }); await sleep(500); }
-        const before = scroller.scrollTop;
-        step(dir);
-        await sleep(WAIT_MS);
-        grab();
-        steps++;
-        onProgress({ paused: false, got: labeled.size, total: setsize });
-        const atEnd = dir < 0 ? scroller.scrollTop <= 0 : scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
-        still = atEnd && Math.abs(scroller.scrollTop - before) < 2 ? still + 1 : 0;
-        if (still >= 4) break;
-        if (Date.now() > deadline) { stopReason = 'collection hit the time limit'; break; }
+    let streaming = false;
+    try {
+      grab();
+      // A reply still being written grows between two reads a moment apart.
+      const first = new Map([...labeled].map(([p, r]) => [p, r.rawLength]));
+      await sleep(WAIT_MS);
+      grab();
+      streaming = [...labeled].some(([p, r]) => first.has(p) && r.rawLength > first.get(p));
+      for (const dir of [-1, 1]) {
+        let still = 0;
+        while (!done() && steps < STEP_CAP) {
+          if (isCancelled()) throw new R.FetchError(PLATFORM, 0, 'Cancelled.');
+          while (document.hidden) { onProgress({ paused: true, got: labeled.size, total: setsize }); await sleep(500); }
+          if (isCancelled()) throw new R.FetchError(PLATFORM, 0, 'Cancelled.');
+          const before = scroller.scrollTop;
+          step(dir);
+          await sleep(WAIT_MS);
+          grab();
+          steps++;
+          onProgress({ paused: false, got: labeled.size, total: setsize });
+          const atEnd = dir < 0 ? scroller.scrollTop <= 0 : scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+          still = atEnd && Math.abs(scroller.scrollTop - before) < 2 ? still + 1 : 0;
+          if (still >= 4) break;
+          if (Date.now() > deadline) { stopReason = 'collection hit the time limit'; break; }
+        }
+        if (stopReason) break;
       }
-      if (stopReason) break;
+      if (!done() && !stopReason) stopReason = steps >= STEP_CAP ? 'collection hit the step limit' : 'Copilot stopped loading messages at the ends of the chat';
+    } finally {
+      // Back where the reader was, also after Cancel or an error.
+      scroller.scrollTop = startTop;
     }
-    if (!done() && !stopReason) stopReason = steps >= STEP_CAP ? 'collection hit the step limit' : 'Copilot stopped loading messages at the ends of the chat';
-    scroller.scrollTop = startTop;
-    return { records: [...labeled.values(), ...unlabeled], setsize, sizesSeen: [...sizes], stopReason };
+    return { records: [...labeled.values(), ...unlabeled], setsize, sizesSeen: [...sizes], stopReason, streaming };
   }
 
   function converter() {

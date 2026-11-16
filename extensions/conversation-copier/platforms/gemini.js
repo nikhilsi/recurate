@@ -94,7 +94,7 @@
     if (!pagesComplete) { complete = false; reason = pagesReason || 'not every page of the conversation could be read'; }
     else if (broken) { complete = false; reason = `${broken} turn link${broken === 1 ? '' : 's'} did not match, so a turn may be missing`; }
 
-    let blocked = 0;
+    const blocked = new Set(); // distinct images; one can appear in several turns
     let unplaced = 0;
     const models = [];
     ordered.forEach((t, ti) => {
@@ -105,14 +105,18 @@
       imagesIn(at(t, 2, 0, 4)).forEach((img, i) => {
         const ref = R.addFile(conv, R.fileRef({ kind: 'gemini-image', id: img.url, name: img.name || `image-${ti + 1}-${i + 1}`, mime: img.mime, from: 'user' }));
         user.blocks.push(R.block.image(ref));
-        blocked++;
+        blocked.add(ref.key);
       });
       const question = str(at(t, 2, 0, 0));
       if (question) user.blocks.push(R.block.text(question));
       conv.messages.push(user);
 
       // Gemini.
-      const cand = at(t, 3, 0, 0) || [];
+      // The chosen draft: t[3][3] names it (equal to the first candidate on
+      // 21 of 21 turns checked live); the first candidate is the fallback.
+      const chosen = str(at(t, 3, 3));
+      const drafts = Array.isArray(at(t, 3, 0)) ? at(t, 3, 0) : [];
+      const cand = drafts.find(c => Array.isArray(c) && chosen && c[0] === chosen) || at(t, 3, 0, 0) || [];
       const model = str(at(t, 3, 21)) || null;
       if (model && !models.includes(model)) models.push(model);
       const reply = R.createMessage('assistant', { createdAt: time, model });
@@ -153,7 +157,7 @@
         imagesIn(slot).forEach((img, k) => {
           const ref = R.addFile(conv, R.fileRef({ kind: 'gemini-image', id: img.url, name: img.name || `gemini-image-${ti + 1}-${k + 1}`, mime: img.mime, from: 'assistant' }));
           reply.blocks.push(R.block.image(ref));
-          blocked++;
+          blocked.add(ref.key);
         });
       });
       conv.messages.push(reply);
@@ -161,7 +165,7 @@
 
     if (models.length) conv.modelNote = `Models: ${models.join(', ')}`;
     if (unplaced) notes.push(`${unplaced} citation${unplaced === 1 ? '' : 's'} could not be placed in the text; ${unplaced === 1 ? 'its source is' : 'their sources are'} still listed.`);
-    if (blocked) conv.completeness.notIncluded.push(`${blocked} image${blocked === 1 ? '' : 's'} (Gemini's image server does not allow downloads from the page; each is listed by name).`);
+    if (blocked.size) conv.completeness.notIncluded.push(`${blocked.size} image${blocked.size === 1 ? '' : 's'} (Gemini's image server does not allow downloads from the page; each is listed by name).`);
     return R.finish(conv, { complete, reason, noTotal: true });
   }
 
@@ -236,7 +240,9 @@
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return await r.blob();
     } catch (e) {
-      throw new R.FetchError(PLATFORM, 0, "Gemini's image server does not allow downloads from the page");
+      const err = new R.FetchError(PLATFORM, 0, "Gemini's image server does not allow downloads from the page");
+      err.final = true; // a retry cannot help
+      throw err;
     }
   }
 
