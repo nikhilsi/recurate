@@ -32,7 +32,7 @@ The fix reads each site's own conversation data instead of the page. Copilot is 
 Build steps (one task each, #531 to #541):
 
 1. [x] Core model, Markdown writer, safeName (#531)
-2. [ ] Probe script and fixture skeletons (#532)
+2. [x] Probe script and fixture skeletons (#532)
 3. [ ] Claude adapter (#533)
 4. [ ] ChatGPT adapter (#534)
 5. [ ] Grok adapter (#535)
