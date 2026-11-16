@@ -1,0 +1,42 @@
+{
+  "_about": "Synthetic ChatGPT conversation shaped like test/skeletons/chatgpt.json. No real chat content.",
+  "conversation_id": "6a000000-0000-8000-8000-000000000001",
+  "title": "Fixture: trains",
+  "create_time": 1794780000.0,
+  "update_time": 1794781000.0,
+  "default_model_slug": "gpt-6",
+  "current_node": "a8",
+  "mapping": {
+    "root": { "id": "root", "parent": null, "children": ["sys"], "message": null },
+    "sys": { "id": "sys", "parent": "root", "children": ["ctx"], "message": { "id": "sys", "author": { "role": "system" }, "content": { "content_type": "text", "parts": [""] }, "recipient": "all", "metadata": {} } },
+    "ctx": { "id": "ctx", "parent": "sys", "children": ["u1"], "message": { "id": "ctx", "author": { "role": "user" }, "content": { "content_type": "user_editable_context", "user_profile": "secret prefs" }, "recipient": "all", "metadata": { "is_visually_hidden_from_conversation": true } } },
+    "u1": { "id": "u1", "parent": "ctx", "children": ["a1"], "message": {
+      "id": "u1", "author": { "role": "user" }, "create_time": 1794780100.0, "recipient": "all",
+      "content": { "content_type": "multimodal_text", "parts": [ { "content_type": "image_asset_pointer", "asset_pointer": "sediment://file_img1", "size_bytes": 10, "width": 4, "height": 4 }, "Plan a trip please" ] },
+      "metadata": { "attachments": [
+        { "id": "file_img1", "name": "map.png", "mime_type": "image/png", "size": 10 },
+        { "id": "file_pdf1", "name": "tickets.pdf", "mime_type": "application/pdf", "size": 20 }
+      ] } } },
+    "a1": { "id": "a1", "parent": "u1", "children": ["a2"], "message": { "id": "a1", "author": { "role": "assistant" }, "create_time": 1794780110.0, "recipient": "all", "content": { "content_type": "thoughts", "thoughts": [ { "summary": "Considering routes", "content": "", "chunks": [], "finished": true } ] }, "metadata": { "model_slug": "gpt-5-6-thinking" } } },
+    "a2": { "id": "a2", "parent": "a1", "children": ["a3"], "message": { "id": "a2", "author": { "role": "assistant" }, "recipient": "all", "content": { "content_type": "reasoning_recap", "content": "Thought for 12s" }, "metadata": {} } },
+    "a3": { "id": "a3", "parent": "a2", "children": ["t1"], "message": { "id": "a3", "author": { "role": "assistant" }, "recipient": "python", "content": { "content_type": "code", "language": "python", "text": "print(1)" }, "metadata": {} } },
+    "t1": { "id": "t1", "parent": "a3", "children": ["a4"], "message": { "id": "t1", "author": { "role": "tool", "name": "python" }, "recipient": "all", "content": { "content_type": "execution_output", "text": "1" }, "metadata": {} } },
+    "a4": { "id": "a4", "parent": "t1", "children": ["t2"], "message": { "id": "a4", "author": { "role": "assistant" }, "recipient": "web.run", "content": { "content_type": "text", "parts": ["{\"q\": \"trains\"}"] }, "metadata": {} } },
+    "t2": { "id": "t2", "parent": "a4", "children": ["a5"], "message": { "id": "t2", "author": { "role": "tool", "name": "web.run" }, "recipient": "all", "content": { "content_type": "multimodal_text", "parts": [ "results page", { "content_type": "image_asset_pointer", "asset_pointer": "sediment://file_res1", "size_bytes": 30, "width": 8, "height": 8 } ] }, "metadata": { "is_visually_hidden_from_conversation": true } } },
+    "a5": { "id": "a5", "parent": "t2", "children": ["a6"], "message": { "id": "a5", "author": { "role": "assistant" }, "recipient": "web.run", "content": { "content_type": "text", "parts": ["{\"open\": 2}"] }, "metadata": {} } },
+    "a6": { "id": "a6", "parent": "a5", "children": ["a7"], "message": {
+      "id": "a6", "author": { "role": "assistant" }, "create_time": 1794780200.0, "recipient": "all",
+      "content": { "content_type": "text", "parts": [ "🚆 Trains run hourlyciteturn0search0. Book on entity[\"sbb\"] now.fileciteturn0file0 Goneciteturn9search9 hidhiddenden widget" ] },
+      "metadata": { "model_slug": "gpt-6", "content_references": [
+        { "type": "grouped_webpages", "matched_text": "citeturn0search0", "start_idx": 19, "end_idx": 37, "alt": "([SBB](https://sbb.example))", "items": [ { "title": "SBB", "url": "https://sbb.example" }, { "title": "NS", "url": "https://ns.example" } ] },
+        { "type": "entity", "matched_text": "entity[\"sbb\"]", "start_idx": 3, "end_idx": 4, "alt": "SBB Mobile", "name": "SBB Mobile" },
+        { "type": "file", "matched_text": "fileciteturn0file0", "name": "tickets.pdf" },
+        { "type": "hidden", "matched_text": "hidden" },
+        { "type": "client_defined_widget", "matched_text": "widget", "category": "map" }
+      ] } } },
+    "a7": { "id": "a7", "parent": "a6", "children": ["u2"], "message": { "id": "a7", "author": { "role": "assistant" }, "recipient": "all", "content": { "content_type": "canvas_doc", "title": "Draft", "body": "canvas body text" }, "metadata": {} } },
+    "u2": { "id": "u2", "parent": "a7", "children": ["a8", "a8b"], "message": { "id": "u2", "author": { "role": "user" }, "create_time": 1794780300.0, "recipient": "all", "content": { "content_type": "text", "parts": ["Thanks"] }, "metadata": {} } },
+    "a8": { "id": "a8", "parent": "u2", "children": [], "message": { "id": "a8", "author": { "role": "assistant" }, "create_time": 1794780310.0, "recipient": "all", "content": { "content_type": "text", "parts": ["You are welcome."] }, "metadata": { "model_slug": "gpt-6" } } },
+    "a8b": { "id": "a8b", "parent": "u2", "children": [], "message": { "id": "a8b", "author": { "role": "assistant" }, "create_time": 1794780320.0, "recipient": "all", "content": { "content_type": "text", "parts": ["Other branch answer."] }, "metadata": { "model_slug": "gpt-6" } } }
+  }
+}
