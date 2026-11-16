@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.8.0] - 2026-11-16
 
-Copier 1.0.0, a rebuild. Built and tested in the repo; the Chrome Web Store upload waits for Nikhil's go. Full release notes, including the untested list, are in `extensions/conversation-copier/STORE_LISTING.md`. Spec and test records are in `extensions/conversation-copier/docs/`.
+Copier 1.0.0, a rebuild. Submitted to the Chrome Web Store on November 16, 2026 (in review). Full release notes, including the untested list, are in `extensions/conversation-copier/STORE_LISTING.md`. Spec and test records are in `extensions/conversation-copier/docs/`.
 
 ### Changed
 - **Copier reads each site's own conversation data** on Claude, ChatGPT, Grok and Gemini instead of copying the page. Copier 0.4.0 was broken or partial on every site (live check, Nov 15): ChatGPT exported 0 messages, Grok dropped the user's messages, Gemini stopped at the latest 10 turns, Copilot got only the visible part, and Claude exports dropped tools, sources and files.

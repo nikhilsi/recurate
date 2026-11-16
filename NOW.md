@@ -41,7 +41,7 @@ Build steps (one task each, #531 to #541):
 8. [x] UI, popup, ZIP, screen check (#538)
 9. [x] Live test matrix and proof (#539)
 10. [x] Breaker pass (#540): 17 findings, then two independent reviews of the fixes (all findings fixed or answered), live rerun on all five sites; records in `extensions/conversation-copier/docs/reviews/`
-11. [ ] Release prep; store upload on Nikhil's go (#541)
+11. [x] Release prep and store submission (#541)
 
 Step 11 (Nov 16):
 - [x] Reruns after Nikhil's reload: Claude uploads 13 of 13 (was 13 of 15), Gemini "1 image" (was 3)
@@ -51,8 +51,9 @@ Step 11 (Nov 16):
 - [x] Three 1280x800 screenshots from the espresso chat and a ChatGPT trip chat (sidebars collapsed, one name covered), approved by Nikhil: `screenshot-1.0-1.jpg` to `-3.jpg`. The three older screenshots are removed (Nikhil, Nov 16)
 - [x] Release ZIP `recurate-copier-1.0.0.zip` (git-ignored)
 - [x] Extension Update Testing Tool skipped by Nikhil's ruling (spec ruling 4): on a Mac it needs a system Chrome policy profile. Chrome's permission list shows no warning for activeTab or scripting, and the six https hosts are a subset of 0.4.0's eight
-- [ ] Store upload, Privacy tab update and screenshots, on Nikhil's go
-- [ ] With the upload: recurate.ai Copier pages (`docs/index.md`, `docs/product_brief.md`, `docs/design.md`; a push to main publishes the site), tag and GitHub release
+- [x] Store upload, description, screenshots and Privacy tab (Nikhil in the dashboard, Nov 16; Chrome blocks extensions from scripting the store). Submitted for review
+- [x] recurate.ai Copier pages and hero image updated; tag v1.8.0 and GitHub release
+- [ ] Store review: if the dashboard shows "Ready to publish" after approval instead of "Published", Nikhil clicks Publish
 - [x] The 29 test exports from Nov 15 and 16 in ~/Downloads moved to the Trash (Nikhil, Nov 16)
 
 Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).

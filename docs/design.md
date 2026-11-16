@@ -64,7 +64,7 @@ What started as a single annotation extension has grown into a suite of five ext
 | **Annotator** (Chrome) | Curate the output — highlight, strikethrough, dig deeper, verify | Claude, ChatGPT, Copilot (consumer + enterprise) | Published |
 | **Annotator** (VS Code) | Same annotation UX for Claude Code terminal workflow | VS Code, Antigravity, VSCodium, Theia | Published |
 | **Composer** | Compose the input — floating markdown toolbar for AI chat inputs | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google Search | Published |
-| **Copier** | Capture the conversation — Copy/Download/Export (ZIP with artifacts on Claude) | Claude, ChatGPT, Grok, Gemini, Copilot (consumer + enterprise), Google AI Mode | v0.2.0 Submitted |
+| **Copier** | Capture the conversation: Copy, Download (Markdown) and Export (ZIP with the chat's files) | Claude, ChatGPT, Grok, Gemini, Copilot (work and personal) | 1.0.0 Submitted |
 | **Connect** | Connect the conversations — share context between two AI chat tabs | Claude, Copilot (2-tab, cross-platform, Chrome + Edge) | v0.2.0 Built |
 
 - **No backend, no API keys, fully client-side.** All extensions run entirely in the browser.
@@ -106,7 +106,7 @@ For full implementation details, see:
 | Copilot (Consumer) | copilot.microsoft.com | Working |
 | Copilot (Enterprise) | m365.cloud.microsoft/chat | Working |
 
-Note: Grok and Gemini are supported by Composer (8 platforms) and Copier (7 platforms) but not yet by the Annotator. Annotator platform expansion is on the roadmap.
+Note: Grok and Gemini are supported by Composer (8 platforms) and Copier (5 sites) but not yet by the Annotator. Annotator platform expansion is on the roadmap.
 
 ### 3.3 Architecture Overview
 
@@ -263,7 +263,7 @@ Two things are novel in the Recurate design:
 | Component | Technology |
 |-----------|------------|
 | Architecture | Vanilla JS, no build step, Chrome Manifest V3 |
-| Platforms | Composer: 8, Copier: 7 (see extension family table above) |
+| Platforms | Composer: 8, Copier: 5 (see extension family table above) |
 
 ### 6.4 Connect
 
@@ -291,7 +291,7 @@ All extensions share a common brand identity (indigo gradient icons, same color 
 
 ### Built and Tested
 
-- **Copier** v0.1.0 published on Chrome Web Store. v0.2.0 with three buttons and ZIP export built locally. 7 platforms.
+- **Copier** 1.0.0 submitted to the Chrome Web Store (November 16, 2026). A rebuild that reads each site's own conversation data. 5 sites.
 - **Connect** v0.2.0 — built and tested. Claude + Copilot cross-platform, 2-tab connection. Chrome + Edge. Not yet submitted.
 - **Recurate Platform** — live at app.recurate.ai. 4 LLMs with Condensed Context synthesis.
 

@@ -71,7 +71,7 @@
 - Platform-specific editor detection: ProseMirror (Claude, ChatGPT, Grok), textarea (Google, Copilot consumer), Lexical (Copilot enterprise), contenteditable (Gemini)
 - Icon: indigo gradient with pen + formatting marks (same brand palette as Annotator)
 
-### Recurate Copier: Conversation Export (1.0 built and tested in the repo; the store still has 0.4.0)
+### Recurate Copier: Conversation Export (1.0.0 submitted to the Chrome Web Store on Nov 16, in review)
 - Vanilla JS, Chrome Manifest V3, no build step. JSZip and Turndown (with its GFM plugin) vendored in `lib/`.
 - **Reads each site's own conversation data** (Claude, ChatGPT, Grok, Gemini). Copilot has none reachable from the page, so it is collected by scrolling and checked against the message total the page reports.
 - **Structure:** one conversation model (`core/model.js`), one Markdown writer (`core/markdown.js`), safe file names (`core/names.js`), one adapter per site (`platforms/`), and `content.js` for buttons, the progress window and the ZIP.
@@ -82,7 +82,7 @@
 - **Permissions:** activeTab and scripting. No background worker, no backend.
 - **Tests:** node tests in `test/` (`node --test test/` from the Copier folder). `probe/` holds the live probe that produced the value-free skeletons the fixtures follow.
 - **Docs:** spec `docs/spec.md` (v2.1); `docs/reviews/` holds the spec review, the live test record and the breaker pass.
-- **Status:** build steps 1 to 10 done (tasks #531 to #540). Step 11, release prep (#541), is in progress: store listing, release notes, screenshots, docs and the release workflow are done. Open: the Extension Update Testing Tool (needs a Chrome policy profile on this Mac), Nikhil's look at the screenshots, and the store upload on his go. The recurate.ai pages for Copier still describe 0.4.0 on purpose: a push to main publishes the site, so they change with the upload.
+- **Status:** all 11 build steps done (tasks #531 to #541). 1.0.0 was submitted to the Chrome Web Store on Nov 16 and is in review; the store page shows 0.4.0 until it is approved. recurate.ai and the GitHub release (v1.8.0) describe 1.0.
 
 ### Recurate Connect — Cross-Chat Context Sharing (Built — Claude.ai + Copilot)
 - WXT + Preact + Preact Signals + TypeScript (same stack as Annotator)

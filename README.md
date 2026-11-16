@@ -74,7 +74,7 @@ Saves a whole AI conversation as Markdown on **Claude**, **ChatGPT**, **Grok**, 
 - Thinking, tool steps, sources, images and files, as far as each site provides them. The branch on screen is the one exported.
 - Buttons in Claude's message toolbar, a floating cluster on the other sites, and a toolbar popup (Alt+Shift+C).
 
-**Status:** 1.0.0 is built and tested in this repo (spec and test records in `extensions/conversation-copier/docs/`). The Chrome Web Store still has 0.4.0 until the 1.0 upload: [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg)
+**Status:** 1.0.0 was submitted to the Chrome Web Store on November 16, 2026 and is in review; the store page shows 0.4.0 until it is approved. Spec and test records are in `extensions/conversation-copier/docs/`. [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg)
 
 ### Recurate Connect — Cross-Chat Context Sharing
 

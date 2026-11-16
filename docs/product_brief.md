@@ -67,13 +67,14 @@ AI responds in rich text. You're stuck with plain text. Recurate Composer adds a
 - Works on **claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot** (consumer + enterprise), **Google Search** — 8 platforms
 - Published on [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-composer/kjohokkfembjbgcoclgomcjfnnpbehjg)
 
-### Recurate Copier — Capture the Conversation
+### Recurate Copier: Capture the Conversation
 
-Copy or download your full AI conversation — both your messages and the AI's responses. One click for clean markdown to clipboard, or download as a styled HTML file with formatted responses, smart filenames, and a print-ready layout.
+Save a whole AI conversation, your messages and the AI's replies, as Markdown. Copy puts it on the clipboard. Download saves a `.md` file. Export saves a ZIP with the chat's files.
 
-- Works on **claude.ai, ChatGPT, Grok, Gemini, Microsoft Copilot** (consumer + enterprise), **Google AI Mode** — 7 platforms
-- Three buttons on Claude.ai: Copy (markdown), Download (quick HTML with timestamp), Export (full ZIP with artifacts + uploads + progress modal)
-- Published on [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg) (v0.1.0). v0.2.0 with ZIP export on [GitHub Releases](https://github.com/nikhilsi/recurate/releases/latest).
+- Works on **Claude, ChatGPT, Grok, Gemini and Microsoft Copilot** (work and personal accounts)
+- Reads each site's own conversation data, so long chats come out whole; every export says whether it is complete
+- Keeps thinking summaries, tool steps, sources, images and files where the site provides them
+- Published on [Chrome Web Store](https://chromewebstore.google.com/detail/recurate-copier/hjghmpleblbcgmmedlejbiemgggcmggg). Version 1.0 (November 2026) is a rebuild.
 
 ### Recurate Connect — Connect the Conversations
 

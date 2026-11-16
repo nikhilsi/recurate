@@ -1,6 +1,8 @@
 # Chrome Web Store Listing: Recurate Copier 1.0.0
 
-Text to paste into the Chrome Web Store developer dashboard, plus the 1.0 release notes and the build command.
+Text to paste into the Chrome Web Store developer dashboard, plus the 1.0 release notes and the build command. Submitted for review on November 16, 2026.
+
+The dashboard asked for a privacy policy URL; it was left empty because Copier collects no user data, and the dashboard allowed the submission. The Privacy tab showed no separate remote code question for this item.
 
 ---
 
