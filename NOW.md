@@ -25,12 +25,25 @@ Copier 0.4.0 (live in the store since Jul 11) is broken or partial on every plat
 The fix reads each site's own conversation data instead of the page. Copilot is collected by scrolling and checked against the total the page reports.
 
 - [x] Live check on all sites (Nov 15)
-- [x] Spec draft: `extensions/conversation-copier/docs/spec.md`
-- [ ] Independent review, findings answered in `extensions/conversation-copier/docs/reviews/`
-- [ ] Nikhil's rulings on the short spec
-- [ ] Build steps (become tasks after the rulings)
+- [x] Spec v2.1 approved: `extensions/conversation-copier/docs/spec.md`
+- [x] Independent review: 27 findings, all answered in `extensions/conversation-copier/docs/reviews/`
+- [x] Rulings (Nov 15): Markdown only; branch tests on existing chats; consumer Copilot is the merged M365 app and is in 1.0
 
-Google AI Mode stays shelved (see CHANGELOG 1.7.0). The spec proposes dropping it.
+Build steps (one task each, #531 to #541):
+
+1. [ ] Core model, Markdown writer, safeName (#531)
+2. [ ] Probe script and fixture skeletons (#532)
+3. [ ] Claude adapter (#533)
+4. [ ] ChatGPT adapter (#534)
+5. [ ] Grok adapter (#535)
+6. [ ] Gemini adapter (#536)
+7. [ ] Copilot adapter, work and personal (#537)
+8. [ ] UI, popup, ZIP, screen check (#538)
+9. [ ] Live test matrix and proof (#539)
+10. [ ] Breaker pass (#540)
+11. [ ] Release prep; store upload on Nikhil's go (#541)
+
+Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
