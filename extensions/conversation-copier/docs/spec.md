@@ -1,6 +1,6 @@
 # Recurate Copier 1.0: Spec
 
-**Status:** Draft v2. Independent review answered (`reviews/2026-11-15-spec-review.md`, 27 findings). Waiting on Nikhil's rulings (section 11).  
+**Status:** v2.1, approved. Independent review answered (`reviews/2026-11-15-spec-review.md`, 27 findings). Nikhil's rulings recorded November 15 (section 11).  
 **Date:** November 15, 2026  
 **Task:** CenterEye #530 (recurate area)  
 **Replaces:** Copier 0.4.0 (July 11, 2026)
@@ -9,7 +9,7 @@
 
 ## 1. Goal
 
-One click gives a complete, faithful copy of any conversation on Claude, ChatGPT, Grok, Gemini and Microsoft 365 Copilot.
+One click gives a complete, faithful copy of any conversation on Claude, ChatGPT, Grok, Gemini and Microsoft Copilot (work and personal accounts).
 
 Complete means every message, not the part the site happens to draw on screen. Faithful means the parts that make a modern chat useful come along: tool steps, web searches and their sources, images, files, and which model answered.
 
@@ -30,7 +30,7 @@ The checks ran in Nikhil's Chrome through Claude in Chrome, read-only, on his si
 | Grok | Replies only, none of the user's messages | The user-message test (`items-end` class) no longer matches. Toolbar injection fails; floating buttons show instead. |
 | Gemini | Every message labeled as Gemini; older turns missing | Role detection fails. Gemini loads the latest 10 turns and older ones only on scroll. |
 | M365 Copilot | 14 of 26 messages (work account), 14 of 18 (personal account) | The page draws a window of messages and swaps them on scroll. |
-| Consumer Copilot | Copier does not run | copilot.microsoft.com redirects to copilot.com. M365 Copilot also answers on copilot.cloud.microsoft. Neither new host is in the manifest. |
+| Copilot on its new addresses | Copier does not run | copilot.microsoft.com redirects to copilot.com, which routes into the merged Copilot app (2.5). Microsoft is moving m365.cloud.microsoft to copilot.cloud.microsoft. Neither new address is in the manifest. |
 
 ### 2.2 The common cause
 
@@ -92,7 +92,9 @@ Copilot labels each message with `aria-posinset` (its position) and `aria-setsiz
 
 **Copilot**
 - One chat had a first message with no position label: setsize said 7, there were 8 messages.
-- Consumer Copilot (copilot.com) uses a different app from M365 Copilot (0.4.0 already had separate selectors). Nikhil's browser routes copilot.com to the work account, so it was not probed.
+- Microsoft merged the consumer Copilot app into the Microsoft 365 Copilot app, rolling out from mid-August 2026. Personal and work accounts sign into one app with their chats kept separate, and personal users on the web are redirected to it ([Microsoft support](https://support.microsoft.com/en-us/microsoft-365-copilot/learning/changes-microsoft-copilot-app), [Office Watch](https://office-watch.com/2026/copilot-apps-merge/)).
+- Nikhil's personal account at m365.cloud.microsoft (badge "Personal") is that merged consumer Copilot. 0.4.0's separate consumer selectors belong to the retired app.
+- Microsoft is moving m365.cloud.microsoft to copilot.cloud.microsoft. On November 15 both addresses served the same app.
 
 ---
 
@@ -301,9 +303,11 @@ Each adapter has three parts:
 - **To confirm at build:** thinking (candidate slot 37), sources (slot 2), images and uploads. Listed in `notIncluded` until confirmed.
 - **Auth errors:** tell the user to reload the page.
 
-### 4.5 M365 Copilot
+### 4.5 Microsoft Copilot (work and personal accounts)
 
-Hosts: `m365.cloud.microsoft` (content script), `copilot.cloud.microsoft` (popup only, section 6).
+One adapter covers both account types: since Microsoft's 2026 merge, consumer Copilot is the same app (2.5). Nikhil's personal account was tested at 18 of 18 messages.
+
+Hosts: `m365.cloud.microsoft` (content script, while Microsoft still serves it). `copilot.cloud.microsoft`, `copilot.com` and `copilot.microsoft.com` through the popup (section 6). When Microsoft redirects m365.cloud.microsoft for everyone, Copilot loses its in-page buttons; the popup and the shortcut keep working.
 
 - **Collection:**
   1. Remember the scroll position.
@@ -314,8 +318,6 @@ Hosts: `m365.cloud.microsoft` (content script), `copilot.cloud.microsoft` (popup
 - **Set size:** the largest seen is kept; a change is noted.
 - **Content:** a parse step takes plain records `{ pos, setsize, role, html, text }`. User text via `innerText`. Answers from `[data-testid="markdown-reply"]` HTML, converted with Turndown (section 12).
 - **Not included:** sources, images and files, until probed. Listed in `notIncluded`.
-
-Consumer Copilot (copilot.com) is not in 1.0 (open question 3).
 
 ---
 
@@ -349,7 +351,8 @@ No build step. Each file ends with `globalThis.Recurate = Object.assign(globalTh
 
 - **Content-script hosts:** `claude.ai`, `chatgpt.com`, `chat.openai.com`, `grok.com`, `gemini.google.com`, `m365.cloud.microsoft`. No host is added.
 - **Hosts removed:** `www.google.com` (Google AI Mode) and `copilot.microsoft.com` (it redirects to copilot.com, so the script never runs there). Removing hosts narrows access.
-- **Permissions added:** `activeTab` and `scripting`, for popup injection. Neither shows a warning. Injection happens only after the user clicks the icon, and only on a supported conversation page.
+- **Permissions added:** `activeTab` and `scripting`, for popup injection. Neither shows a warning. Injection happens only after the user clicks the icon, and only on a supported conversation page. Supported pages include the content-script hosts plus `copilot.cloud.microsoft`, `copilot.com` and `copilot.microsoft.com`.
+- **Trade-off:** adding the new Copilot addresses to the content script would give them in-page buttons, at the cost of every existing user re-approving Copier. 1.0 keeps them popup-only.
 - **Keys added:** `action` (the popup) and `commands` (`_execute_action`).
 - **Existing users:** no re-approval expected. Chrome's Extension Update Testing Tool confirms the update does not disable the extension before upload.
 - **Store listing:** rewritten for 1.0. The host justification names each site and states that requests go only to that site with the user's own session, and nothing leaves the browser. Screenshots replace the HTML ones.
@@ -383,7 +386,7 @@ Every parse step against fixtures built from probe skeletons. Each completeness 
 | Case | Expected | Available on Nikhil's accounts |
 |---|---|---|
 | Long chat, each platform | Complete per 3.3 | Claude, ChatGPT, Gemini (11 turns), Copilot (26) |
-| Edited and regenerated branch, each platform | Exports the branch on screen; screen check passes | Needs test chats (open question 2) |
+| Edited and regenerated branch, each platform | Exports the branch on screen; screen check passes | Existing chats with branches, switched with the site's arrows (ruling 2). Claude and ChatGPT have such chats; Grok and Gemini to be found |
 | Claude chat with files, artifacts, compaction | All files present or listed as failed | Yes |
 | ChatGPT chat with images, searches, code runs | Images in ZIP, sources as links, tool steps | Yes |
 | Gemini beyond one page | All pages read | Yes (forced with a small page size) |
@@ -392,7 +395,7 @@ Every parse step against fixtures built from probe skeletons. Each completeness 
 | Tab open before the update | Popup injects and works | Yes |
 | copilot.cloud.microsoft from the popup | Works | Yes |
 
-Untested on these accounts, named in the release notes: ChatGPT workspace, project and custom GPT chats; a second Google account, a Workspace account, a Gem; a long Grok chat; a Copilot chat of 100 or more messages; a Claude account with two chat orgs; consumer Copilot.
+Untested on these accounts, named in the release notes: ChatGPT workspace, project and custom GPT chats; a second Google account, a Workspace account, a Gem; a long Grok chat; a Copilot chat of 100 or more messages; a Claude account with two chat orgs; a personal Copilot account that stays on copilot.com instead of being routed elsewhere.
 
 ### 8.3 Before release
 
@@ -430,17 +433,17 @@ Each becomes a CenterEye task.
 - Exporting many chats at once. The data sources make it possible; a candidate for the next version.
 - All branches of a chat. The active branch only.
 - Page-reading fallbacks for Claude, ChatGPT, Grok and Gemini.
-- Consumer Copilot (copilot.com), unless open question 3 changes it.
+- In-page buttons on the new Copilot addresses (popup only, section 6).
 - Claude Code sessions at claude.ai/code and Claude in Chrome side-panel chats. Not probed.
 - Google AI Mode.
 
 ---
 
-## 11. Open questions for Nikhil
+## 11. Rulings (Nikhil, November 15)
 
-1. **Markdown only?** Lean: yes. Drop the styled HTML export. Keeping HTML means rendering Markdown ourselves with two more vendored libraries and a second writer to maintain. Cost of yes: Windows has no default `.md` viewer, so people there lose a double-click file.
-2. **Test chats for branches?** Lean: yes. I create a few short throwaway chats on Claude, ChatGPT, Grok and Gemini, each with one edited message and one regenerated answer, to prove the branch rules. They sit on your accounts until you delete them.
-3. **Consumer Copilot out of 1.0?** Lean: yes. It is a different app and I cannot reach it. To include it, you would set up a Chrome profile signed into your personal Microsoft account, and I probe it there.
+1. **Markdown only:** yes ("MD only is fine"). The styled HTML export goes. Windows users lose a double-click file; accepted.
+2. **Branch tests:** use existing chats, create none ("use existing chats? no need to create new ones. there is nothing sensitive really man. I authorize and approve"). Switching branches in existing chats with the site's arrows is covered.
+3. **Consumer Copilot:** in 1.0. Nikhil pointed out his personal account is consumer Copilot. Microsoft's 2026 merge confirms it (2.5). The spec's earlier claim that consumer Copilot is a separate app was wrong.
 
 ---
 
@@ -454,6 +457,7 @@ Each becomes a CenterEye task.
 - Toolbar popup added; in-page shortcuts replaced by a rebindable command (review F23).
 - Tool steps exported whole, in collapsible blocks.
 - Spec and reviews live in this folder, off the recurate.ai site (Nikhil, November 15).
+- Approval line (Nikhil, November 15: "you are all set to go", then "I authorize and approve"): build, live testing in Nikhil's Chrome on existing chats, commits and pushes, creating tasks, the breaker pass and its fixes. Tasks close on Nikhil's word. Not covered: the Chrome Web Store upload and deleting anything.
 
 ---
 
