@@ -126,10 +126,10 @@ Conversation {
   }
 }
 
-Message { role: 'user' | 'assistant', n, createdAt, model, blocks: [ Block ] }
+Message { role: 'user' | 'assistant', n, createdAt, model, blocks: [ Block ], sources: [ { title, url } ] }
 
 Block =
-  { type: 'text', text, sources: [ { title, url } ] }
+  { type: 'text', text }            // source markers [n] point into the message's sources
   { type: 'thinking', summary, text, hiddenInSite }
   { type: 'tool', name, input, output: [ OutputPart ], isError, noResult }
   { type: 'image', file }            // FileRef
@@ -179,7 +179,7 @@ Markdown is the one format (open question 1).
 Nothing is trimmed. Long tool outputs stay whole.
 
 - **Header:** title, platform, link, export time with timezone, the model note, the completeness lines.
-- **Message headings:** numbered, with the time: `## 12. You · 14:02` and `## 13. ChatGPT · 14:02 · gpt-6` (model only where the site records it per message).
+- **Message headings:** numbered, with the date and time: `## 12. You · 2026-11-15 14:02` and `## 13. ChatGPT · 2026-11-15 14:02 · gpt-6` (model only where the site records it per message).
 - **Text:** as the site wrote it.
 - **Sources:** numbered markers in the text, then a `Sources` list after the message (title and link).
 - **Thinking:** a quoted block with the summary, then the full text when the site provides it. Thinking the site hides in its UI is labeled so.
