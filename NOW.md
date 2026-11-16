@@ -12,7 +12,7 @@
 - [x] Extension built and tested on 8 platforms
 - [x] Published on Chrome Web Store (Mar 15)
 
-### Recurate Copier 1.0 (active, task #530)
+### Recurate Copier 1.0 (submitted Nov 16; store approval tracked in #552)
 
 Copier 0.4.0 (live in the store since Jul 11) is broken or partial on every platform. A live check on Nov 15 found:
 
@@ -57,6 +57,15 @@ Step 11 (Nov 16):
 - [x] The 29 test exports from Nov 15 and 16 in ~/Downloads moved to the Trash (Nikhil, Nov 16)
 
 Google AI Mode is removed in 1.0 (shelved since July, see CHANGELOG 1.7.0).
+
+### Next: Copier-style passes on the other extensions (P2, created Nov 16)
+
+Each follows the Copier 1.0 process: live check (counts only), short spec with Nikhil's rulings, build with tests, breaker pass, live matrix in Nikhil's Chrome, release on his go.
+
+- [ ] #553 Annotator (Chrome): its ChatGPT selector matched 0 elements on Nov 15; copilot.microsoft.com no longer reaches Copilot
+- [ ] #554 Composer: copilot.microsoft.com and Google AI Mode are gone; input editors may have changed
+- [ ] #555 Connect: Claude's toolbar and Copilot's addresses changed; sharing auto-sends into the other tab
+- [ ] #556 Annotator (VS Code): check against today's Claude Code session files
 
 ### Recurate Connect
 - [x] Architecture design (docs/connect-architecture.md)
