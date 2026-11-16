@@ -94,6 +94,17 @@
     return base.toLowerCase().endsWith(ext) ? base : base + ext;
   }
 
+  // A file name as Claude's sandbox writes it: every character other than an
+  // ASCII letter, digit, "-" or "_" becomes "_", dots in the stem included,
+  // so "Q3 report (1).v2.pdf" is "Q3_report__1__v2.pdf" (checked live on 80
+  // chats). Lowercased afterwards, for comparing.
+  function sandboxName(name) {
+    const n = String(name);
+    const dot = n.lastIndexOf('.');
+    const stem = (dot > 0 ? n.slice(0, dot) : n).replace(/[^A-Za-z0-9_-]/gu, '_');
+    return (stem + (dot > 0 ? n.slice(dot) : '')).toLowerCase();
+  }
+
   function fileFrom(f, sender) {
     const mime = f.media_type || (f.file_kind === 'image' ? 'image/*' : null);
     const ref = R.fileRef({
@@ -140,8 +151,8 @@
     return parts;
   }
 
-  // data: the chat_conversations response. opts.wiggleFiles: paths from the
-  // older file list, if any. Returns a finished Conversation.
+  // data: the chat_conversations response. opts.wiggleFiles: the older file
+  // list's entries, if any. Returns a finished Conversation.
   const textOf = m => (Array.isArray(m && m.content) ? m.content : []).filter(b => b.type === 'text').map(b => b.text || '').join(' ');
 
   // Claude's data can point at one reply while the page shows a sibling
@@ -193,11 +204,16 @@
     else if (!cur || !ROOT.test(cur)) { complete = false; reason = 'a parent message is missing from the data'; }
     if (!chain.length) throw new R.StructuralError(PLATFORM, "Claude's data has no messages on the active branch");
 
-    // Older file list: path to FileRef.
-    const wiggle = new Map(wiggleFiles.map(path => [path, R.fileRef({
-      kind: 'claude-wiggle', id: path, name: path.split('/').pop() || 'file',
-      from: path.includes('/outputs/') ? 'assistant' : 'user',
-    })]));
+    // Older file list: path to FileRef. An entry is a path, or { path, size }
+    // when the list gave sizes.
+    const wiggle = new Map(wiggleFiles.map(e => {
+      const path = typeof e === 'string' ? e : e.path;
+      const size = typeof e === 'string' ? null : (e.size ?? null);
+      return [path, R.fileRef({
+        kind: 'claude-wiggle', id: path, name: path.split('/').pop() || 'file', size,
+        from: path.includes('/outputs/') ? 'assistant' : 'user',
+      })];
+    }));
 
     const pendingTools = new Map();   // tool_use id to its tool block
     const artifacts = new Map();      // artifact id to { title, type, language, content, block, notes }
@@ -338,21 +354,26 @@
     // Files only the older file list knows about. A message file that also
     // appears there keeps that path as a fallback download (some uploads
     // answer 404 at /files/{uuid}/contents but download from the list).
-    // Pairs need the same name and the same side (uploads or outputs), and
-    // each message file takes at most one fallback; every other entry is a
-    // file of its own (an edited "budget.xlsx" in outputs is not the upload).
-    // An entry whose path a message file already names is that same file.
-    const twins = new Map();
-    const known = new Set();
-    conv.files.filter(f => f.kind === 'claude-file').forEach(f => {
-      if (f.altPath) known.add(f.altPath);
-      const k = `${f.name.toLowerCase()}|${f.from}`;
-      if (!twins.has(k)) twins.set(k, f);
-    });
-    wiggle.forEach(ref => {
-      if (known.has(ref.id)) return;
-      const twin = twins.get(`${ref.name.toLowerCase()}|${ref.from}`);
-      if (twin && !twin.altPath) twin.altPath = ref.id;
+    // A pair needs the same side (uploads or outputs), the same name in the
+    // sandbox's spelling, and sizes that agree: equal, or unknown on either
+    // side (0 counts as unknown, as in fetchFile). Uploads that share a name
+    // are told apart by size, and entries with a size are matched first. An
+    // entry at the path a message file names is that file when the sizes
+    // agree (any of them, when two uploads share the path). Each message file
+    // takes at most one fallback; every other entry is a file of its own (an
+    // edited "budget.xlsx" in outputs is not the upload).
+    const sized = n => typeof n === 'number' && n > 0;
+    const agree = (a, b) => !sized(a) || !sized(b) || a === b;
+    const messageFiles = conv.files.filter(f => f.kind === 'claude-file');
+    const owners = new Map();   // path to the message files that name it
+    messageFiles.filter(f => f.altPath).forEach(f => owners.set(f.altPath, [...(owners.get(f.altPath) || []), f]));
+    const entries = Array.from(wiggle.values()).sort((x, y) => sized(y.size) - sized(x.size));
+    entries.forEach(ref => {
+      if ((owners.get(ref.id) || []).some(f => agree(f.size, ref.size))) return;
+      const free = messageFiles.filter(f => !f.altPath && f.from === ref.from
+        && sandboxName(f.name) === sandboxName(ref.name) && agree(f.size, ref.size));
+      const twin = free.find(f => sized(f.size) && f.size === ref.size) || free[0];
+      if (twin) twin.altPath = ref.id;
       else R.addFile(conv, ref);
     });
 
@@ -406,7 +427,11 @@
       if (r.status === 404) return { files: [], failed: null };
       if (!r.ok) return { files: [], failed: `HTTP ${r.status}` };
       const j = await r.json();
-      return j && j.success && Array.isArray(j.files) ? { files: j.files, failed: null } : { files: [], failed: 'an unexpected reply' };
+      if (!(j && j.success && Array.isArray(j.files))) return { files: [], failed: 'an unexpected reply' };
+      // files_metadata gives each path's size, which tells same-named files apart.
+      const sizes = new Map((Array.isArray(j.files_metadata) ? j.files_metadata : [])
+        .filter(m => m && typeof m.path === 'string' && typeof m.size === 'number').map(m => [m.path, m.size]));
+      return { files: j.files.filter(p => typeof p === 'string').map(path => ({ path, size: sizes.get(path) ?? null })), failed: null };
     } catch (e) {
       return { files: [], failed: 'a network error' };
     }

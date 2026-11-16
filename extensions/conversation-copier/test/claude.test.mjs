@@ -296,3 +296,92 @@ test('file fallback: used only when it works, and never a copy of another size',
   await assert.rejects(run({ ok: false, status: 404 }, { status: 200 }, 250), e => e.final === true && /different version/.test(e.message));
   assert.equal((await run({ ok: false, status: 404 }, { status: 200 })).size, 100);
 });
+
+test('older file list: an upload pairs with its sandbox spelling, and same-named uploads are told apart by size', () => {
+  const data = fixture();
+  const files = data.chat_messages[0].files;
+  files[0].file_name = 'Q3 report (1).v2.pdf';
+  files[0].size_bytes = 10;
+  files.push({ uuid: 'p1', file_uuid: 'p1', file_name: 'photo.jpeg', file_kind: 'image', size_bytes: 100, success: true });
+  files.push({ uuid: 'p2', file_uuid: 'p2', file_name: 'photo.jpeg', file_kind: 'image', size_bytes: 200, success: true });
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: [
+    { path: '/mnt/user-data/uploads/Q3_report__1__v2.pdf', size: 10 },
+    { path: '/mnt/user-data/uploads/photo.jpeg', size: 200 },
+    { path: '/mnt/user-data/uploads/notes.txt', size: 5 },
+  ] });
+  assert.equal(conv.files.find(f => f.name === 'Q3 report (1).v2.pdf').altPath, '/mnt/user-data/uploads/Q3_report__1__v2.pdf');
+  assert.equal(conv.files.find(f => f.id === 'p2').altPath, '/mnt/user-data/uploads/photo.jpeg');
+  assert.equal(conv.files.find(f => f.id === 'p1').altPath, undefined);
+  assert.deepEqual(Array.from(conv.files.filter(f => f.kind === 'claude-wiggle'), f => f.name), ['notes.txt']);
+});
+
+test('older file list: an entry of another size is a file of its own', () => {
+  const data = fixture();
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: [{ path: '/mnt/user-data/uploads/map.png', size: 999 }] });
+  const maps = conv.files.filter(f => f.name === 'map.png');
+  assert.equal(maps.length, 2);
+  assert.equal(maps.find(f => f.kind === 'claude-file').altPath, undefined);
+  assert.equal(maps.find(f => f.kind === 'claude-wiggle').size, 999);
+  // The same entry with the upload's size (1234) is the upload.
+  const same = C.parse(fixture(), { exportedAt: at, wiggleFiles: [{ path: '/mnt/user-data/uploads/map.png', size: 1234 }] });
+  assert.equal(same.files.filter(f => f.name === 'map.png').length, 1);
+});
+
+test('fetch: the older list passes its sizes through to the pairing', async () => {
+  const data = fixture();
+  const fetch = async path => {
+    if (path === '/api/organizations') return { ok: true, json: async () => [{ uuid: 'org', capabilities: ['chat'] }] };
+    if (path.includes('/chat_conversations/')) return { ok: true, json: async () => data };
+    if (path.includes('/wiggle/list-files')) return { ok: true, status: 200, json: async () => ({
+      success: true,
+      files: ['/mnt/user-data/uploads/map.png', '/mnt/user-data/outputs/route.pdf', 7],
+      files_metadata: [{ path: '/mnt/user-data/uploads/map.png', size: 1234 }, { path: '/mnt/user-data/outputs/route.pdf', size: 'big' }],
+    }) };
+    return { ok: false, status: 500 };
+  };
+  const S = load([...CORE, 'platforms/claude.js'], { fetch, document: { cookie: 'lastActiveOrg=org' } });
+  const { conversation } = await S.platforms.claude.extract({ hostname: 'claude.ai', pathname: `/chat/${data.uuid}` });
+  assert.equal(conversation.files.filter(f => f.name === 'map.png').length, 1);
+  const route = conversation.files.find(f => f.name === 'route.pdf');
+  assert.equal(route.kind, 'claude-wiggle');
+  assert.equal(route.size, null);
+});
+
+test('older file list: size 0 is unknown, entries with a size match first, and an own path of another size is its own file', () => {
+  const data = fixture();
+  const files = data.chat_messages[0].files;
+  files[0].size_bytes = 0;                                   // map.png, size unknown
+  files.push({ uuid: 'a', file_uuid: 'a', file_name: 'photo.jpeg', file_kind: 'image', size_bytes: 100, success: true });
+  files.push({ uuid: 'b', file_uuid: 'b', file_name: 'photo.jpeg', file_kind: 'image', success: true });
+  files.push({ uuid: 'c', file_uuid: 'c', file_name: 'x.docx', file_kind: 'blob', size_bytes: 100, path: '/mnt/user-data/uploads/x.docx', success: true });
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: [
+    { path: '/mnt/user-data/uploads/map.png', size: 5000 },
+    { path: '/mnt/user-data/uploads/Photo.jpeg', size: null },
+    { path: '/mnt/user-data/uploads/photo.jpeg', size: 100 },
+    { path: '/mnt/user-data/uploads/x.docx', size: 200 },
+  ] });
+  const by = id => conv.files.find(f => f.id === id);
+  assert.equal(by('f1').altPath, '/mnt/user-data/uploads/map.png');
+  assert.equal(by('a').altPath, '/mnt/user-data/uploads/photo.jpeg');
+  assert.equal(by('b').altPath, '/mnt/user-data/uploads/Photo.jpeg');
+  assert.equal(by('c').altPath, '/mnt/user-data/uploads/x.docx');
+  assert.deepEqual(Array.from(conv.files.filter(f => f.kind === 'claude-wiggle'), f => f.id), ['/mnt/user-data/uploads/x.docx']);
+});
+
+test('sandbox spelling: one underscore per character, emoji and accented capitals included', () => {
+  const data = fixture();
+  const files = data.chat_messages[0].files;
+  files[0].file_name = '\u{1F4C4} notes.pdf';
+  files.push({ uuid: 'i', file_uuid: 'i', file_name: '\u0130stanbul.pdf', file_kind: 'document', size_bytes: 7, success: true });
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: ['/mnt/user-data/uploads/__notes.pdf', '/mnt/user-data/uploads/_stanbul.pdf'] });
+  assert.equal(conv.files.filter(f => f.kind === 'claude-wiggle').length, 0);
+});
+
+test('older file list: two uploads sharing one sandbox path, the entry agrees with either', () => {
+  const data = fixture();
+  const files = data.chat_messages[0].files;
+  files.push({ uuid: 'a', file_uuid: 'a', file_name: 'x.docx', file_kind: 'blob', size_bytes: 100, path: '/mnt/user-data/uploads/x.docx', success: true });
+  files.push({ uuid: 'b', file_uuid: 'b', file_name: 'x.docx', file_kind: 'blob', size_bytes: 200, path: '/mnt/user-data/uploads/x.docx', success: true });
+  const conv = C.parse(data, { exportedAt: at, wiggleFiles: [{ path: '/mnt/user-data/uploads/x.docx', size: 100 }] });
+  assert.equal(conv.files.filter(f => f.kind === 'claude-wiggle').length, 0);
+});
